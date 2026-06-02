@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>餐車市集排班系統 Demo · ZN Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --line-green:#06C755; --line-green-dark:#02a548;
+    --brand-orange:#EA580C; --brand-red:#DC2626;
+    --bg:#f4f6f8; --surface:#fff; --border:#e5e7eb;
+    --text:#1a1a1a; --text-2:#4b5563; --text-3:#9ca3af;
+    --warn:#f59e0b; --warn-bg:#fef3c7;
+    --danger:#dc2626; --danger-bg:#fee2e2;
+    --info:#2563eb; --info-bg:#dbeafe;
+    --event-purple:#7c3aed; --event-bg:#ede9fe;
+  }
+  html,body { font-family:'Noto Sans TC','PingFang TC',-apple-system,sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; }
+  body { min-height:100vh; background:linear-gradient(135deg,#fde9d8 0%,#f4d8c4 100%); display:flex; justify-content:center; align-items:center; padding:24px 0; }
+
+  .desktop-tag { position:fixed; top:14px; left:14px; background:rgba(0,0,0,.8); color:#fff; font-size:11px; padding:6px 12px; border-radius:999px; font-family:'Inter',sans-serif; z-index:100; }
+  .demo-info { position:fixed; top:14px; right:14px; background:rgba(0,0,0,.85); color:#fff; font-size:11px; padding:6px 14px; border-radius:999px; font-family:'Inter',sans-serif; z-index:100; }
+  .demo-info b { color:var(--line-green); }
+
+  .phone { width:390px; max-width:calc(100vw - 32px); background:#fff; border-radius:40px; overflow:hidden; box-shadow:0 30px 60px -15px rgba(0,0,0,.22), 0 0 0 8px #111; position:relative; height:860px; display:flex; flex-direction:column; }
+  @media (max-width:420px) { body { padding:0; background:#fff; } .phone { box-shadow:none; border-radius:0; max-width:100%; width:100%; height:100vh; } .desktop-tag,.demo-info { display:none; } }
+
+  /* ========== 🖥 桌面版 layout（>= 1024px 自動切換） ========== */
+  @media (min-width: 1024px) {
+    body { padding: 24px; align-items: flex-start; }
+    .desktop-tag { background:rgba(0,0,0,.7); }
+    .desktop-tag::after { content:' · 已切到電腦版'; opacity:.7; }
+    .phone {
+      width: 1100px; max-width: calc(100vw - 48px);
+      height: auto; min-height: 720px; max-height: calc(100vh - 80px);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px -10px rgba(0,0,0,.15);
+      border: 1px solid #e5e7eb;
+      /* 移除手機外框 */
+      background:#fff;
+    }
+    .phone::before { /* 隱藏可能的手機 island */ display:none; }
+    .status-bar { display:none; }  /* 不需要假狀態列 */
+    .demo-hint { padding:8px 18px; font-size:12px; }
+
+    /* 月曆 screen 變成兩欄：左 月曆 / 右 我的登記 */
+    .screen#screen-calendar {
+      display: none;
+      flex-direction: column;
+    }
+    .screen#screen-calendar.active {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas:
+        "header header"
+        "switcher banner"
+        "list sidebar";
+      gap: 0;
+      overflow: hidden;
+    }
+    .cal-header { grid-area: header; padding: 18px 24px 14px; }
+    .month-switcher { grid-area: switcher; padding: 16px 24px 10px; border-right:1px solid #f3f4f6; }
+    .phase-banner { grid-area: banner; padding: 16px 24px; align-items:center; border-left:1px solid #fff; }
+    .session-list {
+      grid-area: list;
+      padding: 12px 24px 24px;
+      border-right: 1px solid #f3f4f6;
+      max-height: calc(100vh - 280px);
+    }
+    /* 桌面版側邊欄：常駐顯示「我的登記」摘要 */
+    .desktop-sidebar {
+      grid-area: sidebar;
+      background: #fafbfc;
+      padding: 16px 18px 24px;
+      overflow-y: auto;
+      max-height: calc(100vh - 280px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .desktop-sidebar-title {
+      font-size: 13px; font-weight: 700; color: #4b5563;
+      padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .desktop-sidebar-title .more {
+      font-size: 11px; font-weight: 500; color: var(--brand-orange); cursor: pointer;
+    }
+    .desktop-sidebar-section { font-size: 11px; color: #9ca3af; font-weight: 600; margin-top: 6px; }
+    .desktop-sidebar .session-card,
+    .desktop-sidebar .waitlist-card { margin-bottom: 6px; padding: 10px 12px; }
+    .desktop-sidebar .session-card .session-venue,
+    .desktop-sidebar .waitlist-card { font-size: 13px; }
+    .desktop-sidebar button { padding: 6px !important; font-size: 11px !important; }
+
+    /* 我的登記 screen 桌面版：更寬、置中 */
+    .screen#screen-my {
+      max-width: 720px; margin: 0 auto;
+      width: 100%;
+    }
+    .my-list, .session-list {
+      padding-bottom: 24px;
+    }
+
+    /* Bottom nav 桌面版改成上方 tab 樣式 */
+    .bottom-nav {
+      position: static; padding: 0; border-top: none;
+      border-bottom: 1px solid var(--border);
+      background: #fafbfc;
+    }
+    .nav-item {
+      padding: 12px 8px; flex: 0 1 auto; min-width: 100px;
+      border-bottom: 2px solid transparent;
+    }
+    .nav-item.active {
+      border-bottom-color: var(--brand-orange);
+      background: #fff;
+    }
+    .nav-item .nav-icon { font-size: 18px; }
+    .nav-item .nav-label { font-size: 12px; margin-top: 4px; }
+
+    /* 卡片 / 字體桌面版略放大 */
+    .session-card, .waitlist-card { padding: 14px 16px; }
+    .session-venue { font-size: 15px; }
+    .modal { max-width: 480px; margin: 0 auto; border-radius: 16px; }
+    .modal-overlay { align-items: center; }
+    .modal-btn { font-size: 14px; padding: 12px; }
+
+    /* 隱藏桌面版不需要的右上 demo-info 標籤 */
+    .demo-info { top: auto; bottom: 14px; right: 14px; }
+  }
+
+  .demo-hint { background:#111; color:#fff; font-size:11px; padding:6px 14px; display:flex; align-items:center; justify-content:space-between; font-family:'Inter',sans-serif; flex-shrink:0; }
+  .demo-hint .mode { color:#a0a0a0; }
+  .demo-hint .mode b { color:#fff; margin-left:4px; }
+  .demo-hint button { background:rgba(255,255,255,.18); color:#fff; border:none; font-size:10px; padding:4px 10px; border-radius:4px; cursor:pointer; font-family:inherit; font-weight:500; }
+  .demo-hint button:hover { background:rgba(255,255,255,.28); }
+
+  .status-bar { height:28px; display:flex; justify-content:space-between; align-items:center; padding:0 22px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; background:#fff; flex-shrink:0; }
+
+  .screen { display:none; flex-direction:column; flex:1; min-height:0; background:#fff; }
+  .screen.active { display:flex; }
+
+  /* ==== Screen: 社群 ==== */
+  .community-bar { background:#fff; border-bottom:1px solid #e8e8e8; padding:10px 14px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .community-avatar { width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,#f59e0b,#d97706); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; }
+  .community-name { font-size:14px; font-weight:600; display:flex; align-items:center; gap:4px; }
+  .openchat-tag { font-size:9px; background:#25a049; color:#fff; padding:1px 5px; border-radius:3px; font-weight:700; font-family:'Inter',sans-serif; }
+  .community-meta { font-size:11px; color:#888; }
+  .community-feed { flex:1; background:#f4f4f4; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+  .community-post { background:#fff; border-radius:12px; padding:14px; }
+  .post-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .post-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#06C755,#02a548); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#fff; }
+  .post-author { font-size:13px; font-weight:600; }
+  .post-time { font-size:11px; color:#999; }
+  .post-text { font-size:13px; line-height:1.6; color:#333; margin-bottom:10px; white-space:pre-line; }
+  .liff-card { background:linear-gradient(135deg,#fff7ed,#ffedd5); border:1px solid #fed7aa; border-radius:12px; padding:14px; cursor:pointer; }
+  .liff-card:active { transform:scale(.98); }
+  .liff-card-emoji { font-size:32px; margin-bottom:6px; }
+  .liff-card-title { font-size:15px; font-weight:700; color:#9a3412; margin-bottom:4px; }
+  .liff-card-desc { font-size:12px; color:#7c2d12; margin-bottom:10px; }
+  .liff-card-cta { font-size:12px; font-weight:600; color:#ea580c; }
+
+  /* ==== Screen: 授權 ==== */
+  .auth-screen { background:linear-gradient(180deg,#06C755 0%,#02a548 100%); color:#fff; padding:40px 24px; align-items:center; justify-content:center; text-align:center; }
+  .auth-logo { width:80px; height:80px; border-radius:20px; background:#fff; color:var(--line-green); display:flex; align-items:center; justify-content:center; font-size:48px; margin-bottom:24px; }
+  .auth-title { font-size:22px; font-weight:700; margin-bottom:8px; }
+  .auth-sub { font-size:13px; opacity:.85; margin-bottom:32px; line-height:1.6; }
+  .auth-info { background:rgba(255,255,255,.15); border-radius:12px; padding:14px; width:100%; margin-bottom:16px; }
+  .auth-info-row { display:flex; justify-content:space-between; padding:4px 0; font-size:13px; }
+  .auth-info-row + .auth-info-row { border-top:1px solid rgba(255,255,255,.15); }
+  .auth-btn { width:100%; padding:14px; background:#fff; color:var(--line-green); border:none; border-radius:12px; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; }
+  .auth-btn:active { transform:scale(.98); }
+  .auth-hint { font-size:11px; opacity:.7; margin-top:14px; line-height:1.5; }
+
+  /* ==== Screen: 月曆主頁 ==== */
+  .cal-header { background:linear-gradient(135deg,var(--brand-orange) 0%,var(--brand-red) 100%); color:#fff; padding:14px 16px 12px; flex-shrink:0; position:relative; z-index:5; }
+  .cal-header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .cal-header-title { font-size:13px; opacity:.9; }
+  .cal-header-credit { background:rgba(255,255,255,.2); padding:4px 10px; border-radius:999px; font-size:11px; font-family:'Inter',sans-serif; font-weight:600; }
+
+  /* 🆕 車輛下拉選單 */
+  .car-dropdown { position:relative; }
+  .car-trigger { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.15); padding:8px 12px; border-radius:12px; cursor:pointer; }
+  .car-trigger:active { transform:scale(.99); }
+  .car-avatar { width:34px; height:34px; border-radius:8px; background:#fff; color:var(--brand-orange); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .car-info { flex:1; min-width:0; }
+  .car-name { font-size:14px; font-weight:700; }
+  .car-meta { font-size:11px; opacity:.85; }
+  .car-arrow { font-size:14px; opacity:.85; transition:transform .2s; }
+  .car-dropdown.open .car-arrow { transform:rotate(180deg); }
+  .car-menu { position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.18); max-height:0; overflow:hidden; transition:max-height .25s ease; z-index:10; }
+  .car-dropdown.open .car-menu { max-height:300px; }
+  .car-option { padding:10px 14px; display:flex; align-items:center; gap:10px; cursor:pointer; border-bottom:1px solid #f0f0f0; color:#1a1a1a; }
+  .car-option:last-child { border-bottom:none; }
+  .car-option:hover { background:#f9fafb; }
+  .car-option.selected { background:#fff7ed; }
+  .car-option-avatar { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,#fed7aa,#fdba74); color:#9a3412; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .car-option-info { flex:1; }
+  .car-option-name { font-size:13px; font-weight:600; }
+  .car-option-meta { font-size:11px; color:#666; }
+  .car-option-check { color:var(--brand-orange); font-weight:700; font-size:14px; }
+  .car-option-check.hidden { visibility:hidden; }
+
+  .month-switcher { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; background:#fff; flex-shrink:0; }
+  .month-btn { background:#f4f6f8; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:16px; color:#666; }
+  .month-btn:hover { background:#e5e7eb; }
+  .month-title { font-size:16px; font-weight:700; }
+
+  .phase-banner { padding:8px 16px; font-size:12px; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .phase-banner.main { background:#dcfce7; color:#14532d; }
+  .phase-banner.waitlist { background:#fef3c7; color:#78350f; }
+  .phase-banner.history { background:#f3f4f6; color:#374151; }
+  .phase-banner.future { background:#dbeafe; color:#1e3a8a; }
+  .phase-banner b { font-weight:700; }
+
+  .session-list { flex:1; overflow-y:auto; padding:10px 14px 80px; background:#f7f8fa; }
+  .session-day { font-size:11px; font-weight:700; color:#9ca3af; padding:10px 4px 6px; letter-spacing:.5px; }
+  .session-day.today { color:var(--brand-orange); }
+  .session-card { background:#fff; border-radius:12px; padding:12px 14px; margin-bottom:8px; border-left:4px solid #e5e7eb; }
+  .session-card.available { border-left-color:var(--line-green); cursor:pointer; }
+  .session-card.available:active { transform:scale(.98); }
+  .session-card.full { border-left-color:var(--warn); cursor:pointer; }
+  .session-card.waitlist-full { border-left-color:var(--danger); }
+  .session-card.event { border-left-color:var(--event-purple); }
+  .session-card.blocked { border-left-color:#cbd5e1; background:#fafafa; }
+  .session-card.registered { border-left-color:var(--info); background:#f0f9ff; }
+  .session-card.history { border-left-color:#9ca3af; background:#fafafa; }
+  .session-row1 { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .session-venue { font-size:14px; font-weight:700; }
+  .session-slot { font-size:11px; background:#f3f4f6; color:#666; padding:2px 8px; border-radius:999px; font-weight:600; }
+  .session-row2 { display:flex; justify-content:space-between; align-items:center; }
+  .session-capacity { font-size:12px; color:#666; }
+  .session-tag { font-size:10px; padding:2px 8px; border-radius:999px; font-weight:600; }
+  .tag-available { background:#dcfce7; color:#166534; }
+  .tag-full { background:#fef3c7; color:#78350f; }
+  .tag-waitlist-full { background:#fee2e2; color:#991b1b; }
+  .tag-event { background:var(--event-bg); color:var(--event-purple); }
+  .tag-blocked { background:#f3f4f6; color:#6b7280; }
+  .tag-registered { background:#dbeafe; color:#1e40af; }
+  .tag-history { background:#e5e7eb; color:#4b5563; }
+  .session-note { font-size:11px; color:#9ca3af; margin-top:6px; }
+  .session-note.subtle { color:#94a3b8; font-style:italic; }
+  .waitlist-bar { margin-top:8px; height:4px; background:#fef3c7; border-radius:2px; overflow:hidden; }
+  .waitlist-bar-fill { height:100%; background:var(--warn); transition:width .3s; }
+
+  .future-notice { background:#dbeafe; border-radius:14px; padding:20px; text-align:center; margin:20px 14px; }
+  .future-notice-emoji { font-size:36px; margin-bottom:8px; }
+  .future-notice-title { font-size:15px; font-weight:700; color:#1e3a8a; margin-bottom:4px; }
+  .future-notice-sub { font-size:12px; color:#1e3a8a; opacity:.8; margin-bottom:12px; }
+  .future-countdown { background:rgba(30,58,138,.1); padding:8px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:#1e3a8a; font-family:'Inter',sans-serif; }
+
+  /* ==== Bottom Nav ==== */
+  .bottom-nav { position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); display:flex; justify-content:space-around; padding:8px 0 14px; }
+  .nav-item { flex:1; text-align:center; cursor:pointer; padding:4px; }
+  .nav-icon { font-size:22px; }
+  .nav-label { font-size:10px; color:#999; margin-top:2px; }
+  .nav-item.active .nav-icon { filter:grayscale(0); }
+  .nav-item.active .nav-label { color:var(--brand-orange); font-weight:700; }
+
+  /* ==== Screen: 我的登記 ==== */
+  .my-tabs { display:flex; background:#fff; padding:0 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .my-tab { flex:1; padding:12px 0; text-align:center; font-size:13px; font-weight:600; color:#9ca3af; cursor:pointer; border-bottom:2px solid transparent; }
+  .my-tab.active { color:var(--brand-orange); border-bottom-color:var(--brand-orange); }
+  .my-tab .count { background:#fee; color:var(--brand-orange); font-size:10px; padding:1px 6px; border-radius:999px; margin-left:4px; font-family:'Inter',sans-serif; font-weight:700; }
+  .my-list { flex:1; overflow-y:auto; padding:14px; background:#f7f8fa; padding-bottom:80px; }
+  .waitlist-card { background:#fff; border-radius:12px; padding:14px; margin-bottom:8px; border-left:4px solid var(--warn); }
+  .waitlist-position { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .waitlist-position-num { background:var(--warn); color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:'Inter',sans-serif; }
+  .waitlist-countdown { background:#fef3c7; padding:6px 10px; border-radius:8px; font-size:11px; color:#78350f; margin-top:6px; text-align:center; }
+
+  /* ==== 🆕 Screen: 帳號設定 ==== */
+  .account-header { background:linear-gradient(135deg,var(--brand-orange) 0%,var(--brand-red) 100%); color:#fff; padding:20px 16px; flex-shrink:0; }
+  .account-avatar { width:64px; height:64px; border-radius:50%; background:#fff; color:var(--brand-orange); display:flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:10px; }
+  .account-name { font-size:18px; font-weight:700; }
+  .account-meta { font-size:12px; opacity:.85; margin-top:2px; }
+  .account-credit { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,.2); padding:3px 10px; border-radius:999px; font-size:11px; margin-top:8px; }
+
+  .account-body { flex:1; overflow-y:auto; padding:14px; background:#f7f8fa; padding-bottom:80px; }
+
+  .account-section { background:#fff; border-radius:12px; margin-bottom:12px; overflow:hidden; }
+  .account-section-title { font-size:11px; font-weight:700; color:#9ca3af; padding:10px 14px 4px; letter-spacing:.5px; }
+  .account-row { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid #f3f4f6; }
+  .account-row:last-child { border-bottom:none; }
+  .account-row-label { font-size:12px; color:#666; margin-bottom:2px; }
+  .account-row-value { font-size:14px; font-weight:600; }
+  .account-row-edit { font-size:13px; color:var(--brand-orange); cursor:pointer; font-weight:600; }
+  .account-row.disabled .account-row-edit { color:#cbd5e1; cursor:not-allowed; }
+
+  .truck-card { background:#fff; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+  .truck-card-avatar { width:38px; height:38px; border-radius:8px; background:#fff7ed; color:var(--brand-orange); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .truck-card-info { flex:1; }
+  .truck-card-name { font-size:14px; font-weight:700; }
+  .truck-card-meta { font-size:11px; color:#666; }
+  .truck-card-status { font-size:10px; padding:2px 8px; border-radius:999px; background:#dcfce7; color:#166534; font-weight:600; }
+
+  .cooldown-banner { background:#fef3c7; border:1px solid #fde68a; border-radius:10px; padding:10px 12px; margin:0 0 12px; display:flex; gap:8px; align-items:flex-start; }
+  .cooldown-banner .icon { font-size:14px; }
+  .cooldown-banner .text { font-size:11px; color:#78350f; line-height:1.5; }
+  .cooldown-banner .text b { color:#92400e; }
+
+  .pending-banner { background:#dbeafe; border:1px solid #bfdbfe; border-radius:10px; padding:10px 12px; margin:0 0 12px; display:flex; gap:8px; align-items:flex-start; }
+  .pending-banner .text { font-size:11px; color:#1e3a8a; line-height:1.5; }
+  .pending-banner .text b { color:#1e40af; }
+
+  /* 🆕 場地合併卡片（同日同場地疊一起，點開選時段） */
+  .venue-card {
+    background:#fff; border-radius:12px; padding:12px 14px; margin-bottom:8px;
+    border-left:4px solid #e5e7eb; cursor:pointer; transition:transform .15s;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .venue-card:active { transform:scale(.98); }
+  .venue-card.has-available { border-left-color:var(--line-green); }
+  .venue-card.has-full { border-left-color:var(--warn); }
+  .venue-card.has-registered { border-left-color:var(--info); background:#f0f9ff; }
+  .venue-card.has-event { border-left-color:var(--event-purple); }
+  .venue-card.all-disabled { border-left-color:#cbd5e1; background:#fafafa; opacity:.7; }
+  .venue-card-main { flex:1; min-width:0; }
+  .venue-card-name { font-size:14px; font-weight:700; margin-bottom:6px; }
+  .venue-card-slots { display:flex; gap:6px; flex-wrap:wrap; }
+  .venue-card-arrow { color:#9ca3af; font-size:18px; flex-shrink:0; }
+  .slot-mini {
+    font-size:11px; padding:3px 9px; border-radius:6px; font-weight:600;
+    background:#f3f4f6; color:#6b7280;
+  }
+  .slot-mini.available { background:#dcfce7; color:#166534; }
+  .slot-mini.full { background:#fef3c7; color:#78350f; }
+  .slot-mini.registered { background:#dbeafe; color:#1e40af; }
+  .slot-mini.event { background:var(--event-bg); color:var(--event-purple); }
+  .slot-mini.waitlist-full { background:#fee2e2; color:#991b1b; }
+
+  /* 🆕 時段選擇 modal 的大按鈕 */
+  .slot-picker-grid { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .slot-picker-btn {
+    background:#fff; border:2px solid var(--border); border-radius:12px;
+    padding:14px 16px; cursor:pointer; text-align:left;
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:inherit; transition:transform .15s, box-shadow .15s;
+    width:100%;
+  }
+  .slot-picker-btn:not(:disabled):active { transform:scale(.98); }
+  .slot-picker-btn:not(:disabled):hover { box-shadow:0 4px 12px rgba(0,0,0,.08); }
+  .slot-picker-btn.available { border-color:var(--line-green); background:linear-gradient(to right, #f0fdf4, #fff); }
+  .slot-picker-btn.full { border-color:var(--warn); background:linear-gradient(to right, #fffbeb, #fff); }
+  .slot-picker-btn.registered { border-color:var(--info); background:#f0f9ff; }
+  .slot-picker-btn.event, .slot-picker-btn.disabled { opacity:.5; cursor:not-allowed; }
+  .slot-picker-time { display:flex; flex-direction:column; gap:2px; }
+  .slot-picker-name { font-size:16px; font-weight:700; }
+  .slot-picker-hours { font-size:11px; color:#666; }
+  .slot-picker-status { font-size:13px; font-weight:600; }
+  .slot-picker-status.green { color:var(--line-green-dark); }
+  .slot-picker-status.warn { color:var(--warn); }
+  .slot-picker-status.blue { color:var(--info); }
+  .slot-picker-status.red { color:var(--danger); }
+  .slot-picker-status.gray { color:#6b7280; }
+
+  /* 🆕 列表/網格 切換 */
+  .view-toggle { display:flex; gap:0; background:#f3f4f6; border-radius:8px; padding:2px; margin-left:auto; }
+  .view-toggle-btn {
+    background:transparent; border:none; padding:5px 10px; font-size:11px; font-weight:600;
+    color:#6b7280; cursor:pointer; border-radius:6px; font-family:inherit;
+  }
+  .view-toggle-btn.active { background:#fff; color:var(--brand-orange); box-shadow:0 1px 2px rgba(0,0,0,.05); }
+
+  /* 🆕 月曆網格 view */
+  .calendar-grid-wrap { padding:0 14px 14px; display:none; flex-direction:column; gap:6px; }
+  .calendar-grid-weekdays {
+    display:grid; grid-template-columns:repeat(7, 1fr); gap:4px;
+    font-size:11px; font-weight:700; color:#6b7280; text-align:center;
+    padding:4px 0;
+  }
+  .calendar-grid-weekdays div:first-child, .calendar-grid-weekdays div:last-child { color:var(--danger); }
+  .calendar-grid {
+    display:grid; grid-template-columns:repeat(7, 1fr); gap:4px;
+  }
+  .cal-cell {
+    background:#fff; border-radius:8px; min-height:64px; padding:5px 6px;
+    border:1px solid #f3f4f6; display:flex; flex-direction:column; gap:3px;
+    overflow:hidden; cursor:default;
+  }
+  .cal-cell.empty { background:transparent; border:none; }
+  .cal-cell.today { border-color:var(--brand-orange); background:#fff7ed; }
+  .cal-cell.has-events { cursor:pointer; transition:transform .15s; }
+  .cal-cell.has-events:active { transform:scale(.96); }
+  .cal-cell-date { font-size:11px; font-weight:700; color:#374151; }
+  .cal-cell.today .cal-cell-date { color:var(--brand-orange); }
+  .cal-cell-date.weekend { color:var(--danger); }
+  .cal-cell-events { display:flex; flex-direction:column; gap:2px; flex:1; overflow:hidden; }
+  .cal-event-pill {
+    font-size:9px; padding:2px 5px; border-radius:4px; font-weight:600;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    background:#f3f4f6; color:#6b7280;
+  }
+  .cal-event-pill.available { background:#dcfce7; color:#166534; }
+  .cal-event-pill.full { background:#fef3c7; color:#78350f; }
+  .cal-event-pill.registered { background:#dbeafe; color:#1e40af; }
+  .cal-event-pill.event { background:var(--event-bg); color:var(--event-purple); }
+  .cal-cell-more { font-size:9px; color:#9ca3af; }
+
+  /* Modal */
+  .modal-overlay { position:absolute; inset:0; background:rgba(0,0,0,.5); display:none; align-items:flex-end; z-index:50; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:#fff; border-radius:20px 20px 0 0; width:100%; padding:24px; max-height:80%; overflow-y:auto; }
+  .modal-handle { width:36px; height:4px; background:#d4d4d8; border-radius:2px; margin:0 auto 16px; }
+  .modal-title { font-size:18px; font-weight:700; margin-bottom:14px; }
+  .modal-info { background:#f4f6f8; border-radius:12px; padding:14px; margin-bottom:16px; }
+  .modal-row { display:flex; justify-content:space-between; padding:4px 0; font-size:13px; }
+  .modal-row .label { color:#666; }
+  .modal-row .value { font-weight:600; }
+  .modal-actions { display:flex; gap:10px; }
+  .modal-btn { flex:1; padding:12px; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .modal-btn.cancel { background:#f4f6f8; color:#666; }
+  .modal-btn.confirm { background:var(--line-green); color:#fff; }
+  .modal-btn.waitlist { background:var(--warn); color:#fff; }
+  .modal-btn:active { transform:scale(.98); }
+
+  .modal-input { width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit; margin-bottom:12px; }
+  .modal-input:focus { outline:none; border-color:var(--brand-orange); }
+  .modal-hint { font-size:11px; color:#9ca3af; margin:-8px 0 12px; line-height:1.5; }
+
+  /* Toast */
+  .toast { position:absolute; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:#1a1a1a; color:#fff; padding:12px 20px; border-radius:999px; font-size:13px; opacity:0; transition:all .3s; pointer-events:none; z-index:100; white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,.2); max-width:90%; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.success { background:var(--line-green); }
+  .toast.error { background:var(--danger); }
+  .toast.info { background:var(--info); }
+</style>
+</head>
+<body>
+
+<div class="desktop-tag">💻 桌面瀏覽中（F12 切手機模擬）</div>
+<a href="/" class="demo-info" style="text-decoration:none; color:inherit; cursor:pointer;">📱 餐車排班系統 · <b>Demo</b> · ← 回首頁</a>
+
+<div class="phone">
+  <div class="demo-hint">
+    <span class="mode">DEMO · <b id="modeLabel">月曆主頁</b> · <span id="userBadge" style="background:#06C755;padding:1px 6px;border-radius:3px;font-size:9px;letter-spacing:0;">會員</span></span>
+    <div style="display:flex; gap:5px;">
+      <button onclick="switchScreen('community')">①</button>
+      <button onclick="switchScreen('auth')">②</button>
+      <button onclick="switchScreen('calendar')">③</button>
+      <button onclick="switchScreen('account')">④</button>
+      <button onclick="resetDemo()">重置</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="font-size:8px;">• • •</span>
+    <span style="font-size:11px;">📶 5G  🔋 100%</span>
+  </div>
+
+  <!-- 社群 -->
+  <div class="screen" id="screen-community">
+    <div class="community-bar">
+      <div class="community-avatar">🌳</div>
+      <div style="flex:1;">
+        <div class="community-name">北部餐車市集 <span class="openchat-tag">OPENCHAT</span></div>
+        <div class="community-meta">912 位成員 · 官方管理</div>
+      </div>
+    </div>
+    <div class="community-feed">
+      <div class="community-post">
+        <div class="post-header">
+          <div class="post-avatar">K</div>
+          <div style="flex:1;">
+            <div class="post-author">管理員</div>
+            <div class="post-time">今天 09:15</div>
+          </div>
+        </div>
+        <div class="post-text">📢 各位老闆好！
+
+【7 月排班登記正式開放】
+6/15 ~ 6/28 為主要登記期
+6/28 後僅開放候補
+
+請點下方連結進入新版登記系統 ↓</div>
+        <div class="liff-card" onclick="switchScreen('auth')">
+          <div class="liff-card-emoji">🚐</div>
+          <div class="liff-card-title">餐車市集 7 月排班登記</div>
+          <div class="liff-card-desc">點擊進入，使用 LINE 帳號自動登入，不需註冊</div>
+          <div class="liff-card-cta">立即進入 →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 授權 -->
+  <div class="screen auth-screen" id="screen-auth">
+    <div class="auth-logo">🚐</div>
+    <div class="auth-title">餐車市集排班系統</div>
+    <div class="auth-sub">使用您的 LINE 帳號授權登入<br>無需另外註冊，3 秒完成</div>
+    <div class="auth-info">
+      <div class="auth-info-row"><span>LINE 暱稱</span><b>Nick Chang</b></div>
+      <div class="auth-info-row"><span>ID</span><span style="font-family:'Inter',sans-serif; font-size:11px; opacity:.8;">@nickai216</span></div>
+      <div class="auth-info-row"><span>狀態</span><span style="color:#bef264;">● 已綁定</span></div>
+    </div>
+    <button class="auth-btn" onclick="switchScreen('calendar')">繼續使用 ✓</button>
+    <div class="auth-hint">您將授權系統存取您的 LINE 暱稱與大頭貼，不會取得訊息內容</div>
+  </div>
+
+  <!-- 月曆主頁 -->
+  <div class="screen active" id="screen-calendar">
+    <div class="cal-header">
+      <div class="cal-header-top">
+        <div class="cal-header-title">您好 Nick Chang</div>
+        <div class="cal-header-credit">⭐ 信用 100</div>
+      </div>
+      <!-- 🆕 車輛下拉選單 -->
+      <div class="car-dropdown" id="carDropdown">
+        <div class="car-trigger" onclick="toggleCarDropdown()">
+          <div class="car-avatar" id="carAvatar">🍜</div>
+          <div class="car-info">
+            <div class="car-name" id="carName">泰沙了打抛飯</div>
+            <div class="car-meta" id="carMeta">餐車 · 泰式料理</div>
+          </div>
+          <span class="car-arrow">▾</span>
+        </div>
+        <div class="car-menu" id="carMenu"></div>
+      </div>
+    </div>
+
+    <div class="month-switcher">
+      <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+      <div class="month-title" id="monthTitle">2026 年 6 月</div>
+      <button class="month-btn" onclick="changeMonth(1)">›</button>
+      <!-- 🆕 列表 / 網格 切換 -->
+      <div class="view-toggle" id="viewToggle">
+        <button class="view-toggle-btn active" data-view="list" onclick="switchCalendarView('list')">☰ 列表</button>
+        <button class="view-toggle-btn" data-view="grid" onclick="switchCalendarView('grid')">▦ 月曆</button>
+      </div>
+    </div>
+
+    <div class="phase-banner" id="phaseBanner"></div>
+    <div class="session-list" id="sessionList"></div>
+    <!-- 🆕 月曆網格 view（桌面版友好） -->
+    <div class="calendar-grid-wrap" id="calendarGridWrap" style="display:none;">
+      <div class="calendar-grid-weekdays">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <!-- 🖥 桌面版專用：右側「我的登記」摘要 sidebar -->
+    <div class="desktop-sidebar" id="desktopSidebar" style="display:none;"></div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="switchScreen('calendar')">
+        <div class="nav-icon">📅</div><div class="nav-label">場次</div>
+      </div>
+      <div class="nav-item" onclick="switchScreen('my')">
+        <div class="nav-icon">📋</div><div class="nav-label">我的登記</div>
+      </div>
+      <div class="nav-item" onclick="switchScreen('account')">
+        <div class="nav-icon">👤</div><div class="nav-label">帳號</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 我的登記 -->
+  <div class="screen" id="screen-my">
+    <div class="cal-header" style="padding-bottom:16px;">
+      <div class="cal-header-top">
+        <div class="cal-header-title">我的登記紀錄</div>
+        <div class="cal-header-credit">⭐ 信用 100</div>
+      </div>
+    </div>
+    <div class="my-tabs">
+      <div class="my-tab active" onclick="switchMyTab('confirmed', this)">已確認 <span class="count">1</span></div>
+      <div class="my-tab" onclick="switchMyTab('waiting', this)">候補中 <span class="count">2</span></div>
+      <div class="my-tab" onclick="switchMyTab('history', this)">歷史</div>
+    </div>
+    <div class="my-list" id="myList"></div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchScreen('calendar')"><div class="nav-icon">📅</div><div class="nav-label">場次</div></div>
+      <div class="nav-item active" onclick="switchScreen('my')"><div class="nav-icon">📋</div><div class="nav-label">我的登記</div></div>
+      <div class="nav-item" onclick="switchScreen('account')"><div class="nav-icon">👤</div><div class="nav-label">帳號</div></div>
+    </div>
+  </div>
+
+  <!-- 🆕 帳號設定 -->
+  <div class="screen" id="screen-account">
+    <div class="account-header">
+      <div class="account-avatar">👤</div>
+      <div class="account-name">Nick Chang</div>
+      <div class="account-meta">@nickai216 · LINE 已綁定</div>
+      <div class="account-credit">⭐ 信用 100 · 加入於 2026/3</div>
+    </div>
+
+    <div class="account-body">
+
+      <div class="pending-banner">
+        <span>🔵</span>
+        <div class="text"><b>1 筆修改申請審核中</b><br>送出時間：今天 14:22 · 預計 24 小時內審核完畢</div>
+      </div>
+
+      <div class="cooldown-banner">
+        <span class="icon">🕐</span>
+        <div class="text"><b>修改規則：</b>首次綁定 24h 內可自由修改，之後每次修改需間隔 7 天<br>下次可修改時間：<b>2026/06/27 14:22</b>（7 天後）</div>
+      </div>
+
+      <div class="account-section-title">基本資料</div>
+      <div class="account-section">
+        <div class="account-row">
+          <div>
+            <div class="account-row-label">社群暱稱</div>
+            <div class="account-row-value">Nick / 泰式攤</div>
+          </div>
+          <div class="account-row-edit" onclick="openEditModal('社群暱稱','Nick / 泰式攤')">修改</div>
+        </div>
+        <div class="account-row">
+          <div>
+            <div class="account-row-label">電話</div>
+            <div class="account-row-value">0932-684-***</div>
+          </div>
+          <div class="account-row-edit" onclick="openEditModal('電話','0932-684-051')">修改</div>
+        </div>
+        <div class="account-row">
+          <div>
+            <div class="account-row-label">Email <span style="color:#9ca3af; font-weight:400; font-size:11px;">（非必填）</span></div>
+            <div class="account-row-value" style="color:#9ca3af; font-weight:500;">尚未填寫</div>
+          </div>
+          <div class="account-row-edit" onclick="openEditModal('Email','')">新增</div>
+        </div>
+      </div>
+
+      <div class="account-section-title" id="truckSectionTitle">我的餐車</div>
+      <div id="truckList"></div>
+      <button class="modal-btn cancel" style="width:100%; margin-top:6px;" onclick="openAddTruckModal()">＋ 新增餐車</button>
+
+      <div class="account-section-title">修改紀錄</div>
+      <div class="account-section">
+        <div class="account-row">
+          <div>
+            <div class="account-row-label">今天 14:22</div>
+            <div class="account-row-value" style="font-size:13px;">修改電話：0987-***-*** → 0932-684-***</div>
+          </div>
+          <span class="truck-card-status" style="background:#dbeafe; color:#1e40af;">審核中</span>
+        </div>
+        <div class="account-row">
+          <div>
+            <div class="account-row-label">2026/06/12</div>
+            <div class="account-row-value" style="font-size:13px;">新增餐車：黑熊烤玉米</div>
+          </div>
+          <span class="truck-card-status">已通過</span>
+        </div>
+        <div class="account-row">
+          <div>
+            <div class="account-row-label">2026/03/15</div>
+            <div class="account-row-value" style="font-size:13px;">首次綁定帳號</div>
+          </div>
+          <span class="truck-card-status">已通過</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchScreen('calendar')"><div class="nav-icon">📅</div><div class="nav-label">場次</div></div>
+      <div class="nav-item" onclick="switchScreen('my')"><div class="nav-icon">📋</div><div class="nav-label">我的登記</div></div>
+      <div class="nav-item active" onclick="switchScreen('account')"><div class="nav-icon">👤</div><div class="nav-label">帳號</div></div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="modal" onclick="if(event.target === this) closeModal()">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="modalTitle">確認登記</div>
+      <div id="modalBody"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+        <button class="modal-btn confirm" id="modalConfirmBtn" onclick="doConfirm()">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  // ============ 🔌 真實 API 串接設定 ============
+  const API_BASE = 'https://nickleo9.zeabur.app/webhook';
+  const REGISTER_URL = `${API_BASE}/foodtruck-register`;
+
+  // URL ?user=nick / ?user=amy / ?user=lin / ?user=chen 切換不同會員視角
+  const URL_PARAMS = new URLSearchParams(location.search);
+  // 🆕 demo 預設 offline mock（避免後端 Sheets 殘留資料導致重複擋下）
+  // 要打真 webhook 才加 ?mode=real
+  const USE_REAL_API = URL_PARAMS.get('mode') === 'real';
+  const DEMO_USER_KEY = URL_PARAMS.get('user') || 'nick';
+  const DEMO_USERS = {
+    nick: { lineUserId:'U_line_nick001', label:'Nick' },
+    amy:  { lineUserId:'U_line_amy004',  label:'Amy' },
+    lin:  { lineUserId:'U_line_lin003',  label:'林姊' },
+    chen: { lineUserId:'U_line_chen002', label:'陳大哥' }
+  };
+  const CURRENT_USER = DEMO_USERS[DEMO_USER_KEY] || DEMO_USERS.nick;
+
+  // 前端 mock id (t1/t2/t3) 對應後端真實 ID (T_001/T_002/T_003)
+  const TRUCK_ID_MAP = { t1:'T_001', t2:'T_002', t3:'T_003' };
+  // 場地名稱對應 venueId
+  const VENUE_NAME_TO_ID = {
+    '南港餐車市集': 'V_001',
+    '央北中山小熊': 'V_002',
+    '三峽老街': 'V_003',
+    '新店夜市': 'V_004',
+    '蘆洲廟口': 'V_005'
+  };
+
+  let TRUCKS = [
+    { id:'t1', name:'泰沙了打抛飯', emoji:'🍜', type:'餐車', food:'泰式料理', plate:'ABC-1234', status:'active', blocked:['新店夜市'] },
+    { id:'t2', name:'ZN 飲料', emoji:'🧋', type:'餐車', food:'飲料茶飲', plate:'XYZ-5678', status:'active', blocked:['南港餐車市集'] },
+    { id:'t3', name:'黑熊烤玉米', emoji:'🌽', type:'落地攤', food:'燒烤', plate:null, status:'active', blocked:[] }
+  ];
+  // 🆕 備份 TRUCKS 初始狀態，給 resetDemo 用
+  const INITIAL_TRUCKS_JSON = JSON.stringify(TRUCKS);
+
+  // 🆕 場地時段配置 — 對應後端 venues 表的 openDays / capacity
+  const VENUE_CONFIG = {
+    '南港餐車市集': {
+      slots: ['AM', 'PM'],
+      labels: { AM:'午場', PM:'晚場' },
+      hours:  { AM:'10:00–15:00', PM:'16:00–21:00' },
+      openWeekdays: { AM:[1,2,3,4,5,6,7], PM:[1,2,3,4,5,6,7] },   // 每天都開
+      capacity: { AM:5, PM:5 }
+    },
+    '央北中山小熊': {
+      slots: ['AM', 'PM'],
+      labels: { AM:'午場', PM:'晚場' },
+      hours:  { AM:'10:00–15:00', PM:'16:00–21:00' },
+      openWeekdays: { AM:[1,2,3,4,5], PM:[1,2,3,4,5] },             // 平日才開
+      capacity: { AM:4, PM:3 }
+    },
+    '三峽老街': {
+      slots: ['AM', 'PM'],
+      labels: { AM:'早市', PM:'晚市' },
+      hours:  { AM:'09:00–14:00', PM:'17:00–22:00' },
+      openWeekdays: { AM:[6,7], PM:[6,7] },                          // 週末才開
+      capacity: { AM:3, PM:4 }
+    },
+    '新店夜市': {
+      slots: ['PM'],
+      labels: { PM:'夜市' },
+      hours:  { PM:'17:00–24:00' },
+      openWeekdays: { PM:[1,3,5] },                                  // 週一三五才開
+      capacity: { PM:6 }
+    },
+    '蘆洲廟口': {
+      slots: ['ALL'],
+      labels: { ALL:'整天場' },
+      hours:  { ALL:'10:00–21:00' },
+      openWeekdays: { ALL:[1,2,3,4,5,6,7] },                         // 每天都開
+      capacity: { ALL:8 }
+    }
+  };
+
+  // helper：取得場地時段顯示名稱
+  function getSlotLabel(venue, slot) {
+    return (VENUE_CONFIG[venue] && VENUE_CONFIG[venue].labels[slot]) || slot;
+  }
+  function getSlotHours(venue, slot) {
+    return (VENUE_CONFIG[venue] && VENUE_CONFIG[venue].hours[slot]) || '';
+  }
+  function getVenueSlotCount(venue) {
+    return (VENUE_CONFIG[venue] && VENUE_CONFIG[venue].slots.length) || 2;
+  }
+
+  const TODAY = '2026-06-20';
+
+  // 🆕 SESSIONS：按照 VENUE_CONFIG 的場地時段規律重新設計，讓 demo 能看到「每個場地的差異」
+  // - 南港：每天 AM+PM（5+5）
+  // - 央北：平日 AM+PM（4+3），週末休
+  // - 三峽：假日早市+晚市（3+4），平日休
+  // - 新店：週一三五只夜市（6），其他天休
+  // - 蘆洲：每天整天場（10:00–21:00，容量 8）
+  const SESSIONS = {
+    '2026-05': [
+      { d:'2026-05-03', wd:'六', slot:'PM', venue:'三峽老街', status:'history-completed', truckOk:'all' },
+      { d:'2026-05-15', wd:'四', slot:'AM', venue:'南港餐車市集', status:'history-completed', truckOk:['t1','t3'] }
+    ],
+    '2026-06': [
+      // === 6/22（一）平日 ===
+      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'南港餐車市集', status:'full',        cap:[5,5], wl:[2,5], truckOk:['t1','t3'] },
+      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'新店夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
+      { d:'2026-06-22', wd:'一', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' },
+
+      // === 6/23（二）平日 ===
+      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'央北中山小熊', status:'event', event:'小熊夏季嘉年華', truckOk:'all' },
+      { d:'2026-06-23', wd:'二', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[6,8], wl:[0,8], truckOk:'all' },
+
+      // === 6/24（三）平日 ===
+      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'央北中山小熊', status:'full',        cap:[4,4], wl:[1,4], truckOk:'all' },
+      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'新店夜市',     status:'full',        cap:[6,6], wl:[2,6], truckOk:['t2','t3'] },
+      { d:'2026-06-24', wd:'三', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
+
+      // === 6/25（四）平日 ===
+      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[1,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-25', wd:'四', slot:'ALL', venue:'蘆洲廟口',     status:'full',        cap:[8,8], wl:[1,8], truckOk:'all' },
+
+      // === 6/26（五）平日 ===
+      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[3,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'央北中山小熊', status:'full',        cap:[3,3], wl:[1,3], truckOk:'all' },
+      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'新店夜市',     status:'available',   cap:[4,6], wl:[0,6], truckOk:['t2','t3'] },
+      { d:'2026-06-26', wd:'五', slot:'ALL', venue:'蘆洲廟口',     status:'waitlist-full', cap:[8,8], wl:[8,8], truckOk:'all' },
+
+      // === 6/27（六）週末 ===
+      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'三峽老街',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'三峽老街',     status:'registered',  cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-27', wd:'六', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[3,8], wl:[0,8], truckOk:'all' },
+
+      // === 6/28（日）週末 ===
+      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'三峽老街',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'三峽老街',     status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-28', wd:'日', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
+
+      // === 6/29（一）平日，南港 PM 包場 ===
+      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'南港餐車市集', status:'event', event:'南港居民日', truckOk:['t1','t3'] },
+      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'新店夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
+      { d:'2026-06-29', wd:'一', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[2,8], wl:[0,8], truckOk:'all' },
+
+      // === 6/30（二）平日 ===
+      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-30', wd:'二', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' }
+    ],
+    '2026-07': []
+  };
+
+  // 🆕 備份初始 SESSIONS（resetDemo 用深拷貝還原）
+  const INITIAL_SESSIONS_JSON = JSON.stringify(SESSIONS);
+
+  // 🆕 我的登記紀錄（單一資料源 · 取代原本 hard-coded HTML）
+  // 每筆：{ id, sessionKey, status, registeredAt, waitlistOrder, promotedAt }
+  // status: 'confirmed' | 'waiting' | 'promoted' | 'completed' | 'cancelled'
+  let MY_REGISTRATIONS = [];
+  let _regCounter = 0;
+  const makeRegId = () => 'r' + (++_regCounter);
+
+  const sessionKeyOf = (s) => `${s.venue}|${s.d}|${s.slot}`;
+
+  function findSession(key) {
+    for (const month of Object.keys(SESSIONS)) {
+      const found = (SESSIONS[month] || []).find(x => sessionKeyOf(x) === key);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function formatNow() {
+    const d = new Date();
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function initMyRegistrations() {
+    _regCounter = 0;
+    MY_REGISTRATIONS = [
+      { id: makeRegId(), sessionKey:'三峽老街|2026-06-27|PM', truckId:'t1', status:'confirmed', registeredAt:'6/19 14:32' },
+      { id: makeRegId(), sessionKey:'南港餐車市集|2026-06-22|PM', truckId:'t3', status:'waiting', registeredAt:'6/19 14:35', waitlistOrder:2 },
+      // 已遞補上（30 分鐘倒數中，3 分鐘前剛遞補上）
+      { id: makeRegId(), sessionKey:'央北中山小熊|2026-06-24|AM', truckId:'t1', status:'promoted', registeredAt:'6/18 10:15', promotedAt: Date.now() - 3 * 60 * 1000 },
+      { id: makeRegId(), sessionKey:'三峽老街|2026-05-03|PM', truckId:'t1', status:'completed', registeredAt:'4/28 09:10' },
+      { id: makeRegId(), sessionKey:'南港餐車市集|2026-05-15|AM', truckId:'t1', status:'completed', registeredAt:'4/30 16:42' }
+    ];
+  }
+
+  let STATE = {
+    currentScreen: 'calendar',
+    currentMonth: '2026-06',
+    currentTruckIdx: 0,
+    currentMyTab: 'confirmed',
+    calendarView: 'list',  // 'list' 或 'grid'，桌面版預設 grid（init 時設定）
+    pendingSession: null,
+    pendingAction: null,
+    pendingRegId: null
+  };
+
+  function switchScreen(id) {
+    closeCarDropdown();
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    STATE.currentScreen = id;
+    const labels = { community:'LINE 社群', auth:'LIFF 登入', calendar:'月曆主頁', my:'我的登記', account:'帳號設定' };
+    document.getElementById('modeLabel').textContent = labels[id] || id;
+    if (id === 'calendar') renderCalendar();
+    if (id === 'my') renderMyList();
+  }
+
+  // 🆕 車輛下拉選單
+  function toggleCarDropdown() {
+    document.getElementById('carDropdown').classList.toggle('open');
+    renderCarMenu();
+  }
+  function closeCarDropdown() {
+    document.getElementById('carDropdown').classList.remove('open');
+  }
+  function selectCar(idx) {
+    STATE.currentTruckIdx = idx;
+    const t = TRUCKS[idx];
+    document.getElementById('carAvatar').textContent = t.emoji;
+    document.getElementById('carName').textContent = t.name;
+    document.getElementById('carMeta').textContent = `${t.type} · ${t.food}`;
+    closeCarDropdown();
+    showToast(`已切換為「${t.name}」`);
+    renderCalendar();
+  }
+  function renderCarMenu() {
+    const menu = document.getElementById('carMenu');
+    menu.innerHTML = TRUCKS.map((t,i)=>`
+      <div class="car-option ${i===STATE.currentTruckIdx?'selected':''}" onclick="selectCar(${i})">
+        <div class="car-option-avatar">${t.emoji}</div>
+        <div class="car-option-info">
+          <div class="car-option-name">${t.name}</div>
+          <div class="car-option-meta">${t.type} · ${t.food}</div>
+        </div>
+        <span class="car-option-check ${i===STATE.currentTruckIdx?'':'hidden'}">✓</span>
+      </div>
+    `).join('');
+  }
+
+  // 🆕 渲染帳號頁餐車列表
+  function renderTruckList() {
+    const titleEl = document.getElementById('truckSectionTitle');
+    if (titleEl) titleEl.textContent = `我的餐車（${TRUCKS.length} 台）`;
+    const listEl = document.getElementById('truckList');
+    if (!listEl) return;
+    listEl.innerHTML = TRUCKS.map((t, i) => `
+      <div class="truck-card">
+        <div class="truck-card-avatar">${t.emoji}</div>
+        <div class="truck-card-info">
+          <div class="truck-card-name">${t.name}</div>
+          <div class="truck-card-meta">${t.type} · ${t.food}${t.plate ? ' · 車牌 ' + t.plate : ''}</div>
+        </div>
+        <span class="truck-card-status ${t.status === 'pending' ? 'pending' : ''}" style="${t.status === 'pending' ? 'background:#dbeafe; color:#1e40af;' : ''}">
+          ${t.status === 'pending' ? '審核中' : '啟用中'}
+        </span>
+      </div>
+    `).join('');
+  }
+
+  // 🆕 開「新增餐車」modal
+  function openAddTruckModal() {
+    STATE.pendingAction = 'add_truck';
+    document.getElementById('modalTitle').textContent = '新增餐車';
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-info" style="margin-bottom:12px; padding:10px 12px; background:#fff7ed; border-radius:8px; font-size:12px; color:#92400e; line-height:1.6;">
+        📋 新增餐車申請需審核<br>送出後 24 小時內生效
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">餐車名稱 <span style="color:var(--danger);">*</span></label>
+          <input type="text" class="modal-input" id="addTruckName" placeholder="例：阿明的雞排" style="width:100%;">
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">類型</label>
+          <select class="modal-input" id="addTruckType" style="width:100%; cursor:pointer;">
+            <option value="餐車">🚐 餐車（含車牌）</option>
+            <option value="落地攤">🏪 落地攤（無車牌）</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">餐點類別 <span style="color:var(--danger);">*</span></label>
+          <input type="text" class="modal-input" id="addTruckFood" placeholder="例：日式料理 / 飲料茶飲" style="width:100%;">
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">車牌（餐車類型才需要）</label>
+          <input type="text" class="modal-input" id="addTruckPlate" placeholder="例：ABC-1234" style="width:100%;">
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">代表 Emoji</label>
+          <input type="text" class="modal-input" id="addTruckEmoji" placeholder="🍔" value="🚐" maxlength="2" style="width:100%; text-align:center; font-size:18px;">
+        </div>
+      </div>`;
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.style.display = '';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.className = 'modal-btn confirm';
+    btn.textContent = '送出審核';
+    document.getElementById('modal').classList.add('show');
+  }
+
+  // 🆕 實際執行新增餐車
+  function doAddTruck() {
+    const name = document.getElementById('addTruckName').value.trim();
+    const type = document.getElementById('addTruckType').value;
+    const food = document.getElementById('addTruckFood').value.trim();
+    const plate = document.getElementById('addTruckPlate').value.trim();
+    const emoji = document.getElementById('addTruckEmoji').value.trim() || '🚐';
+
+    if (!name) { showToast('請填寫餐車名稱', 'error'); return; }
+    if (!food) { showToast('請填寫餐點類別', 'error'); return; }
+
+    // 避免重複
+    if (TRUCKS.some(t => t.name === name)) {
+      showToast(`「${name}」已經存在`, 'error');
+      return;
+    }
+
+    const newId = 't' + (TRUCKS.length + 1);
+    TRUCKS.push({
+      id: newId,
+      emoji: emoji,
+      name: name,
+      type: type,
+      food: food,
+      plate: plate || null,
+      status: 'pending'  // 新增的車預設審核中
+    });
+
+    closeModal();
+    renderTruckList();
+    renderCarMenu();
+    showToast(`「${name}」已送出審核 📋 24 小時內生效`, 'success');
+  }
+
+  // 🆕 切換列表/網格 view
+  function switchCalendarView(view) {
+    STATE.calendarView = view;
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === view);
+    });
+    renderCalendar();
+  }
+
+  // 🆕 渲染月曆網格 view（7×N grid）
+  function renderCalendarGrid(sessions, phase) {
+    const [y, m] = STATE.currentMonth.split('-').map(Number);
+    const firstDay = new Date(y, m - 1, 1);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const startWeekday = firstDay.getDay(); // 0=日
+
+    // 按日期 group sessions
+    const sessionsByDate = {};
+    sessions.forEach(s => {
+      if (!sessionsByDate[s.d]) sessionsByDate[s.d] = [];
+      sessionsByDate[s.d].push(s);
+    });
+
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    // 開頭空格
+    for (let i = 0; i < startWeekday; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-cell empty';
+      grid.appendChild(empty);
+    }
+
+    const currentTruck = TRUCKS[STATE.currentTruckIdx];
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const cell = document.createElement('div');
+      const isToday = dateStr === TODAY;
+      const weekday = (startWeekday + d - 1) % 7;
+      const isWeekend = weekday === 0 || weekday === 6;
+
+      cell.className = 'cal-cell';
+      if (isToday) cell.classList.add('today');
+
+      let cellHtml = `<div class="cal-cell-date ${isWeekend?'weekend':''}">${d}</div>`;
+
+      const daySessions = sessionsByDate[dateStr] || [];
+      if (daySessions.length > 0) {
+        cell.classList.add('has-events');
+        // 按 venue 整理（同 venue 多時段算一個）
+        const byVenue = {};
+        daySessions.forEach(s => {
+          if (!byVenue[s.venue]) byVenue[s.venue] = [];
+          byVenue[s.venue].push(s);
+        });
+        cellHtml += '<div class="cal-cell-events">';
+        const venues = Object.entries(byVenue);
+        const showCount = Math.min(venues.length, 3);
+        for (let i = 0; i < showCount; i++) {
+          const [venue, slots] = venues[i];
+          // 取此 venue 在此日的「最佳狀態」
+          let pillClass = '';
+          if (slots.some(s => s.status === 'registered')) pillClass = 'registered';
+          else if (slots.some(s => s.status === 'available' && (s.truckOk === 'all' || s.truckOk.includes(currentTruck.id)))) pillClass = 'available';
+          else if (slots.some(s => s.status === 'full' && (s.truckOk === 'all' || s.truckOk.includes(currentTruck.id)))) pillClass = 'full';
+          else if (slots.some(s => s.status === 'event')) pillClass = 'event';
+          // 縮短場地名
+          const shortName = venue.length > 4 ? venue.slice(0, 4) : venue;
+          cellHtml += `<div class="cal-event-pill ${pillClass}" title="${venue}">${shortName}</div>`;
+        }
+        if (venues.length > 3) {
+          cellHtml += `<div class="cal-cell-more">+${venues.length - 3}</div>`;
+        }
+        cellHtml += '</div>';
+
+        // 點 cell → 開該日詳情（用 openDayDetail）
+        cell.onclick = () => openDayDetail(dateStr, daySessions);
+      }
+
+      cell.innerHTML = cellHtml;
+      grid.appendChild(cell);
+    }
+  }
+
+  // 🆕 點月曆網格某日 → 開該日場地清單 modal
+  function openDayDetail(dateStr, daySessions) {
+    const [, mm, dd] = dateStr.split('-');
+    const wd = daySessions[0].wd;
+
+    // group by venue
+    const byVenue = {};
+    daySessions.forEach(s => {
+      if (!byVenue[s.venue]) byVenue[s.venue] = [];
+      byVenue[s.venue].push(s);
+    });
+
+    const currentTruck = TRUCKS[STATE.currentTruckIdx];
+    document.getElementById('modalTitle').textContent = `${parseInt(mm)}/${parseInt(dd)}（${wd}）場次`;
+
+    let body = '<div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">';
+    Object.entries(byVenue).forEach(([venue, slots]) => {
+      const chips = slots.map(s => {
+        const allowed = s.truckOk === 'all' || s.truckOk.includes(currentTruck.id);
+        const slotLabel = getSlotLabel(s.venue, s.slot);
+        let key = '', label = '';
+        if (!allowed) { key = ''; label = '未開放'; }
+        else if (s.status === 'event') { key = 'event'; label = '🎪 包場'; }
+        else if (s.status === 'waitlist-full') { key = 'waitlist-full'; label = '已額滿'; }
+        else if (s.status === 'registered') { key = 'registered'; label = '✅ 已登記'; }
+        else if (s.status === 'available') { key = 'available'; label = `剩 ${s.cap[1]-s.cap[0]}/${s.cap[1]}`; }
+        else if (s.status === 'full') { key = 'full'; label = `候補 ${s.wl[0]}/${s.wl[1]}`; }
+        return `<span class="slot-mini ${key}">${slotLabel} · ${label}</span>`;
+      }).join('');
+
+      body += `
+        <div class="venue-card" style="margin-bottom:0;" onclick="closeModal(); setTimeout(() => openSlotPicker('${dateStr}', '${venue.replace(/'/g, '\\\'')}', findVenueSlots('${dateStr}','${venue.replace(/'/g, '\\\'')}')), 100);">
+          <div class="venue-card-main">
+            <div class="venue-card-name">${venue}</div>
+            <div class="venue-card-slots">${chips}</div>
+          </div>
+          <span class="venue-card-arrow">›</span>
+        </div>`;
+    });
+    body += '</div>';
+
+    document.getElementById('modalBody').innerHTML = body;
+    document.getElementById('modalConfirmBtn').style.display = 'none';
+    document.querySelector('.modal-actions .modal-btn.cancel').textContent = '關閉';
+    document.getElementById('modal').classList.add('show');
+  }
+
+  // helper: 給日期 + 場地，取回該日該場地所有 slots
+  function findVenueSlots(dateStr, venue) {
+    return (SESSIONS[STATE.currentMonth] || []).filter(s => s.d === dateStr && s.venue === venue);
+  }
+
+  function changeMonth(delta) {
+    const [y, m] = STATE.currentMonth.split('-').map(Number);
+    let newM = m + delta, newY = y;
+    if (newM > 12) { newM = 1; newY++; }
+    if (newM < 1) { newM = 12; newY--; }
+    STATE.currentMonth = `${newY}-${String(newM).padStart(2,'0')}`;
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    const [y, m] = STATE.currentMonth.split('-').map(Number);
+    document.getElementById('monthTitle').textContent = `${y} 年 ${m} 月`;
+
+    const today = new Date(TODAY);
+    const monthStart = new Date(`${STATE.currentMonth}-01`);
+    const monthEnd = new Date(y, m, 0);
+    let phase, phaseHtml;
+    if (monthEnd < today) {
+      phase = 'history';
+      phaseHtml = `📜 <span>歷史紀錄 · <b>本月場次已結束</b></span>`;
+    } else if (monthStart > today) {
+      phase = 'future';
+      const openDate = new Date(y, m-2, 15);
+      const daysLeft = Math.ceil((openDate - today) / 86400000);
+      phaseHtml = `⏳ <span><b>${m} 月排班尚未開放登記</b> · ${daysLeft > 0 ? `${daysLeft} 天後開放` : '即將開放'}</span>`;
+    } else {
+      const day = today.getDate();
+      if (day >= 15 && day <= 28) {
+        phase = 'main';
+        phaseHtml = `🟢 <span><b>主登記期</b>（每月 15–28 日）· 自由登記中</span>`;
+      } else {
+        phase = 'waitlist';
+        phaseHtml = `🟡 <span><b>候補期</b> · 僅可加入候補佇列</span>`;
+      }
+    }
+    const banner = document.getElementById('phaseBanner');
+    banner.className = `phase-banner ${phase}`;
+    banner.innerHTML = phaseHtml;
+
+    const list = document.getElementById('sessionList');
+    const gridWrap = document.getElementById('calendarGridWrap');
+    list.innerHTML = '';
+
+    // 🆕 view 切換：grid 用月曆網格，list 用 venue-card 列表
+    const useGrid = STATE.calendarView === 'grid' && phase !== 'future';
+    list.style.display = useGrid ? 'none' : '';
+    if (gridWrap) gridWrap.style.display = useGrid ? 'flex' : 'none';
+
+    if (phase === 'future') {
+      // 🆕 動態算「距開放還有 N 天」（上個月 15 日開放當月排班登記）
+      const openDate = new Date(y, m - 2, 15);
+      const todayDateOnly = new Date(TODAY);
+      const daysLeft = Math.ceil((openDate - todayDateOnly) / 86400000);
+      const countdownText = daysLeft > 0
+        ? `距開放還有 ${daysLeft} 天`
+        : daysLeft === 0
+          ? '今日開放登記 🎉'
+          : `已開放 · 排程整理中`;
+      list.innerHTML = `
+        <div class="future-notice">
+          <div class="future-notice-emoji">📅</div>
+          <div class="future-notice-title">${m} 月排班尚未開放</div>
+          <div class="future-notice-sub">每月 15 日開放下個月場次登記</div>
+          <div class="future-countdown">${countdownText}</div>
+        </div>
+      `;
+      return;
+    }
+
+    const sessions = SESSIONS[STATE.currentMonth] || [];
+    if (sessions.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:#9ca3af; padding:40px 0; font-size:13px;">此月份無場次</div>`;
+      return;
+    }
+
+    // 🆕 走網格 view
+    if (useGrid) {
+      renderCalendarGrid(sessions, phase);
+      renderDesktopSidebar();
+      return;
+    }
+
+    const currentTruck = TRUCKS[STATE.currentTruckIdx];
+
+    // 🆕 先按 date → venue 分組（同一日同一場地的不同時段疊在一起）
+    const grouped = {};
+    sessions.forEach(s => {
+      if (!grouped[s.d]) grouped[s.d] = { wd: s.wd, venues: {} };
+      if (!grouped[s.d].venues[s.venue]) grouped[s.d].venues[s.venue] = [];
+      grouped[s.d].venues[s.venue].push(s);
+    });
+
+    Object.entries(grouped).forEach(([date, info]) => {
+      // 日期 header
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'session-day' + (date === TODAY ? ' today' : '');
+      const [, mm, dd] = date.split('-');
+      dayDiv.textContent = `${parseInt(mm)}/${parseInt(dd)}（${info.wd}）${date === TODAY ? ' · 今天' : ''}`;
+      list.appendChild(dayDiv);
+
+      Object.entries(info.venues).forEach(([venue, slots]) => {
+        // 🆕 補齊「該場地該開的時段」— 缺的標 closed（未排場）
+        // 用 VENUE_CONFIG 決定該場地有哪些 slot，不再寫死 AM+PM
+        const slotMap = {};
+        const venueSlots = (VENUE_CONFIG[venue] && VENUE_CONFIG[venue].slots) || ['AM','PM'];
+        venueSlots.forEach(sl => { slotMap[sl] = null; });
+        slots.forEach(s => { slotMap[s.slot] = s; });
+        const allSlots = venueSlots.map(sl => slotMap[sl] || {
+          slot: sl, d: date, venue, wd: info.wd, status: 'closed', truckOk: 'all'
+        });
+
+        // 計算此 venue 的整體狀態 + 每個 slot 的 mini 標籤
+        const card = document.createElement('div');
+        const slotStatuses = allSlots.map(s => {
+          if (s.status === 'closed') return { key:'closed', label:'未排' };
+          const allowed = s.truckOk === 'all' || s.truckOk.includes(currentTruck.id);
+          if (phase === 'history') return { key:'history', label:'已完成' };
+          if (!allowed) return { key:'blocked', label:'未開放' };
+          if (s.status === 'event') return { key:'event', label:'🎪 包場' };
+          if (s.status === 'waitlist-full') return { key:'waitlist-full', label:'已額滿' };
+          if (s.status === 'registered') return { key:'registered', label:'✅ 已登記' };
+          if (s.status === 'available') return { key:'available', label:`剩 ${s.cap[1]-s.cap[0]}/${s.cap[1]}` };
+          if (s.status === 'full') return { key:'full', label:`候補 ${s.wl[0]}/${s.wl[1]}` };
+          return { key:'', label:s.status };
+        });
+
+        // 卡片 border 顏色根據優先級：registered > available > full > event > all-disabled
+        const hasReg = slotStatuses.some(x => x.key === 'registered');
+        const hasAvail = slotStatuses.some(x => x.key === 'available');
+        const hasFull = slotStatuses.some(x => x.key === 'full');
+        const hasEvent = slotStatuses.some(x => x.key === 'event');
+        const allDisabled = slotStatuses.every(x => ['blocked','waitlist-full','event','history','closed'].includes(x.key));
+        let cardClass = 'venue-card';
+        if (hasReg) cardClass += ' has-registered';
+        else if (hasAvail) cardClass += ' has-available';
+        else if (hasFull) cardClass += ' has-full';
+        else if (hasEvent) cardClass += ' has-event';
+        if (allDisabled) cardClass += ' all-disabled';
+
+        // 卡片內 mini chip
+        const chips = allSlots.map((s, i) => {
+          const st = slotStatuses[i];
+          const slotLabel = getSlotLabel(s.venue, s.slot);
+          return `<span class="slot-mini ${st.key}">${slotLabel} · ${st.label}</span>`;
+        }).join('');
+
+        card.className = cardClass;
+        card.innerHTML = `
+          <div class="venue-card-main">
+            <div class="venue-card-name">${venue}</div>
+            <div class="venue-card-slots">${chips}</div>
+          </div>
+          <span class="venue-card-arrow">›</span>`;
+        // 點卡片 → 開時段選擇 modal（帶 allSlots 含 closed）
+        card.onclick = () => openSlotPicker(date, venue, allSlots);
+
+        list.appendChild(card);
+      });
+    });
+    renderDesktopSidebar();
+  }
+
+  // 🆕 時段選擇 modal：點 venue 卡片後跳出，內含 AM/PM 兩個大按鈕
+  // 對「單時段場」（蘆洲整天場、新店夜市）直接跳過此 modal，走對應 action
+  function openSlotPicker(date, venue, slots) {
+    // 🆕 單時段場 fast path：不開選時段 modal
+    if (slots.length === 1) {
+      const s = slots[0];
+      const truck = TRUCKS[STATE.currentTruckIdx];
+      const allowed = s.truckOk === 'all' || s.truckOk.includes(truck.id);
+      if (!allowed) { showToast('此據點目前不開放您登記', 'info'); return; }
+      if (s.status === 'event') { showToast(`此場已包場：${s.event}`, 'error'); return; }
+      if (s.status === 'waitlist-full') { showToast('此場次已額滿', 'error'); return; }
+      if (s.status === 'registered') {
+        const r = MY_REGISTRATIONS.find(x => x.sessionKey === sessionKeyOf(s) && x.status === 'confirmed');
+        if (r) { cancelRegistration(r.id); return; }
+      }
+      if (s.status === 'available') { openConfirm(s, 'register'); return; }
+      if (s.status === 'full') { openConfirm(s, 'waitlist'); return; }
+      return;
+    }
+
+    const truck = TRUCKS[STATE.currentTruckIdx];
+    const [, mm, dd] = date.split('-');
+    const wd = slots[0].wd;
+
+    document.getElementById('modalTitle').textContent = '選擇時段';
+    let body = `
+      <div class="modal-info" style="margin-bottom:8px;">
+        <div class="modal-row"><span class="label">場地</span><span class="value">${venue}</span></div>
+        <div class="modal-row"><span class="label">日期</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${wd}）</span></div>
+        <div class="modal-row"><span class="label">餐車</span><span class="value">${truck.emoji} ${truck.name}</span></div>
+      </div>
+      <div class="slot-picker-grid">`;
+
+    slots.forEach(s => {
+      const slotName = getSlotLabel(s.venue, s.slot);
+      const hours = getSlotHours(s.venue, s.slot);
+      const allowed = s.truckOk === 'all' || s.truckOk.includes(truck.id);
+      const sk = sessionKeyOf(s);
+      let cls = 'slot-picker-btn', statusCls = 'gray', statusText = '', onclickAttr = '', disabled = false;
+
+      if (!allowed) {
+        statusText = '📋 此據點本月暫不開放';
+        cls += ' disabled'; disabled = true;
+      } else if (s.status === 'event') {
+        statusText = `🎪 已包場：${s.event}`;
+        cls += ' event'; disabled = true;
+      } else if (s.status === 'waitlist-full') {
+        statusText = `🚫 已額滿（含候補）`;
+        cls += ' disabled'; statusCls = 'red'; disabled = true;
+      } else if (s.status === 'registered') {
+        statusText = `✅ 您已登記 · 點此取消`;
+        cls += ' registered'; statusCls = 'blue';
+        const r = MY_REGISTRATIONS.find(x => x.sessionKey === sk && x.status === 'confirmed');
+        if (r) onclickAttr = `onclick="closeModal(); cancelRegistration('${r.id}')"`;
+      } else if (s.status === 'available') {
+        statusText = `🚐 剩 ${s.cap[1] - s.cap[0]}/${s.cap[1]} 名額 · 點此登記`;
+        cls += ' available'; statusCls = 'green';
+        onclickAttr = `onclick="closeModal(); openConfirm(findSession('${sk}'), 'register')"`;
+      } else if (s.status === 'full') {
+        statusText = `⚠️ 已滿 · 候補 ${s.wl[0]}/${s.wl[1]} · 點此候補`;
+        cls += ' full'; statusCls = 'warn';
+        onclickAttr = `onclick="closeModal(); openConfirm(findSession('${sk}'), 'waitlist')"`;
+      }
+
+      body += `
+        <button class="${cls}" ${onclickAttr} ${disabled?'disabled':''}>
+          <div class="slot-picker-time">
+            <div class="slot-picker-name">${slotName}</div>
+            <div class="slot-picker-hours">${hours}</div>
+          </div>
+          <div class="slot-picker-status ${statusCls}">${statusText}</div>
+        </button>`;
+    });
+    body += '</div>';
+
+    document.getElementById('modalBody').innerHTML = body;
+    // 此 modal 無底部確認按鈕
+    document.getElementById('modalConfirmBtn').style.display = 'none';
+    document.querySelector('.modal-actions .modal-btn.cancel').textContent = '關閉';
+    document.getElementById('modal').classList.add('show');
+  }
+
+  // 🖥 桌面版 sidebar：常駐顯示我的登記摘要
+  function renderDesktopSidebar() {
+    const sb = document.getElementById('desktopSidebar');
+    if (!sb) return;
+    const isDesktop = (typeof window.matchMedia === 'function') && window.matchMedia('(min-width: 1024px)').matches;
+    sb.style.display = isDesktop ? 'flex' : 'none';
+    if (!isDesktop) return;
+
+    const confirmed = MY_REGISTRATIONS.filter(r => r.status === 'confirmed');
+    const waiting   = MY_REGISTRATIONS.filter(r => r.status === 'waiting');
+    const promoted  = MY_REGISTRATIONS.filter(r => r.status === 'promoted');
+
+    let html = `<div class="desktop-sidebar-title">
+      📋 我的登記摘要
+      <span class="more" onclick="switchScreen('my')">查看全部 →</span>
+    </div>`;
+
+    if (promoted.length > 0) {
+      html += `<div class="desktop-sidebar-section" style="color:var(--line-green);">🔔 已遞補待確認 (${promoted.length})</div>`;
+      promoted.slice(0, 3).forEach(r => {
+        const s = findSession(r.sessionKey);
+        if (!s) return;
+        const [, mm, dd] = s.d.split('-');
+        html += `<div class="waitlist-card" style="border-left-color:var(--line-green);">
+          <div style="font-size:13px; font-weight:700;">${s.venue}</div>
+          <div style="font-size:11px; color:#666; margin:2px 0 6px;">${parseInt(mm)}/${parseInt(dd)} ${s.slot==='AM'?'午場':'晚場'}</div>
+          <div style="display:flex; gap:6px;">
+            <button class="modal-btn cancel"  style="flex:1; padding:6px; font-size:11px;" onclick="declineWaitlist('${r.id}')">讓位</button>
+            <button class="modal-btn confirm" style="flex:1; padding:6px; font-size:11px;" onclick="acceptWaitlist('${r.id}')">確認補位</button>
+          </div>
+        </div>`;
+      });
+    }
+
+    if (confirmed.length > 0) {
+      html += `<div class="desktop-sidebar-section">✅ 已確認 (${confirmed.length})</div>`;
+      confirmed.slice(0, 3).forEach(r => {
+        const s = findSession(r.sessionKey);
+        if (!s) return;
+        const [, mm, dd] = s.d.split('-');
+        const truck = TRUCKS.find(x => x.id === r.truckId) || TRUCKS[0];
+        html += `<div class="session-card registered">
+          <div style="font-size:13px; font-weight:700;">${s.venue}</div>
+          <div style="font-size:11px; color:#666; margin:2px 0;">${parseInt(mm)}/${parseInt(dd)} ${s.slot==='AM'?'午場':'晚場'} · ${truck.emoji} ${truck.name}</div>
+          <button onclick="cancelRegistration('${r.id}')" style="margin-top:4px; padding:5px 8px; background:#fee2e2; color:#991b1b; border:none; border-radius:5px; font-size:11px; cursor:pointer; font-family:inherit;">取消</button>
+        </div>`;
+      });
+    }
+
+    if (waiting.length > 0) {
+      html += `<div class="desktop-sidebar-section" style="color:var(--warn);">⏳ 候補中 (${waiting.length})</div>`;
+      waiting.slice(0, 3).forEach(r => {
+        const s = findSession(r.sessionKey);
+        if (!s) return;
+        const [, mm, dd] = s.d.split('-');
+        html += `<div class="waitlist-card">
+          <div style="font-size:13px; font-weight:700;">${s.venue}</div>
+          <div style="font-size:11px; color:#666; margin:2px 0;">${parseInt(mm)}/${parseInt(dd)} ${s.slot==='AM'?'午場':'晚場'} · 第 ${r.waitlistOrder} 位</div>
+        </div>`;
+      });
+    }
+
+    if (confirmed.length === 0 && waiting.length === 0 && promoted.length === 0) {
+      html += `<div style="text-align:center; color:#9ca3af; padding:24px 0; font-size:12px;">尚無登記紀錄<br>從左側月曆挑場次吧</div>`;
+    }
+
+    sb.innerHTML = html;
+  }
+
+  function renderMyList() {
+    const list = document.getElementById('myList');
+
+    // 即時計算各 tab 數量
+    const counts = {
+      confirmed: MY_REGISTRATIONS.filter(r => r.status === 'confirmed').length,
+      waiting:   MY_REGISTRATIONS.filter(r => ['waiting','promoted'].includes(r.status)).length,
+      history:   MY_REGISTRATIONS.filter(r => r.status === 'completed').length
+    };
+    const tabKeys = ['confirmed','waiting','history'];
+    document.querySelectorAll('.my-tab').forEach((tab, i) => {
+      const c = tab.querySelector('.count');
+      const k = tabKeys[i];
+      if (!c) return;
+      if (counts[k] > 0) { c.textContent = counts[k]; c.style.display = ''; }
+      else c.style.display = 'none';
+    });
+
+    // 過濾出當前 tab 該顯示的紀錄
+    let items;
+    if (STATE.currentMyTab === 'confirmed')      items = MY_REGISTRATIONS.filter(r => r.status === 'confirmed');
+    else if (STATE.currentMyTab === 'waiting')   items = MY_REGISTRATIONS.filter(r => ['waiting','promoted'].includes(r.status));
+    else                                          items = MY_REGISTRATIONS.filter(r => r.status === 'completed');
+
+    if (items.length === 0) {
+      const msg = STATE.currentMyTab === 'confirmed' ? '尚無已確認的登記，至月曆挑場次吧'
+                : STATE.currentMyTab === 'waiting'   ? '目前沒有候補中的登記'
+                : '尚無歷史紀錄';
+      list.innerHTML = `<div style="text-align:center; color:#9ca3af; padding:48px 16px; font-size:13px;">${msg}</div>`;
+      return;
+    }
+
+    let html = '';
+    items.forEach(r => {
+      const s = findSession(r.sessionKey);
+      if (!s) return;
+      const slotText = getSlotLabel(s.venue, s.slot);
+      const [, mm, dd] = s.d.split('-');
+      const dateText = `${parseInt(mm)}/${parseInt(dd)}（${s.wd}）`;
+      const truck = TRUCKS.find(x => x.id === r.truckId) || TRUCKS[0];
+      const truckLine = `<div style="font-size:11px; color:#666; margin-top:2px;">${truck.emoji} ${truck.name}</div>`;
+
+      if (r.status === 'confirmed') {
+        html += `
+          <div class="session-card registered" style="margin-bottom:8px;">
+            <div class="session-row1">
+              <div>
+                <div class="session-venue">${s.venue}</div>
+                ${truckLine}
+              </div>
+              <div class="session-slot">${slotText}</div>
+            </div>
+            <div class="session-row2">
+              <div class="session-capacity">📅 ${dateText}</div>
+              <span class="session-tag tag-registered">已確認</span>
+            </div>
+            <div class="session-note">登記時間：${r.registeredAt || '-'}</div>
+            <button onclick="cancelRegistration('${r.id}')" style="margin-top:10px; width:100%; padding:9px; background:#fee2e2; color:#991b1b; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">取消登記</button>
+          </div>`;
+      } else if (r.status === 'waiting') {
+        const pct = s.wl ? Math.round((s.wl[0] / s.wl[1]) * 100) : 0;
+        html += `
+          <div class="waitlist-card">
+            <div class="waitlist-position">
+              <div class="waitlist-position-num">${r.waitlistOrder || '?'}</div>
+              <div style="font-size:13px;">候補 <b style="color:var(--warn);">第 ${r.waitlistOrder||'?'} 位</b>${s.wl?` / 共 ${s.wl[1]} 位上限`:''}</div>
+            </div>
+            <div style="font-size:14px; font-weight:700; margin:6px 0 2px;">${s.venue} · ${dateText}${slotText}</div>
+            ${truckLine}
+            <div class="waitlist-bar" style="margin-top:8px;"><div class="waitlist-bar-fill" style="width:${pct}%"></div></div>
+            <div style="font-size:11px; color:#666; margin-top:6px;">登記時間：${r.registeredAt || '-'}</div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button class="modal-btn cancel" style="flex:1;" onclick="cancelWaitlist('${r.id}')">取消候補</button>
+            </div>
+          </div>`;
+      } else if (r.status === 'promoted') {
+        const elapsed = Math.floor((Date.now() - r.promotedAt) / 1000);
+        const remaining = Math.max(0, 30*60 - elapsed);
+        const cmm = String(Math.floor(remaining / 60)).padStart(2,'0');
+        const css = String(remaining % 60).padStart(2,'0');
+        const expired = remaining === 0;
+        html += `
+          <div class="waitlist-card" data-promoted-id="${r.id}">
+            <div class="waitlist-position">
+              <div class="waitlist-position-num" style="background:var(--line-green);">!</div>
+              <div style="font-size:13px;"><b style="color:var(--line-green);">您已遞補上！</b>請於 30 分鐘內確認</div>
+            </div>
+            <div style="font-size:14px; font-weight:700; margin:6px 0 2px;">${s.venue} · ${dateText}${slotText}</div>
+            ${truckLine}
+            ${expired
+              ? `<div class="waitlist-countdown" style="background:#fee2e2;color:#991b1b;margin-top:8px;">⏰ 已逾時，遞補資格已轉給下一位</div>`
+              : `<div class="waitlist-countdown" data-countdown="${r.id}" style="margin-top:8px;">⏰ 剩餘 ${cmm}:${css}，未確認將自動轉給下一位</div>`}
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button class="modal-btn cancel"  style="flex:1; ${expired?'opacity:.5;cursor:not-allowed;':''}" ${expired?'disabled':''} onclick="declineWaitlist('${r.id}')">讓位</button>
+              <button class="modal-btn confirm" style="flex:1; ${expired?'opacity:.5;cursor:not-allowed;':''}" ${expired?'disabled':''} onclick="acceptWaitlist('${r.id}')">確認補位</button>
+            </div>
+          </div>`;
+      } else if (r.status === 'completed') {
+        html += `
+          <div class="session-card history">
+            <div class="session-row1">
+              <div>
+                <div class="session-venue">${s.venue}</div>
+                ${truckLine}
+              </div>
+              <div class="session-slot">${slotText}</div>
+            </div>
+            <div class="session-row2"><div class="session-capacity">📅 ${dateText} · ✅ 已完成</div><span class="session-tag tag-history">歷史</span></div>
+          </div>`;
+      }
+    });
+
+    list.innerHTML = html;
+  }
+
+  // 🆕 候補操作：確認補位 / 讓位 / 取消候補 / 取消已確認登記
+  function acceptWaitlist(regId) {
+    const r = MY_REGISTRATIONS.find(x => x.id === regId);
+    if (!r || r.status !== 'promoted') return;
+    // 防呆：檢查是否逾時
+    if (Date.now() - r.promotedAt >= 30 * 60 * 1000) {
+      showToast('已逾時，遞補資格已自動轉給下一位', 'error');
+      renderMyList();
+      return;
+    }
+    r.status = 'confirmed';
+    r.registeredAt = formatNow();
+    delete r.promotedAt;
+    delete r.waitlistOrder;
+    // 同步月曆顯示
+    const s = findSession(r.sessionKey);
+    if (s) s.status = 'registered';
+    showToast('✓ 已確認補位，歡迎來擺攤！', 'success');
+    renderMyList();
+    if (STATE.currentScreen === 'calendar') renderCalendar();
+  }
+
+  function declineWaitlist(regId) {
+    const r = MY_REGISTRATIONS.find(x => x.id === regId);
+    if (!r || r.status !== 'promoted') return;
+    if (!confirm('確定要讓位給下一位候補嗎？\n讓出後將無法復原。')) return;
+    const sk = r.sessionKey;
+    MY_REGISTRATIONS = MY_REGISTRATIONS.filter(x => x.id !== regId);
+    // 🆕 讓位後自動 promote 下一位候補
+    promoteNextWaiting(sk);
+    showToast('已讓位給下一位候補', 'info');
+    renderMyList();
+    if (STATE.currentScreen === 'calendar') renderCalendar();
+  }
+
+  function cancelWaitlist(regId) {
+    const r = MY_REGISTRATIONS.find(x => x.id === regId);
+    if (!r || r.status !== 'waiting') return;
+    if (!confirm('確定要取消候補嗎？\n取消後將失去候補順位。')) return;
+    const sk = r.sessionKey;
+    const myOrder = r.waitlistOrder || 999;
+    MY_REGISTRATIONS = MY_REGISTRATIONS.filter(x => x.id !== regId);
+    // 同步：候補總數 -1
+    const s = findSession(sk);
+    if (s && s.wl && s.wl[0] > 0) s.wl[0]--;
+    // 🆕 將排在我後面的候補順位往前遞補
+    MY_REGISTRATIONS.filter(x =>
+      x.sessionKey === sk && x.status === 'waiting' && (x.waitlistOrder || 999) > myOrder
+    ).forEach(x => { x.waitlistOrder--; });
+    showToast('已取消候補', 'info');
+    renderMyList();
+    if (STATE.currentScreen === 'calendar') renderCalendar();
+  }
+
+  // 🆕 取消已確認的登記（用 in-app modal 取代 native confirm）
+  function cancelRegistration(regId) {
+    const r = MY_REGISTRATIONS.find(x => x.id === regId);
+    if (!r || r.status !== 'confirmed') return;
+    const s = findSession(r.sessionKey);
+    if (!s) return;
+
+    // 計算距離場次天數
+    const sDate = new Date(s.d + 'T00:00:00');
+    const todayDate = new Date(TODAY + 'T00:00:00');
+    const daysUntil = Math.round((sDate - todayDate) / 86400000);
+
+    if (daysUntil < 0) {
+      showToast('此場次已過，無法取消', 'error');
+      return;
+    }
+
+    // 開 in-app 確認 modal
+    STATE.pendingRegId = regId;
+    STATE.pendingAction = 'confirm_cancel';
+    const truck = TRUCKS.find(x => x.id === r.truckId) || TRUCKS[0];
+    const [, mm, dd] = s.d.split('-');
+    const slotText = getSlotLabel(s.venue, s.slot);
+
+    document.getElementById('modalTitle').textContent = '取消這筆登記？';
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-info">
+        <div class="modal-row"><span class="label">場地</span><span class="value">${s.venue}</span></div>
+        <div class="modal-row"><span class="label">日期 / 時段</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${s.wd}）${slotText}</span></div>
+        <div class="modal-row"><span class="label">餐車</span><span class="value">${truck.emoji} ${truck.name}</span></div>
+        <div class="modal-row"><span class="label">登記時間</span><span class="value">${r.registeredAt}</span></div>
+        <div class="modal-row"><span class="label">距離場次</span><span class="value">${daysUntil} 天後</span></div>
+      </div>
+      ${daysUntil < 3 ? `<div style="margin-top:12px; padding:10px 12px; background:#fee2e2; color:#991b1b; border-radius:8px; font-size:12px; line-height:1.5;">⚠️ 距離場次 &lt; 3 天<br>正式上線後將扣 5 點信用分</div>` : ''}`;
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.className = 'modal-btn';
+    btn.style.background = 'var(--danger)';
+    btn.style.color = '#fff';
+    btn.textContent = '確定取消登記';
+    document.getElementById('modal').classList.add('show');
+  }
+
+  // 實際執行取消（從 modal 觸發）
+  function doCancelRegistration(regId) {
+    const r = MY_REGISTRATIONS.find(x => x.id === regId);
+    if (!r || r.status !== 'confirmed') return;
+    const s = findSession(r.sessionKey);
+    if (!s) return;
+
+    const sDate = new Date(s.d + 'T00:00:00');
+    const todayDate = new Date(TODAY + 'T00:00:00');
+    const daysUntil = Math.round((sDate - todayDate) / 86400000);
+
+    // 移除我的登記
+    MY_REGISTRATIONS = MY_REGISTRATIONS.filter(x => x.id !== regId);
+    // session cap -1
+    if (s.cap && s.cap[0] > 0) s.cap[0]--;
+    // 自動 promote 候補佇列第一位
+    const promoted = promoteNextWaiting(r.sessionKey);
+    // session 狀態回復
+    if (s.cap && s.cap[0] < s.cap[1]) {
+      if (s.status === 'registered' || s.status === 'full') s.status = 'available';
+    }
+
+    const toastMsg = daysUntil < 3
+      ? `已取消（< 3 天，正式上線會扣 5 點信用）`
+      : (promoted ? `已取消，第 1 位候補已自動遞補 🎉` : '已取消登記');
+    showToast(toastMsg, daysUntil < 3 ? 'error' : 'info');
+    renderMyList();
+    if (STATE.currentScreen === 'calendar') renderCalendar();
+  }
+
+  // 🆕 將候補佇列第一位往上 promote（30 分鐘倒數）
+  // 回傳被 promote 的 record（沒人候補則回 null）
+  function promoteNextWaiting(sessionKey) {
+    const queue = MY_REGISTRATIONS
+      .filter(x => x.sessionKey === sessionKey && x.status === 'waiting')
+      .sort((a, b) => (a.waitlistOrder || 999) - (b.waitlistOrder || 999));
+    if (queue.length === 0) return null;
+    const first = queue[0];
+    first.status = 'promoted';
+    first.promotedAt = Date.now();
+    const oldOrder = first.waitlistOrder || 1;
+    delete first.waitlistOrder;
+    // 後面的人往前一位
+    MY_REGISTRATIONS.filter(x =>
+      x.sessionKey === sessionKey && x.status === 'waiting'
+    ).forEach(x => {
+      if ((x.waitlistOrder || 999) > oldOrder) x.waitlistOrder--;
+    });
+    // session wl -1（這位從候補拉出來）
+    const s = findSession(sessionKey);
+    if (s && s.wl && s.wl[0] > 0) s.wl[0]--;
+    return first;
+  }
+
+  // 🆕 promoted 倒數每秒更新；逾時自動移除 + promote 下一位
+  function startPromotedCountdown() {
+    setInterval(() => {
+      let needRerender = false;
+      const toExpire = [];
+      MY_REGISTRATIONS.forEach(r => {
+        if (r.status !== 'promoted') return;
+        const elapsed = Math.floor((Date.now() - r.promotedAt) / 1000);
+        const remaining = Math.max(0, 30*60 - elapsed);
+        if (remaining === 0) { toExpire.push(r); return; }
+        // 更新文字（不 re-render，避免閃爍）
+        const el = document.querySelector(`[data-countdown="${r.id}"]`);
+        if (el) {
+          const cmm = String(Math.floor(remaining / 60)).padStart(2,'0');
+          const css = String(remaining % 60).padStart(2,'0');
+          el.textContent = `⏰ 剩餘 ${cmm}:${css}，未確認將自動轉給下一位`;
+        }
+      });
+      toExpire.forEach(r => {
+        MY_REGISTRATIONS = MY_REGISTRATIONS.filter(x => x.id !== r.id);
+        promoteNextWaiting(r.sessionKey);
+        needRerender = true;
+      });
+      if (needRerender) {
+        if (STATE.currentScreen === 'my') renderMyList();
+        else if (STATE.currentScreen === 'calendar') renderCalendar();
+      }
+    }, 1000);
+  }
+
+  function switchMyTab(tab, el) {
+    STATE.currentMyTab = tab;
+    document.querySelectorAll('.my-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    renderMyList();
+  }
+
+  function openConfirm(s, action) {
+    STATE.pendingSession = s;
+    STATE.pendingAction = action;
+    const t = TRUCKS[STATE.currentTruckIdx];
+    document.getElementById('modalTitle').textContent = action === 'register' ? '確認登記場次' : '加入候補佇列';
+    const [, mm, dd] = s.d.split('-');
+    const slot = `${getSlotLabel(s.venue, s.slot)} (${getSlotHours(s.venue, s.slot)})`;
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-info">
+        <div class="modal-row"><span class="label">場地</span><span class="value">${s.venue}</span></div>
+        <div class="modal-row"><span class="label">日期</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${s.wd}）</span></div>
+        <div class="modal-row"><span class="label">時段</span><span class="value">${slot}</span></div>
+        <div class="modal-row"><span class="label">餐車</span><span class="value">${t.emoji} ${t.name}</span></div>
+        ${action === 'waitlist' ? `<div class="modal-row" style="color:var(--warn);"><span class="label">⚠️ 候補</span><span class="value">將是第 ${s.wl[0]+1} 位 / 上限 ${s.wl[1]}</span></div>` : ''}
+      </div>`;
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.className = 'modal-btn ' + (action === 'register' ? 'confirm' : 'waitlist');
+    btn.textContent = action === 'register' ? '確認登記' : '加入候補';
+    document.getElementById('modal').classList.add('show');
+  }
+
+  function openEditModal(field, currentVal) {
+    document.getElementById('modalTitle').textContent = '修改 ' + field;
+    document.getElementById('modalBody').innerHTML = `
+      <input type="text" class="modal-input" value="${currentVal}" placeholder="輸入新的 ${field}" id="editInput">
+      <div class="modal-hint">📋 修改後將送出審核，24 小時內生效。<br>本次修改後，下次可修改時間為 <b style="color:#92400e;">7 天後</b>。</div>`;
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.className = 'modal-btn confirm';
+    btn.textContent = '送出審核';
+    STATE.pendingAction = 'edit';
+    document.getElementById('modal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('show');
+    // 🆕 reset 按鈕狀態（避免不同 modal 間殘留）
+    const btn = document.getElementById('modalConfirmBtn');
+    if (btn) { btn.style.display = ''; btn.style.background = ''; btn.style.color = ''; }
+    const cancel = document.querySelector('.modal-actions .modal-btn.cancel');
+    if (cancel) cancel.textContent = '取消';
+  }
+
+  async function doConfirm() {
+    if (STATE.pendingAction === 'add_truck') {
+      doAddTruck();
+      return;
+    }
+    closeModal();
+    if (STATE.pendingAction === 'edit') {
+      showToast('修改申請已送出，等待審核 📋', 'info');
+      return;
+    }
+    if (STATE.pendingAction === 'confirm_cancel') {
+      doCancelRegistration(STATE.pendingRegId);
+      return;
+    }
+
+    const s = STATE.pendingSession;
+    const t = TRUCKS[STATE.currentTruckIdx];
+    const truckId = TRUCK_ID_MAP[t.id];
+    const venueId = VENUE_NAME_TO_ID[s.venue];
+
+    // 🆕 Pending 餐車不能登記
+    if (t.status === 'pending') {
+      showToast(`「${t.name}」仍在審核中，審核通過後才能登記場次`, 'error');
+      return;
+    }
+
+    // 防呆 1：避免同場次重複登記
+    const dup = MY_REGISTRATIONS.find(r =>
+      r.sessionKey === sessionKeyOf(s) &&
+      ['confirmed','waiting','promoted'].includes(r.status)
+    );
+    if (dup) {
+      showToast('您已登記過此場次', 'error');
+      return;
+    }
+
+    // 🆕 防呆 2：規則 #4 — 同一台車同日同時段衝突
+    const conflict = MY_REGISTRATIONS.find(r => {
+      if (r.truckId !== t.id) return false;
+      if (!['confirmed','waiting','promoted'].includes(r.status)) return false;
+      const parts = r.sessionKey.split('|');
+      const rDate = parts[1], rSlot = parts[2];
+      return rDate === s.d && rSlot === s.slot;
+    });
+    if (conflict) {
+      const conflictVenue = conflict.sessionKey.split('|')[0];
+      showToast(`「${t.name}」${s.d} ${getSlotLabel(s.venue, s.slot)} 已登記在「${conflictVenue}」`, 'error');
+      return;
+    }
+
+    // 🆕 以「使用者意圖」為準，而非後端回應
+    // user 點 available 場次 → 登記；點 full 場次 → 候補
+    const intendedKind = STATE.pendingAction === 'register' ? 'confirmed' : 'waiting';
+
+    const recordSuccess = (kind, extra={}) => {
+      MY_REGISTRATIONS.push({
+        id: makeRegId(),
+        sessionKey: sessionKeyOf(s),
+        truckId: t.id,
+        status: kind,
+        registeredAt: formatNow(),
+        ...extra
+      });
+    };
+
+    const applyIntent = (sid) => {
+      if (intendedKind === 'confirmed') {
+        showToast(sid ? `✅ 登記成功！${sid} 已寫入 Sheets` : '登記成功！已寄出 LINE OA 確認 ✓', 'success');
+        s.status = 'registered';
+        if (s.cap) s.cap[0]++;
+        recordSuccess('confirmed');
+      } else {
+        const order = s.wl ? s.wl[0] + 1 : 1;
+        if (s.wl) s.wl[0]++;
+        if (s.status === 'available') s.status = 'full';
+        showToast(`已加入候補佇列！您是第 ${order} 位 ⏳`, 'info');
+        recordSuccess('waiting', { waitlistOrder: order });
+      }
+      setTimeout(renderCalendar, 300);
+    };
+
+    if (USE_REAL_API && truckId && venueId) {
+      showToast('送出中…', 'info');
+      try {
+        const res = await fetch(REGISTER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lineUserId: CURRENT_USER.lineUserId,
+            truckId: truckId,
+            venueId: venueId,
+            date: s.d,
+            slot: s.slot
+          })
+        });
+        const raw = await res.json();
+        const data = Array.isArray(raw) ? raw[0] : raw;
+        const status = data.status || data.狀態;
+
+        if (status === 'rejected') {
+          showToast(`❌ ${data.rejectionReason || '無法登記'}`, 'error');
+          return;
+        }
+        // 不管後端回 confirmed 或 waiting，前端以 user 意圖為準
+        const sid = data.排班ID || data.scheduleId || '';
+        applyIntent(sid);
+      } catch (err) {
+        console.error('Register fetch failed:', err);
+        showToast('連線失敗，使用 mock 模式', 'error');
+        applyIntent('');
+      }
+    } else {
+      // Offline / Mock 行為
+      applyIntent('');
+    }
+  }
+
+  function showToast(msg, type='') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast show ' + type;
+    setTimeout(()=>toast.classList.remove('show'), 2800);
+  }
+
+  function resetDemo() {
+    // 用初始 JSON 深拷貝完整還原 SESSIONS
+    const initial = JSON.parse(INITIAL_SESSIONS_JSON);
+    Object.keys(initial).forEach(month => { SESSIONS[month] = initial[month]; });
+    // 🆕 還原 TRUCKS（清掉新增的 pending 車）
+    const initialTrucks = JSON.parse(INITIAL_TRUCKS_JSON);
+    TRUCKS.splice(0, TRUCKS.length, ...initialTrucks);
+    // 還原我的登記
+    initMyRegistrations();
+    // 還原 STATE
+    STATE.currentTruckIdx = 0;
+    STATE.currentMonth = '2026-06';
+    STATE.currentMyTab = 'confirmed';
+    // 還原 tab UI
+    document.querySelectorAll('.my-tab').forEach((tab, i) => {
+      tab.classList.toggle('active', i === 0);
+    });
+    selectCar(0);
+    renderTruckList();
+    switchScreen('calendar');
+    showToast('已重置所有 Demo 資料 🔄', 'info');
+  }
+
+  // Init
+  // 設定 user badge
+  const ub = document.getElementById('userBadge');
+  if (ub) {
+    ub.textContent = (USE_REAL_API ? '🔌 ' : '📴 ') + CURRENT_USER.label;
+    ub.style.background = USE_REAL_API ? '#06C755' : '#9ca3af';
+  }
+  initMyRegistrations();
+  renderCarMenu();
+  renderTruckList();
+  // 🆕 桌面版自動使用月曆網格 view
+  if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
+    STATE.calendarView = 'grid';
+    setTimeout(() => {
+      document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === 'grid');
+      });
+    }, 0);
+  }
+  renderCalendar();
+  startPromotedCountdown();
+</script>
+
+</body>
+</html>

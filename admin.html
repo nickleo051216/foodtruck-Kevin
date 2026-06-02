@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐車市集管理後台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --sidebar-bg:#1a1d23;
+    --sidebar-text:#c7cad1;
+    --sidebar-text-2:#7c8089;
+    --sidebar-active:#2a2e36;
+    --sidebar-border:#2a2e36;
+    --bg:#f7f8fa;
+    --surface:#ffffff;
+    --border:#e8eaed;
+    --border-strong:#d0d3d8;
+    --text:#1a1a1a;
+    --text-2:#5b6068;
+    --text-3:#8c919a;
+    --brand:#EA580C;
+    --brand-dark:#c2410c;
+    --brand-light:#fff7ed;
+    --line-green:#06C755;
+    --warn:#d97706;
+    --warn-bg:#fef3c7;
+    --danger:#dc2626;
+    --danger-bg:#fee2e2;
+    --info:#2563eb;
+    --info-bg:#dbeafe;
+    --success-bg:#dcfce7;
+    --success:#16a34a;
+    --purple:#7c3aed;
+    --purple-bg:#ede9fe;
+  }
+  html,body { font-family:'Noto Sans TC','PingFang TC',-apple-system,sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; min-height:100vh; }
+  body { display:flex; }
+
+  .demo-tag { position:fixed; top:14px; right:14px; background:rgba(0,0,0,.85); color:#fff; font-size:11px; padding:6px 14px; border-radius:999px; font-family:'Inter',sans-serif; z-index:200; }
+  .demo-tag b { color:var(--brand); }
+
+  /* ===== Sidebar ===== */
+  .sidebar { width:240px; background:var(--sidebar-bg); color:var(--sidebar-text); min-height:100vh; display:flex; flex-direction:column; padding:18px 0; flex-shrink:0; position:sticky; top:0; transition:width .25s ease; }
+  /* 🆕 折疊狀態 */
+  .sidebar.collapsed { width:68px; }
+  .sidebar.collapsed .sidebar-logo-text,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .nav-badge,
+  .sidebar.collapsed .sidebar-section,
+  .sidebar.collapsed .sidebar-user-info { display:none; }
+  .sidebar.collapsed .sidebar-logo { padding:0 0 14px; justify-content:center; gap:0; }
+  .sidebar.collapsed .nav-item { padding-left:0; padding-right:0; justify-content:center; position:relative; }
+  .sidebar.collapsed .nav-item .nav-icon { width:auto; }
+  .sidebar.collapsed .sidebar-user { justify-content:center; padding:12px 0 0; }
+  /* tooltip 樣式（折疊時 hover 才顯示） */
+  .sidebar.collapsed .nav-item:hover::after {
+    content:attr(data-tooltip); position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%);
+    background:#1a1a1a; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; white-space:nowrap;
+    z-index:100; box-shadow:0 4px 14px rgba(0,0,0,.35); pointer-events:none; font-weight:500;
+  }
+  .sidebar.collapsed .nav-item:hover::before {
+    content:""; position:absolute; left:calc(100% + 4px); top:50%; transform:translateY(-50%);
+    border:5px solid transparent; border-right-color:#1a1a1a; z-index:100; pointer-events:none;
+  }
+  .sidebar-logo { padding:0 20px 18px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--sidebar-border); margin-bottom:14px; }
+  .sidebar-logo-icon { width:36px; height:36px; border-radius:9px; background:linear-gradient(135deg,var(--brand),var(--danger)); display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .sidebar-logo-text { font-size:14px; font-weight:700; color:#fff; line-height:1.2; }
+  .sidebar-logo-text small { display:block; font-size:10px; opacity:.6; font-weight:400; font-family:'Inter',sans-serif; letter-spacing:.5px; }
+
+  .sidebar-section { font-size:10px; color:var(--sidebar-text-2); padding:14px 22px 6px; text-transform:uppercase; letter-spacing:.8px; font-family:'Inter',sans-serif; font-weight:600; }
+
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 22px; color:var(--sidebar-text); font-size:13px; cursor:pointer; border-left:3px solid transparent; transition:all .15s; user-select:none; }
+  .nav-item:hover { background:var(--sidebar-active); color:#fff; }
+  .nav-item.active { background:var(--sidebar-active); color:#fff; border-left-color:var(--brand); font-weight:600; }
+  .nav-item .nav-icon { font-size:16px; width:20px; }
+  .nav-item .nav-label { flex:1; }
+  .nav-badge { background:var(--danger); color:#fff; font-size:10px; padding:1px 6px; border-radius:999px; font-family:'Inter',sans-serif; font-weight:700; }
+  .nav-badge.warn { background:var(--warn); }
+
+  .sidebar-user { margin-top:auto; padding:12px 18px 0; border-top:1px solid var(--sidebar-border); display:flex; align-items:center; gap:10px; }
+  .sidebar-user-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#f97316,#ea580c); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; }
+  .sidebar-user-info { flex:1; min-width:0; }
+  .sidebar-user-name { font-size:13px; color:#fff; font-weight:600; }
+  .sidebar-user-role { font-size:10px; color:var(--sidebar-text-2); }
+
+  /* ===== Main ===== */
+  .main { flex:1; min-width:0; display:flex; flex-direction:column; }
+
+  .topbar { background:var(--surface); padding:14px 28px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:50; }
+  .topbar-title { font-size:18px; font-weight:700; }
+  .topbar-title small { font-size:12px; color:var(--text-3); font-weight:400; margin-left:8px; }
+  .topbar-actions { display:flex; gap:10px; align-items:center; }
+  .topbar-btn { padding:7px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:12px; color:var(--text-2); cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
+  .topbar-btn:hover { background:#eef0f3; }
+  .topbar-btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .topbar-btn.primary:hover { background:var(--brand-dark); }
+
+  .content { padding:24px 28px; flex:1; }
+
+  /* Pages */
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ===== KPI Cards ===== */
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:24px; }
+  .kpi-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px; }
+  .kpi-label { font-size:11px; color:var(--text-3); font-weight:600; letter-spacing:.3px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+  .kpi-icon { font-size:16px; }
+  .kpi-value { font-size:28px; font-weight:700; font-family:'Inter',sans-serif; line-height:1; margin-bottom:6px; }
+  .kpi-delta { font-size:11px; }
+  .kpi-delta.up { color:var(--success); }
+  .kpi-delta.down { color:var(--danger); }
+  .kpi-delta.neutral { color:var(--text-3); }
+
+  /* ===== Card ===== */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:18px; overflow:hidden; }
+  .card-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .card-title { font-size:14px; font-weight:700; }
+  .card-title-meta { font-size:11px; color:var(--text-3); font-weight:400; margin-left:6px; }
+  .card-body { padding:14px 18px; }
+  .card-body.no-padding { padding:0; }
+
+  /* ===== Tables ===== */
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead th { text-align:left; padding:10px 14px; color:var(--text-3); font-weight:600; font-size:11px; letter-spacing:.3px; background:#fafafa; border-bottom:1px solid var(--border); }
+  tbody td { padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:hover { background:#fafafa; }
+
+  /* ===== Badges ===== */
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:600; }
+  .badge.success { background:var(--success-bg); color:var(--success); }
+  .badge.warn { background:var(--warn-bg); color:var(--warn); }
+  .badge.danger { background:var(--danger-bg); color:var(--danger); }
+  .badge.info { background:var(--info-bg); color:var(--info); }
+  .badge.purple { background:var(--purple-bg); color:var(--purple); }
+  .badge.neutral { background:#f3f4f6; color:#6b7280; }
+  .badge .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  /* ===== Buttons ===== */
+  .btn { padding:6px 14px; border:1px solid var(--border); background:var(--surface); border-radius:7px; font-size:12px; cursor:pointer; font-family:inherit; color:var(--text-2); display:inline-flex; align-items:center; gap:4px; transition:all .15s; }
+  .btn:hover { background:#fafafa; border-color:var(--border-strong); }
+  .btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .btn.primary:hover { background:var(--brand-dark); }
+  .btn.success { background:var(--success); color:#fff; border-color:var(--success); }
+  .btn.success:hover { background:#15803d; }
+  .btn.danger { background:#fff; color:var(--danger); border-color:#fecaca; }
+  .btn.danger:hover { background:var(--danger-bg); }
+  .btn.sm { padding:4px 10px; font-size:11px; }
+
+  /* ===== Calendar Grid ===== */
+  .cal-controls { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--border); }
+  .cal-month-nav { display:flex; align-items:center; gap:8px; }
+  .cal-month-btn { background:var(--bg); border:none; width:30px; height:30px; border-radius:7px; cursor:pointer; font-size:14px; }
+  .cal-month-title { font-size:15px; font-weight:700; min-width:120px; text-align:center; }
+  .cal-legend { display:flex; gap:14px; font-size:11px; color:var(--text-3); }
+  .cal-legend-item { display:flex; align-items:center; gap:5px; }
+  .cal-legend-dot { width:10px; height:10px; border-radius:3px; }
+  .cal-grid { overflow-x:auto; }
+  .cal-grid-inner { min-width:1100px; }
+  .cal-grid-table { border-collapse:separate; border-spacing:0; width:100%; }
+  .cal-grid-table th { position:sticky; top:0; background:#fafafa; padding:8px 6px; font-size:10px; font-weight:600; color:var(--text-3); border-bottom:1px solid var(--border); white-space:nowrap; }
+  .cal-grid-table th:first-child { text-align:left; padding-left:14px; min-width:130px; }
+  .cal-grid-table td { padding:4px; border-bottom:1px solid #f3f4f6; border-right:1px solid #f3f4f6; vertical-align:top; min-width:75px; }
+  .cal-grid-table td:first-child { padding-left:14px; font-size:12px; font-weight:600; }
+  .cal-grid-table tbody tr:hover td { background:#fafafa; }
+  .cal-cell { padding:5px 6px; border-radius:5px; font-size:10px; min-height:32px; display:flex; flex-direction:column; gap:1px; cursor:pointer; }
+  .cal-cell.available { background:var(--success-bg); color:#14532d; }
+  .cal-cell.warning { background:var(--warn-bg); color:#78350f; }
+  .cal-cell.full { background:var(--danger-bg); color:#7f1d1d; }
+  .cal-cell.event { background:var(--purple-bg); color:#5b21b6; }
+  .cal-cell.closed { background:#f4f4f5; color:#a1a1aa; }
+  .cal-cell-count { font-weight:700; font-size:12px; font-family:'Inter',sans-serif; }
+  .cal-cell-meta { font-size:9px; opacity:.85; }
+
+  /* ===== Review Page ===== */
+  .review-item { border-bottom:1px solid var(--border); padding:16px 18px; display:flex; gap:14px; align-items:flex-start; }
+  .review-item:last-child { border-bottom:none; }
+  .review-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#06C755,#02a548); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+  .review-content { flex:1; min-width:0; }
+  .review-header { display:flex; justify-content:space-between; margin-bottom:6px; align-items:baseline; }
+  .review-name { font-size:14px; font-weight:600; }
+  .review-time { font-size:11px; color:var(--text-3); }
+  .review-diff { background:var(--bg); border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:12px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  .review-diff .field-label { color:var(--text-3); font-weight:600; font-size:10px; letter-spacing:.3px; }
+  .review-diff .old { color:var(--text-3); text-decoration:line-through; }
+  .review-diff .arrow { color:var(--text-3); }
+  .review-diff .new { color:var(--success); font-weight:600; }
+  .review-actions { display:flex; gap:6px; }
+
+  /* ===== Specific Rules ===== */
+  .rules-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; padding:16px; }
+  .rule-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .rule-venue { font-size:13px; font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between; }
+  .rule-blocked-truck { display:inline-flex; align-items:center; gap:4px; background:var(--danger-bg); color:var(--danger); padding:3px 9px; border-radius:999px; font-size:11px; margin:2px 2px 2px 0; font-weight:500; }
+  .rule-blocked-truck small { opacity:.7; font-weight:400; }
+  .rule-empty { color:var(--text-3); font-size:11px; padding:6px 0; }
+  .rule-add-btn { width:100%; margin-top:8px; padding:7px; background:var(--bg); border:1px dashed var(--border-strong); border-radius:7px; font-size:11px; color:var(--text-2); cursor:pointer; font-family:inherit; }
+  .rule-add-btn:hover { background:#eef0f3; }
+
+  /* ===== Credit Watch ===== */
+  .watch-card { display:flex; gap:14px; padding:14px 18px; border-bottom:1px solid var(--border); align-items:center; }
+  .watch-card:last-child { border-bottom:none; }
+  .watch-avatar { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+  .watch-info { flex:1; min-width:0; }
+  .watch-name { font-size:14px; font-weight:600; margin-bottom:2px; }
+  .watch-meta { font-size:11px; color:var(--text-3); }
+  .watch-score { font-size:22px; font-weight:700; font-family:'Inter',sans-serif; }
+  .watch-score.warn { color:var(--warn); }
+  .watch-score.danger { color:var(--danger); }
+
+  /* ===== Modal ===== */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:#fff; border-radius:14px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 30px 60px rgba(0,0,0,.25); }
+  .modal-header { padding:18px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .modal-title { font-size:16px; font-weight:700; }
+  .modal-close { background:none; border:none; font-size:20px; color:var(--text-3); cursor:pointer; }
+  .modal-body { padding:20px; }
+  .modal-row { display:flex; justify-content:space-between; padding:8px 0; font-size:13px; border-bottom:1px solid #f3f4f6; }
+  .modal-row:last-child { border-bottom:none; }
+  .modal-row .label { color:var(--text-3); }
+  .modal-row .value { font-weight:600; }
+  .modal-footer { padding:14px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
+
+  /* ===== Toast ===== */
+  .toast { position:fixed; bottom:24px; right:24px; background:#1a1a1a; color:#fff; padding:14px 20px; border-radius:10px; font-size:13px; opacity:0; transform:translateY(20px); transition:all .3s; pointer-events:none; z-index:200; box-shadow:0 10px 25px rgba(0,0,0,.2); }
+  .toast.show { opacity:1; transform:translateY(0); }
+  .toast.success { background:var(--success); }
+  .toast.danger { background:var(--danger); }
+  .toast.info { background:var(--info); }
+
+  /* ===== Today Schedule ===== */
+  .today-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; padding:14px; }
+  .today-venue { border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .today-venue-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .today-venue-name { font-size:13px; font-weight:700; }
+  .today-venue-trucks { display:flex; flex-direction:column; gap:5px; }
+  .today-truck { font-size:12px; padding:5px 9px; background:var(--bg); border-radius:6px; display:flex; align-items:center; gap:6px; }
+  .today-truck-emoji { font-size:14px; }
+  .today-truck-status { margin-left:auto; font-size:10px; color:var(--text-3); }
+  .today-truck.confirmed { background:#f0f9ff; color:#1e40af; }
+  .today-truck.waitlist { background:var(--warn-bg); color:#78350f; }
+
+  /* ===== Alert List ===== */
+  .alert-item { display:flex; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border); align-items:flex-start; }
+  .alert-item:last-child { border-bottom:none; }
+  .alert-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .alert-content { flex:1; font-size:12px; }
+  .alert-title { font-weight:600; margin-bottom:2px; }
+  .alert-meta { color:var(--text-3); font-size:11px; }
+
+  /* 🆕 Toggle 按鈕 */
+  .sidebar-toggle { background:var(--bg); border:1px solid var(--border); padding:7px 11px; border-radius:7px; font-size:16px; cursor:pointer; color:var(--text-2); line-height:1; font-family:inherit; }
+  .sidebar-toggle:hover { background:#eef0f3; color:var(--text); }
+
+  /* 響應式：手機自動折疊（也含 tooltip） */
+  @media (max-width:768px) {
+    .sidebar { width:68px; }
+    .sidebar .sidebar-logo-text,
+    .sidebar .nav-label,
+    .sidebar .nav-badge,
+    .sidebar .sidebar-section,
+    .sidebar .sidebar-user-info { display:none; }
+    .sidebar .sidebar-logo { padding:0 0 14px; justify-content:center; gap:0; }
+    .sidebar .nav-item { padding-left:0; padding-right:0; justify-content:center; position:relative; }
+    .sidebar .nav-item .nav-icon { width:auto; }
+    .sidebar .sidebar-user { justify-content:center; padding:12px 0 0; }
+    .sidebar .nav-item:hover::after {
+      content:attr(data-tooltip); position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%);
+      background:#1a1a1a; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; white-space:nowrap;
+      z-index:100; box-shadow:0 4px 14px rgba(0,0,0,.35); pointer-events:none;
+    }
+    .sidebar-toggle { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-tag">🖥️ 管理後台 · <b>Demo v1</b></div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">🚐</div>
+    <div class="sidebar-logo-text">餐車市集後台<small>ADMIN · ZN Studio</small></div>
+  </div>
+
+  <div class="sidebar-section">營運</div>
+  <div class="nav-item active" onclick="switchPage('overview', this)"><span class="nav-icon">📊</span><span class="nav-label">即時總覽</span></div>
+  <div class="nav-item" onclick="switchPage('calendar', this)"><span class="nav-icon">📅</span><span class="nav-label">排班月曆</span></div>
+  <div class="nav-item" onclick="switchPage('review', this)"><span class="nav-icon">📋</span><span class="nav-label">待審核</span><span class="nav-badge">2</span></div>
+
+  <div class="sidebar-section">資料</div>
+  <div class="nav-item" onclick="switchPage('venues', this)"><span class="nav-icon">📍</span><span class="nav-label">場地管理</span></div>
+  <div class="nav-item" onclick="switchPage('trucks', this)"><span class="nav-icon">🚐</span><span class="nav-label">餐車總覽</span></div>
+  <div class="nav-item" onclick="switchPage('rules', this)"><span class="nav-icon">🚫</span><span class="nav-label">特殊規則</span></div>
+  <div class="nav-item" onclick="switchPage('events', this)"><span class="nav-icon">🎪</span><span class="nav-label">包場管理</span></div>
+
+  <div class="sidebar-section">監控</div>
+  <div class="nav-item" onclick="switchPage('credit', this)"><span class="nav-icon">⭐</span><span class="nav-label">信用觀察</span><span class="nav-badge warn">2</span></div>
+  <div class="nav-item" onclick="switchPage('reports', this)"><span class="nav-icon">📈</span><span class="nav-label">報表</span></div>
+
+  <a href="/" style="display:flex; align-items:center; gap:8px; padding:8px 14px; margin:8px 12px 0; font-size:12px; color:rgba(255,255,255,.6); text-decoration:none; border-radius:6px; transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='transparent'">
+    <span style="font-size:14px;">←</span>
+    <span>回首頁</span>
+  </a>
+
+  <div class="sidebar-user">
+    <div class="sidebar-user-avatar">A</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">管理員</div>
+      <div class="sidebar-user-role">業主</div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+
+  <header class="topbar">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" title="收合/展開側欄">☰</button>
+      <div class="topbar-title" id="pageTitle">即時總覽 <small id="pageTitleSub">2026 年 6 月 20 日（六）</small></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn">🔔 通知</button>
+      <button class="topbar-btn">📥 匯出</button>
+      <button class="topbar-btn primary">＋ 月度推播</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ====== Page: 即時總覽 ====== -->
+    <div class="page active" id="page-overview">
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">本月確認登記<span class="kpi-icon">✅</span></div>
+          <div class="kpi-value">387</div>
+          <div class="kpi-delta up">↑ 比上月 +12%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">候補佇列總數<span class="kpi-icon">⏳</span></div>
+          <div class="kpi-value">42</div>
+          <div class="kpi-delta neutral">平均候補 1.4 位/場</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">待審核申請<span class="kpi-icon">📋</span></div>
+          <div class="kpi-value" style="color:var(--brand);">2</div>
+          <div class="kpi-delta neutral">最舊 14 小時前</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">信用觀察名單<span class="kpi-icon">⚠️</span></div>
+          <div class="kpi-value" style="color:var(--warn);">2</div>
+          <div class="kpi-delta down">信用分 &lt; 80 之車主</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:2fr 1fr; gap:18px;">
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="card-title">今日排班</span>
+              <span class="card-title-meta">6/20（六）· 共 4 場地有營業</span>
+            </div>
+            <button class="btn sm">查看月曆 →</button>
+          </div>
+          <div class="today-grid">
+            <div class="today-venue">
+              <div class="today-venue-header">
+                <span class="today-venue-name">南港餐車市集 · 晚場</span>
+                <span class="badge success"><span class="dot"></span>5/5 滿</span>
+              </div>
+              <div class="today-venue-trucks">
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🍜</span>泰沙了打抛飯<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🌽</span>黑熊烤玉米<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🥟</span>米粉湯王<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🍢</span>關東煮 G<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🥤</span>飲料姊妹<span class="today-truck-status">已確認</span></div>
+              </div>
+            </div>
+            <div class="today-venue">
+              <div class="today-venue-header">
+                <span class="today-venue-name">三峽老街 · 晚場</span>
+                <span class="badge warn"><span class="dot"></span>3/4 接近滿</span>
+              </div>
+              <div class="today-venue-trucks">
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🧋</span>ZN 飲料<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🍤</span>阿根廷酥炸<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🥩</span>BC 職人烤玉米<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck waitlist"><span class="today-truck-emoji">🍕</span>好食披薩<span class="today-truck-status">候補 #1</span></div>
+              </div>
+            </div>
+            <div class="today-venue">
+              <div class="today-venue-header">
+                <span class="today-venue-name">央北中山小熊 · 午場</span>
+                <span class="badge purple"><span class="dot"></span>已包場</span>
+              </div>
+              <div class="today-venue-trucks">
+                <div class="today-truck" style="background:var(--purple-bg); color:#5b21b6;">🎪 小熊夏季嘉年華</div>
+              </div>
+            </div>
+            <div class="today-venue">
+              <div class="today-venue-header">
+                <span class="today-venue-name">新店夜市 · 晚場</span>
+                <span class="badge info"><span class="dot"></span>3/6 還早</span>
+              </div>
+              <div class="today-venue-trucks">
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🥞</span>胖揍餐車<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🥨</span>麵糰杜<span class="today-truck-status">已確認</span></div>
+                <div class="today-truck confirmed"><span class="today-truck-emoji">🍡</span>萌娃甜點<span class="today-truck-status">已確認</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">⚠️ 異常警示</span>
+              <span class="badge danger">3</span>
+            </div>
+            <div class="card-body no-padding">
+              <div class="alert-item">
+                <span class="alert-icon">🟡</span>
+                <div class="alert-content">
+                  <div class="alert-title">陳大哥（黑熊烤玉米）信用分 72</div>
+                  <div class="alert-meta">上週缺席 1 次 · 進入觀察名單</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <span class="alert-icon">🔴</span>
+                <div class="alert-content">
+                  <div class="alert-title">林姊（米粉湯王）信用分 65</div>
+                  <div class="alert-meta">本月已遲到 2 次</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <span class="alert-icon">📋</span>
+                <div class="alert-content">
+                  <div class="alert-title">2 筆社群暱稱修改待審核</div>
+                  <div class="alert-meta">最舊申請：14 小時前</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">🎯 場地容量熱度</span>
+            </div>
+            <div class="card-body" style="font-size:12px;">
+              <div style="margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>南港餐車市集</span><span style="color:var(--danger); font-weight:700;">95%</span></div>
+                <div style="height:6px; background:#f3f4f6; border-radius:3px;"><div style="height:100%; background:var(--danger); width:95%; border-radius:3px;"></div></div>
+              </div>
+              <div style="margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>三峽老街</span><span style="color:var(--warn); font-weight:700;">78%</span></div>
+                <div style="height:6px; background:#f3f4f6; border-radius:3px;"><div style="height:100%; background:var(--warn); width:78%; border-radius:3px;"></div></div>
+              </div>
+              <div style="margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>央北中山小熊</span><span style="color:var(--success); font-weight:700;">62%</span></div>
+                <div style="height:6px; background:#f3f4f6; border-radius:3px;"><div style="height:100%; background:var(--success); width:62%; border-radius:3px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>新店夜市</span><span style="color:var(--info); font-weight:700;">45%</span></div>
+                <div style="height:6px; background:#f3f4f6; border-radius:3px;"><div style="height:100%; background:var(--info); width:45%; border-radius:3px;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Page: 排班月曆 ====== -->
+    <div class="page" id="page-calendar">
+      <div class="card">
+        <div class="cal-controls">
+          <div class="cal-month-nav">
+            <button class="cal-month-btn">‹</button>
+            <span class="cal-month-title">2026 年 6 月</span>
+            <button class="cal-month-btn">›</button>
+          </div>
+          <div class="cal-legend">
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#86efac;"></div>還早</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#fcd34d;"></div>接近滿</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#fca5a5;"></div>已滿</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#c4b5fd;"></div>包場</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e4e4e7;"></div>未開放</div>
+          </div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-grid-inner">
+            <table class="cal-grid-table">
+              <thead>
+                <tr>
+                  <th>場地</th>
+                  <th>20<br>六</th><th>21<br>日</th><th>22<br>一</th><th>23<br>二</th><th>24<br>三</th>
+                  <th>25<br>四</th><th>26<br>五</th><th>27<br>六</th><th>28<br>日</th><th>29<br>一</th><th>30<br>二</th>
+                </tr>
+              </thead>
+              <tbody id="calGridBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Page: 待審核 ====== -->
+    <div class="page" id="page-review">
+      <!-- 🆕 新增餐車申請（連動 LIFF 端新增餐車） -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">🚐 新增餐車申請</span>
+            <span class="card-title-meta">餐車主在 LIFF 新增餐車後 → 此處審核</span>
+          </div>
+          <span class="badge warn" id="newTruckCount">2 筆</span>
+        </div>
+        <div id="newTruckReviewList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">📝 待審核修改申請</span>
+            <span class="card-title-meta">僅「社群暱稱」修改需審核 · 其他資料變動自動生效</span>
+          </div>
+          <span class="badge warn" id="nicknameReviewCount">2 筆</span>
+        </div>
+        <div id="nicknameReviewList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">✅ 最近自動生效（無需審核）</span>
+          <span class="card-title-meta">電話 / Email / 車輛資料 · 修改即時生效</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>時間</th><th>車主</th><th>項目</th><th>變更</th></tr>
+          </thead>
+          <tbody id="autoApplyTable">
+            <tr><td>今天 14:22</td><td>Nick Chang</td><td>電話</td><td><span style="color:var(--text-3);">0987-***-***</span> → <b>0932-684-***</b></td></tr>
+            <tr><td>今天 11:05</td><td>胡桃哥</td><td>新增餐車</td><td><b>胡桃辣椒醬</b>（落地攤）</td></tr>
+            <tr><td>昨天 19:31</td><td>Amy</td><td>Email</td><td>新增 <b>a***@gmail.com</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== Page: 場地管理 ====== -->
+    <div class="page" id="page-venues">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">場地清單</span>
+          <button class="btn primary">＋ 新增場地</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>場地</th><th>午場上限</th><th>晚場上限</th><th>開放星期</th><th>候補上限</th><th>狀態</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>南港餐車市集</b><br><span style="font-size:11px; color:var(--text-3);">📌 禁止放音樂</span></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm">編輯</button></td></tr>
+            <tr><td><b>央北中山小熊</b><br><span style="font-size:11px; color:var(--text-3);">📌 室內限落地</span></td><td>4</td><td>3</td><td>週一~五</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm">編輯</button></td></tr>
+            <tr><td><b>三峽老街</b></td><td>3</td><td>4</td><td>週六、日</td><td>1.5:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm">編輯</button></td></tr>
+            <tr><td><b>新店夜市</b></td><td>0</td><td>6</td><td>週一、三、五</td><td>0.8:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm">編輯</button></td></tr>
+            <tr><td><b>蘆洲廟口</b></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge neutral"><span class="dot"></span>暫停</span></td><td><button class="btn sm">編輯</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== Page: 餐車總覽 ====== -->
+    <div class="page" id="page-trucks">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">餐車總覽</span>
+            <span class="card-title-meta">共 912 台 · 啟用中 887 台</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" placeholder="🔍 搜尋餐車名 / 車主 / 車牌" style="padding:7px 12px; border:1px solid var(--border); border-radius:7px; font-size:12px; font-family:inherit; min-width:240px;">
+            <button class="btn">📥 匯入 CSV</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>餐車</th><th>車主</th><th>類型</th><th>車牌</th><th>本月場次</th><th>信用</th><th>狀態</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>🍜 泰沙了打抛飯</b><br><span style="font-size:11px; color:var(--text-3);">泰式料理</span></td><td>Nick Chang</td><td>餐車</td><td>ABC-1234</td><td>6</td><td><span class="badge success">100</span></td><td><span class="badge success"><span class="dot"></span>啟用</span></td></tr>
+            <tr><td><b>🧋 ZN 飲料</b><br><span style="font-size:11px; color:var(--text-3);">飲料茶飲</span></td><td>Nick Chang</td><td>餐車</td><td>XYZ-5678</td><td>4</td><td><span class="badge success">100</span></td><td><span class="badge success"><span class="dot"></span>啟用</span></td></tr>
+            <tr><td><b>🌽 黑熊烤玉米</b><br><span style="font-size:11px; color:var(--text-3);">燒烤</span></td><td>陳大哥</td><td>落地攤</td><td>─</td><td>8</td><td><span class="badge warn">72</span></td><td><span class="badge warn"><span class="dot"></span>觀察</span></td></tr>
+            <tr><td><b>🥟 米粉湯王</b><br><span style="font-size:11px; color:var(--text-3);">小吃</span></td><td>林姊</td><td>餐車</td><td>DEF-9012</td><td>5</td><td><span class="badge danger">65</span></td><td><span class="badge danger"><span class="dot"></span>觀察</span></td></tr>
+            <tr><td><b>🍡 萌娃甜點</b><br><span style="font-size:11px; color:var(--text-3);">甜點</span></td><td>Amy</td><td>餐車</td><td>GHI-3456</td><td>3</td><td><span class="badge success">100</span></td><td><span class="badge success"><span class="dot"></span>啟用</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== Page: 特殊規則 (黑名單) ====== -->
+    <div class="page" id="page-rules">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">特殊規則 · 黑名單管理</span>
+            <span class="card-title-meta">⚠️ 此標籤僅後台可見，車主端會顯示「此據點本月暫不開放」</span>
+          </div>
+          <button class="btn primary">＋ 新增規則</button>
+        </div>
+        <div class="rules-grid">
+          <div class="rule-card">
+            <div class="rule-venue">📍 南港餐車市集 <span class="badge danger">1 筆</span></div>
+            <div>
+              <span class="rule-blocked-truck">🧋 ZN 飲料 <small>· 飲料品項衝突</small> ✕</span>
+            </div>
+            <button class="rule-add-btn">＋ 加入黑名單</button>
+          </div>
+          <div class="rule-card">
+            <div class="rule-venue">📍 新店夜市 <span class="badge danger">1 筆</span></div>
+            <div>
+              <span class="rule-blocked-truck">🍜 泰沙了打抛飯 <small>· 場地方拒絕</small> ✕</span>
+            </div>
+            <button class="rule-add-btn">＋ 加入黑名單</button>
+          </div>
+          <div class="rule-card">
+            <div class="rule-venue">📍 三峽老街 <span class="badge danger">2 筆</span></div>
+            <div>
+              <span class="rule-blocked-truck">🌮 墨西哥捲 <small>· 重複品項</small> ✕</span>
+              <span class="rule-blocked-truck">🍔 速食堡 <small>· 場地調整</small> ✕</span>
+            </div>
+            <button class="rule-add-btn">＋ 加入黑名單</button>
+          </div>
+          <div class="rule-card">
+            <div class="rule-venue">📍 央北中山小熊 <span class="badge neutral">0 筆</span></div>
+            <div class="rule-empty">尚無特殊規則</div>
+            <button class="rule-add-btn">＋ 加入黑名單</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Page: 包場管理 ====== -->
+    <div class="page" id="page-events">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">包場紀錄</span>
+          <button class="btn primary" onclick="openAddEventModal()">＋ 新增包場</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>日期</th><th>場地</th><th>時段</th><th>活動名稱</th><th>聯絡人</th><th>備註</th><th></th></tr>
+          </thead>
+          <tbody id="eventsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== Page: 信用觀察 ====== -->
+    <div class="page" id="page-credit">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">信用觀察名單</span>
+            <span class="card-title-meta">信用分 &lt; 80 之車主，連續累積 3 次需停權審核</span>
+          </div>
+          <span class="badge warn">2 位</span>
+        </div>
+        <div>
+          <div class="watch-card">
+            <div class="watch-avatar" style="background:linear-gradient(135deg,#fb923c,#ea580c);">陳</div>
+            <div class="watch-info">
+              <div class="watch-name">陳大哥（黑熊烤玉米）</div>
+              <div class="watch-meta">扣分原因：6/12 晚場無故缺席 (-15) · 6/8 取消過晚 (-5) · 5/30 取消過晚 (-8)</div>
+            </div>
+            <div class="watch-score warn">72</div>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+              <button class="btn sm">查看紀錄</button>
+              <button class="btn sm danger">發出警告</button>
+            </div>
+          </div>
+          <div class="watch-card">
+            <div class="watch-avatar" style="background:linear-gradient(135deg,#f87171,#dc2626);">林</div>
+            <div class="watch-info">
+              <div class="watch-name">林姊（米粉湯王）</div>
+              <div class="watch-meta">扣分原因：6/15 遲到超過 1 小時 (-10) · 6/2 遲到 30 分鐘 (-5) · 5/24 缺席 (-15) · 5/10 取消過晚 (-5)</div>
+            </div>
+            <div class="watch-score danger">65</div>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+              <button class="btn sm">查看紀錄</button>
+              <button class="btn sm danger">發出警告</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Page: 報表 ====== -->
+    <div class="page" id="page-reports">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">月度報表 · 2026 年 6 月</span>
+          <div style="display:flex; gap:8px;"><button class="btn">📥 匯出 PDF</button><button class="btn primary">📊 匯出 CSV</button></div>
+        </div>
+        <div class="kpi-grid" style="margin:14px; gap:10px;">
+          <div class="kpi-card"><div class="kpi-label">總場次數</div><div class="kpi-value">456</div><div class="kpi-delta up">↑ +8% vs 上月</div></div>
+          <div class="kpi-card"><div class="kpi-label">確認登記</div><div class="kpi-value">387</div><div class="kpi-delta up">↑ +12%</div></div>
+          <div class="kpi-card"><div class="kpi-label">候補後遞補</div><div class="kpi-value">42</div><div class="kpi-delta neutral">候補→正取率 89%</div></div>
+          <div class="kpi-card"><div class="kpi-label">缺席率</div><div class="kpi-value">1.8%</div><div class="kpi-delta down">↓ 比上月低 0.4%</div></div>
+        </div>
+        <table>
+          <thead><tr><th>場地</th><th>本月登記</th><th>候補</th><th>包場</th><th>滿載率</th></tr></thead>
+          <tbody>
+            <tr><td><b>南港餐車市集</b></td><td>148</td><td>22</td><td>1</td><td><span style="color:var(--danger); font-weight:700;">95%</span></td></tr>
+            <tr><td><b>三峽老街</b></td><td>87</td><td>10</td><td>1</td><td><span style="color:var(--warn); font-weight:700;">78%</span></td></tr>
+            <tr><td><b>央北中山小熊</b></td><td>76</td><td>5</td><td>1</td><td><span style="color:var(--success); font-weight:700;">62%</span></td></tr>
+            <tr><td><b>新店夜市</b></td><td>76</td><td>5</td><td>0</td><td><span style="color:var(--info); font-weight:700;">45%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 🆕 新增包場 modal -->
+<div class="modal-overlay" id="eventModal" onclick="if(event.target===this) closeEventModal()" style="position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:1000;">
+  <div style="background:#fff; border-radius:12px; padding:24px; width:480px; max-width:calc(100vw - 40px); box-shadow:0 20px 50px rgba(0,0,0,.2);">
+    <div style="font-size:18px; font-weight:700; margin-bottom:6px;">新增包場</div>
+    <div style="font-size:12px; color:var(--text-3); margin-bottom:16px;">建立後 LIFF 端對應場次自動標記為「包場」</div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div>
+        <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">日期 <span style="color:#dc2626;">*</span></label>
+        <input type="date" id="evDate" value="2026-07-05" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit; font-size:13px;">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">場地 <span style="color:#dc2626;">*</span></label>
+        <select id="evVenue" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit; font-size:13px; cursor:pointer;">
+          <option>南港餐車市集</option>
+          <option>央北中山小熊</option>
+          <option>三峽老街</option>
+          <option>新店夜市</option>
+          <option>蘆洲廟口</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">時段 <span style="color:#dc2626;">*</span></label>
+        <select id="evSlot" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit; font-size:13px; cursor:pointer;">
+          <option value="AM">午場 (10:00–15:00)</option>
+          <option value="PM">晚場 (16:00–21:00)</option>
+          <option value="ALL">全日</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">活動名稱 <span style="color:#dc2626;">*</span></label>
+        <input type="text" id="evName" placeholder="例：南港居民日" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit; font-size:13px;">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">聯絡人</label>
+        <input type="text" id="evContact" placeholder="例：李里長 · 09xx-***-456" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit; font-size:13px;">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">備註</label>
+        <input type="text" id="evNote" placeholder="例：晚場包場" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit; font-size:13px;">
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:18px; justify-content:flex-end;">
+      <button class="btn" onclick="closeEventModal()">取消</button>
+      <button class="btn primary" onclick="doAddEvent()">建立包場</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // 🆕 折疊/展開側欄
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('collapsed');
+  }
+
+  // 🆕 自動讓 nav-item 帶上 tooltip 文字（折疊時 hover 顯示）
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const label = item.querySelector('.nav-label');
+    const badge = item.querySelector('.nav-badge');
+    if (label) {
+      let txt = label.textContent.trim();
+      if (badge) txt += ` (${badge.textContent.trim()})`;
+      item.setAttribute('data-tooltip', txt);
+    }
+  });
+
+  const PAGE_TITLES = {
+    overview: ['即時總覽', '2026 年 6 月 20 日（六）'],
+    calendar: ['排班月曆', '多場地總覽'],
+    review: ['待審核', '社群暱稱修改申請'],
+    venues: ['場地管理', '5 個據點'],
+    trucks: ['餐車總覽', '912 台車輛'],
+    rules: ['特殊規則', '黑名單管理（後台限定）'],
+    events: ['包場管理', 'EventBookings'],
+    credit: ['信用觀察', '信用分 < 80 名單'],
+    reports: ['報表', '月度數據 · 2026/6']
+  };
+
+  function switchPage(id, el) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('page-'+id).classList.add('active');
+    el.classList.add('active');
+    const [t, s] = PAGE_TITLES[id];
+    document.getElementById('pageTitle').firstChild.textContent = t + ' ';
+    document.getElementById('pageTitleSub').textContent = s;
+  }
+
+  // ===== 🆕 Mock Data：跟 LIFF 端對齊 =====
+  // 新車申請（LIFF 端餐車主新增餐車後進到這裡審核）
+  let NEW_TRUCK_REVIEWS = [
+    {
+      id: 'NT_001',
+      avatarText: '張',
+      ownerName: '張師傅',
+      handle: '@zhang_chef',
+      time: '今天 09:15',
+      truck: {
+        name: '阿明的雞排',
+        type: '餐車',
+        food: '炸物',
+        plate: 'NEW-9999',
+        emoji: '🍗'
+      },
+      submittedFrom: 'LIFF'
+    },
+    {
+      id: 'NT_002',
+      avatarText: 'Amy',
+      ownerName: 'Amy',
+      handle: '@amy_dessert',
+      time: '昨天 18:42',
+      truck: {
+        name: '萌娃甜點',
+        type: '餐車',
+        food: '甜點',
+        plate: 'GHI-3456',
+        emoji: '🍰'
+      },
+      submittedFrom: 'LIFF'
+    }
+  ];
+
+  // 暱稱修改申請
+  let NICKNAME_REVIEWS = [
+    {
+      id: 'NK_001',
+      avatarText: '陳',
+      ownerName: '陳大哥',
+      handle: '@chenfood',
+      time: '14 小時前 · 6/19 22:18',
+      oldVal: '陳大哥 / 黑熊燒烤',
+      newVal: '陳大 / 黑熊烤玉米',
+      creditScore: null
+    },
+    {
+      id: 'NK_002',
+      avatarText: '林',
+      avatarGradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
+      ownerName: '林姊',
+      handle: '@lin_noodle',
+      time: '3 小時前 · 6/20 06:50',
+      oldVal: '林姊 / 米粉湯',
+      newVal: '林婆婆 / 米粉湯王',
+      creditScore: 65
+    }
+  ];
+
+  // 包場紀錄
+  let EVENTS = [
+    { id:'E_001', date:'2026-06-23', dateLabel:'6/23（二）', venue:'央北中山小熊', slot:'PM', slotLabel:'晚場', name:'小熊夏季嘉年華', contact:'王先生 · 09xx-***-123', note:'整晚包場 / 含落地攤' },
+    { id:'E_002', date:'2026-06-29', dateLabel:'6/29（一）', venue:'南港餐車市集', slot:'PM', slotLabel:'晚場', name:'南港居民日', contact:'李里長 · 09xx-***-456', note:'晚場包場' },
+    { id:'E_003', date:'2026-07-05', dateLabel:'7/5（日）', venue:'三峽老街', slot:'ALL', slotLabel:'全日', name:'三峽建鎮慶典', contact:'三峽區公所', note:'整日包場' }
+  ];
+
+  // 自動生效紀錄
+  let AUTO_APPLY = [
+    { time:'今天 14:22', owner:'Nick Chang', field:'電話', diff:'<span style="color:var(--text-3);">0987-***-***</span> → <b>0932-684-***</b>' },
+    { time:'今天 11:05', owner:'胡桃哥', field:'新增餐車', diff:'<b>胡桃辣椒醬</b>（落地攤）' },
+    { time:'昨天 19:31', owner:'Amy', field:'Email', diff:'新增 <b>a***@gmail.com</b>' }
+  ];
+
+  // ===== 🆕 render 函式 =====
+  function renderNewTruckReviews() {
+    const list = document.getElementById('newTruckReviewList');
+    const count = document.getElementById('newTruckCount');
+    if (!list) return;
+    if (NEW_TRUCK_REVIEWS.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:var(--text-3); padding:30px 0; font-size:13px;">目前沒有待審核的新車申請</div>`;
+      count.style.display = 'none';
+    } else {
+      count.style.display = '';
+      count.textContent = `${NEW_TRUCK_REVIEWS.length} 筆`;
+      list.innerHTML = NEW_TRUCK_REVIEWS.map(r => `
+        <div class="review-item">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#86efac,#16a34a);">${r.avatarText.charAt(0)}</div>
+          <div class="review-content">
+            <div class="review-header">
+              <div>
+                <span class="review-name">${r.ownerName}</span>
+                <span class="badge neutral" style="margin-left:6px;">${r.handle}</span>
+                <span class="badge info" style="margin-left:6px;">來自 ${r.submittedFrom}</span>
+              </div>
+              <span class="review-time">${r.time}</span>
+            </div>
+            <div class="review-diff" style="background:#f0fdf4; border-color:#86efac;">
+              <span class="field-label" style="background:#16a34a; color:#fff;">新增</span>
+              <span style="font-size:24px; margin:0 4px;">${r.truck.emoji}</span>
+              <span class="new"><b>${r.truck.name}</b></span>
+              <span style="color:var(--text-3); margin-left:8px;">${r.truck.type} · ${r.truck.food}${r.truck.plate ? ' · 車牌 ' + r.truck.plate : ''}</span>
+            </div>
+            <div class="review-actions">
+              <button class="btn success" onclick="approveNewTruck('${r.id}')">✓ 核准上線</button>
+              <button class="btn danger" onclick="rejectNewTruck('${r.id}')">✗ 拒絕</button>
+              <button class="btn sm">查看申請人</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    updateKPIs();
+  }
+
+  function renderNicknameReviews() {
+    const list = document.getElementById('nicknameReviewList');
+    const count = document.getElementById('nicknameReviewCount');
+    if (!list) return;
+    if (NICKNAME_REVIEWS.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:var(--text-3); padding:30px 0; font-size:13px;">目前沒有待審核的暱稱修改</div>`;
+      count.style.display = 'none';
+    } else {
+      count.style.display = '';
+      count.textContent = `${NICKNAME_REVIEWS.length} 筆`;
+      list.innerHTML = NICKNAME_REVIEWS.map(r => `
+        <div class="review-item">
+          <div class="review-avatar" ${r.avatarGradient ? `style="background:${r.avatarGradient};"` : ''}>${r.avatarText}</div>
+          <div class="review-content">
+            <div class="review-header">
+              <div>
+                <span class="review-name">${r.ownerName}</span>
+                <span class="badge neutral" style="margin-left:6px;">${r.handle}</span>
+                ${r.creditScore !== null && r.creditScore < 80 ? `<span class="badge warn" style="margin-left:6px;">⚠️ 信用 ${r.creditScore}</span>` : ''}
+              </div>
+              <span class="review-time">${r.time}</span>
+            </div>
+            <div class="review-diff">
+              <span class="field-label">社群暱稱</span>
+              <span class="old">${r.oldVal}</span>
+              <span class="arrow">→</span>
+              <span class="new">${r.newVal}</span>
+            </div>
+            <div class="review-actions">
+              <button class="btn success" onclick="approveNickname('${r.id}')">✓ 核准</button>
+              <button class="btn danger" onclick="rejectNickname('${r.id}')">✗ 拒絕</button>
+              <button class="btn sm">查看歷史紀錄</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    updateKPIs();
+  }
+
+  function renderAutoApply() {
+    const tbody = document.getElementById('autoApplyTable');
+    if (!tbody) return;
+    tbody.innerHTML = AUTO_APPLY.map(r => `
+      <tr><td>${r.time}</td><td>${r.owner}</td><td>${r.field}</td><td>${r.diff}</td></tr>
+    `).join('');
+  }
+
+  function renderEvents() {
+    const tbody = document.getElementById('eventsTable');
+    if (!tbody) return;
+    tbody.innerHTML = EVENTS.map(e => `
+      <tr>
+        <td><b>${e.dateLabel}</b></td>
+        <td>${e.venue}</td>
+        <td><span class="badge purple">${e.slotLabel}</span></td>
+        <td>${e.name}</td>
+        <td>${e.contact || '-'}</td>
+        <td>${e.note || '-'}</td>
+        <td><button class="btn sm" onclick="deleteEvent('${e.id}')">刪除</button></td>
+      </tr>
+    `).join('');
+  }
+
+  // KPI 更新
+  function updateKPIs() {
+    const total = NEW_TRUCK_REVIEWS.length + NICKNAME_REVIEWS.length;
+    const kpis = document.querySelectorAll('.kpi-card .kpi-value');
+    if (kpis[2]) kpis[2].textContent = total;
+    // 待審核 KPI 跟 sidebar badge 也同步
+    const sidebarBadge = document.querySelector('.nav-item .badge');
+    if (sidebarBadge) sidebarBadge.textContent = total;
+  }
+
+  // ===== 🆕 審核動作 =====
+  function approveNewTruck(id) {
+    const r = NEW_TRUCK_REVIEWS.find(x => x.id === id);
+    if (!r) return;
+    // 加到「最近自動生效」
+    AUTO_APPLY.unshift({
+      time: '剛剛',
+      owner: r.ownerName,
+      field: '新增餐車（已核准）',
+      diff: `<b>${r.truck.name}</b>（${r.truck.type}）`
+    });
+    NEW_TRUCK_REVIEWS = NEW_TRUCK_REVIEWS.filter(x => x.id !== id);
+    renderNewTruckReviews();
+    renderAutoApply();
+    showToast(`✓ 已核准「${r.truck.name}」上線，LIFF 端立即生效`, 'success');
+  }
+
+  function rejectNewTruck(id) {
+    const r = NEW_TRUCK_REVIEWS.find(x => x.id === id);
+    if (!r) return;
+    if (!confirm(`確定拒絕「${r.truck.name}」的新車申請？`)) return;
+    NEW_TRUCK_REVIEWS = NEW_TRUCK_REVIEWS.filter(x => x.id !== id);
+    renderNewTruckReviews();
+    showToast(`已拒絕「${r.truck.name}」申請，LIFF 端會收到通知`, 'danger');
+  }
+
+  function approveNickname(id) {
+    const r = NICKNAME_REVIEWS.find(x => x.id === id);
+    if (!r) return;
+    AUTO_APPLY.unshift({
+      time: '剛剛',
+      owner: r.ownerName,
+      field: '暱稱修改（已核准）',
+      diff: `${r.oldVal} → <b>${r.newVal}</b>`
+    });
+    NICKNAME_REVIEWS = NICKNAME_REVIEWS.filter(x => x.id !== id);
+    renderNicknameReviews();
+    renderAutoApply();
+    showToast(`✓ 已核准 ${r.ownerName} 的暱稱修改`, 'success');
+  }
+
+  function rejectNickname(id) {
+    const r = NICKNAME_REVIEWS.find(x => x.id === id);
+    if (!r) return;
+    NICKNAME_REVIEWS = NICKNAME_REVIEWS.filter(x => x.id !== id);
+    renderNicknameReviews();
+    showToast(`已拒絕 ${r.ownerName} 的暱稱修改`, 'danger');
+  }
+
+  // ===== 🆕 包場 modal =====
+  function openAddEventModal() {
+    document.getElementById('eventModal').style.display = 'flex';
+    document.getElementById('evName').focus();
+  }
+  function closeEventModal() {
+    document.getElementById('eventModal').style.display = 'none';
+    ['evName','evContact','evNote'].forEach(id => document.getElementById(id).value = '');
+  }
+  function doAddEvent() {
+    const date = document.getElementById('evDate').value;
+    const venue = document.getElementById('evVenue').value;
+    const slotVal = document.getElementById('evSlot').value;
+    const name = document.getElementById('evName').value.trim();
+    const contact = document.getElementById('evContact').value.trim();
+    const note = document.getElementById('evNote').value.trim();
+    if (!name) { showToast('請填寫活動名稱', 'danger'); return; }
+    const slotLabel = slotVal === 'AM' ? '午場' : slotVal === 'PM' ? '晚場' : '全日';
+    // 格式化日期
+    const d = new Date(date);
+    const wd = ['日','一','二','三','四','五','六'][d.getDay()];
+    const dateLabel = `${d.getMonth()+1}/${d.getDate()}（${wd}）`;
+    EVENTS.push({
+      id: 'E_' + (Date.now()),
+      date, dateLabel, venue, slot: slotVal, slotLabel,
+      name, contact, note
+    });
+    closeEventModal();
+    renderEvents();
+    showToast(`✓ 已建立包場「${name}」，LIFF 端 ${date} 該時段已標記為包場`, 'success');
+  }
+
+  function deleteEvent(id) {
+    const e = EVENTS.find(x => x.id === id);
+    if (!e) return;
+    if (!confirm(`確定刪除包場「${e.name}」？\n刪除後 LIFF 端該時段重新開放登記。`)) return;
+    EVENTS = EVENTS.filter(x => x.id !== id);
+    renderEvents();
+    showToast(`已刪除包場「${e.name}」`, 'info');
+  }
+
+  // 舊 reviewAction 保留為 backward compat（其他頁可能用到）
+  function reviewAction(action, name) {
+    const msg = action === 'approve' ? `已核准 ${name} 的暱稱修改 ✓` : `已拒絕 ${name} 的暱稱修改`;
+    showToast(msg, action === 'approve' ? 'success' : 'danger');
+  }
+
+  function showToast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(()=>t.classList.remove('show'), 2500);
+  }
+
+  // 渲染月曆 grid（對齊 VENUE_CONFIG）
+  function renderCalGrid() {
+    const venues = [
+      { name:'南港餐車市集', slot:'晚場', slotKey:'PM' },
+      { name:'央北中山小熊', slot:'午場', slotKey:'AM' },
+      { name:'三峽老街', slot:'晚市', slotKey:'PM' },
+      { name:'新店夜市', slot:'夜市', slotKey:'PM' },
+      { name:'蘆洲廟口', slot:'整天場', slotKey:'ALL' }
+    ];
+    // 6/20 ~ 6/30，週幾 1-7（一-日）
+    // 南港: 每天開
+    // 央北: 平日才開（1-5），週末 C
+    // 三峽: 週末才開（6-7），平日 C
+    // 新店夜市: 週一三五才開
+    // 蘆洲: 每天開
+    // F=已滿 W=接近滿 A=可登記 E=包場 C=不開放
+    const data = [
+      // 6/20(六) 21(日) 22(一) 23(二) 24(三) 25(四) 26(五) 27(六) 28(日) 29(一) 30(二)
+      ['F','F','A','A','A','A','A','A','A','A','A'],  // 南港（6/29 PM 包場）
+      ['C','C','A','E','F','A','A','C','C','A','A'],  // 央北（週末 C，6/23 PM 包場）
+      ['F','F','C','C','C','C','C','A','A','C','C'],  // 三峽（平日 C）
+      ['C','C','A','C','F','C','A','C','C','A','C'],  // 新店（只週一三五 PM）
+      ['A','A','A','A','A','F','F','A','A','A','A']   // 蘆洲（6/25-26 已滿）
+    ];
+    // 修正 6/29 一 南港 PM 包場
+    data[0][9] = 'E';
+    // 修正 6/23 二 央北 PM 包場
+    data[1][3] = 'E';
+
+    const counts = {
+      'F': () => `${5}/5`,
+      'W': () => `${4}/5`,
+      'A': () => `${Math.floor(Math.random()*3)+1}/5`,
+      'E': () => '包場',
+      'C': () => '─'
+    };
+    const cls = { 'F':'full', 'W':'warning', 'A':'available', 'E':'event', 'C':'closed' };
+    const body = document.getElementById('calGridBody');
+    body.innerHTML = venues.map((v, i) => `
+      <tr>
+        <td><b>${v.name}</b><br><span style="font-size:10px; color:var(--text-3);">${v.slot}</span></td>
+        ${data[i].map(s => `<td><div class="cal-cell ${cls[s]}"><div class="cal-cell-count">${counts[s]()}</div></div></td>`).join('')}
+      </tr>
+    `).join('');
+  }
+
+  // 🆕 初始化
+  renderCalGrid();
+  renderNewTruckReviews();
+  renderNicknameReviews();
+  renderAutoApply();
+  renderEvents();
+  updateKPIs();
+</script>
+
+</body>
+</html>

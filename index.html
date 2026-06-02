@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐車市集排班系統 · Demo</title>
+<meta name="description" content="餐車市集排班系統 demo · LIFF 餐車主端 + Admin 後台">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 50%, #fff7ed 100%);
+    color: #1f2937;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .container { max-width: 880px; width: 100%; }
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .badge-top {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #fff;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #92400e;
+    letter-spacing: .5px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #92400e;
+    margin-bottom: 8px;
+    letter-spacing: -.5px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #78350f;
+    line-height: 1.6;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 36px;
+  }
+  @media (max-width: 640px) {
+    .cards { grid-template-columns: 1fr; }
+    .title { font-size: 24px; }
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+    transition: transform .2s, box-shadow .2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border: 2px solid transparent;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.06);
+  }
+  .card.liff:hover { border-color: #06C755; }
+  .card.admin:hover { border-color: #f97316; }
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 14px;
+  }
+  .card.liff .card-icon { background: #dcfce7; }
+  .card.admin .card-icon { background: #fed7aa; }
+  .card-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    margin-bottom: 6px;
+  }
+  .card.liff .card-tag { background: #06C755; color: #fff; }
+  .card.admin .card-tag { background: #f97316; color: #fff; }
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .card-features {
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.8;
+  }
+  .card-features li {
+    list-style: none;
+    padding-left: 18px;
+    position: relative;
+  }
+  .card-features li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #16a34a;
+    font-weight: 700;
+  }
+  .card-arrow {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card.liff .card-arrow { color: #06C755; }
+  .card.admin .card-arrow { color: #f97316; }
+  .info-box {
+    background: rgba(255,255,255,.7);
+    border-radius: 12px;
+    padding: 18px 22px;
+    font-size: 12px;
+    color: #78350f;
+    line-height: 1.7;
+    backdrop-filter: blur(10px);
+    margin-bottom: 18px;
+  }
+  .info-box b { color: #92400e; }
+  .info-box code {
+    background: #fff;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Monaco, monospace;
+    font-size: 11px;
+    color: #b45309;
+  }
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: #92400e;
+    line-height: 1.8;
+  }
+  .footer a { color: #b45309; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+  .footer .divider { color: #d4d4d8; margin: 0 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="badge-top">DEMO · ZN STUDIO</div>
+    <div class="title">餐車市集排班系統</div>
+    <div class="subtitle">為北部 20+ 據點、900+ 餐車設計的線上排班與管理平台</div>
+  </div>
+
+  <div class="cards">
+
+    <a href="/liff" class="card liff">
+      <div class="card-icon">📱</div>
+      <div class="card-tag">餐車主端</div>
+      <div class="card-title">LIFF 排班 App</div>
+      <div class="card-desc">餐車主在手機上登記場次、查看候補、管理餐車資料</div>
+      <ul class="card-features">
+        <li>月曆網格 + 列表雙視圖</li>
+        <li>登記、候補、自動遞補</li>
+        <li>新增餐車（須經審核）</li>
+        <li>手機 / 桌面響應式</li>
+      </ul>
+      <div class="card-arrow">開啟 LIFF 端 →</div>
+    </a>
+
+    <a href="/admin" class="card admin">
+      <div class="card-icon">💼</div>
+      <div class="card-tag">業主後台</div>
+      <div class="card-title">Admin Dashboard</div>
+      <div class="card-desc">業主端排班管理、審核新車、建立包場、信用分管控</div>
+      <ul class="card-features">
+        <li>多場地月排班總覽</li>
+        <li>新車申請審核（連動 LIFF）</li>
+        <li>包場建立 / 黑名單</li>
+        <li>信用觀察 / 月度報表</li>
+      </ul>
+      <div class="card-arrow">開啟 Admin 後台 →</div>
+    </a>
+
+  </div>
+
+  <div class="info-box">
+    💡 <b>給試用者：</b>兩端目前是獨立 demo，操作畫面與 mock 資料一致；簽約後串接 n8n + Google Sheets 即可雙向同步。<br>
+    🔄 <b>LIFF 端可重置：</b>右上角「⟳ 重置」按鈕可還原所有 demo 資料。<br>
+    🔌 <b>串接真實 API：</b>LIFF 加 <code>?mode=real</code> 會打 n8n webhook 真實寫入 Sheets。
+  </div>
+
+  <div class="footer">
+    <b>Nick Chang</b> ｜ ZN Studio
+    <div style="margin-top:6px;">
+      <a href="mailto:nickleo051216@gmail.com">nickleo051216@gmail.com</a>
+      <span class="divider">·</span>
+      0932-684-051
+      <span class="divider">·</span>
+      <a href="https://portaly.cc/zn.studio" target="_blank">portaly.cc/zn.studio</a>
+    </div>
+    <div style="margin-top:4px;">
+      Threads <a href="https://www.threads.com/@nickai216" target="_blank">@nickai216</a>
+      <span class="divider">·</span>
+      <a href="https://lin.ee/Faz0doj" target="_blank">LINE 官方帳號</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
