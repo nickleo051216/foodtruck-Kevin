@@ -481,8 +481,8 @@
     <div class="auth-title">餐車市集排班系統</div>
     <div class="auth-sub">使用您的 LINE 帳號授權登入<br>無需另外註冊，3 秒完成</div>
     <div class="auth-info">
-      <div class="auth-info-row"><span>LINE 暱稱</span><b>Nick Chang</b></div>
-      <div class="auth-info-row"><span>ID</span><span style="font-family:'Inter',sans-serif; font-size:11px; opacity:.8;">@nickai216</span></div>
+      <div class="auth-info-row"><span>LINE 暱稱</span><b id="authLineName">Nick Chang</b></div>
+      <div class="auth-info-row"><span>ID</span><span id="authLineId" style="font-family:'Inter',sans-serif; font-size:11px; opacity:.8;">@nickai216</span></div>
       <div class="auth-info-row"><span>狀態</span><span style="color:#bef264;">● 已綁定</span></div>
     </div>
     <button class="auth-btn" onclick="switchScreen('calendar')">繼續使用 ✓</button>
@@ -493,7 +493,7 @@
   <div class="screen active" id="screen-calendar">
     <div class="cal-header">
       <div class="cal-header-top">
-        <div class="cal-header-title">您好 Nick Chang</div>
+        <div class="cal-header-title" id="calHeaderTitle">您好 Nick Chang</div>
         <div class="cal-header-credit">⭐ 信用 100</div>
       </div>
       <!-- 🆕 車輛下拉選單 -->
@@ -570,10 +570,11 @@
   <!-- 🆕 帳號設定 -->
   <div class="screen" id="screen-account">
     <div class="account-header">
-      <div class="account-avatar">👤</div>
-      <div class="account-name">Nick Chang</div>
-      <div class="account-meta">@nickai216 · LINE 已綁定</div>
+      <div class="account-avatar" id="accountAvatar">👤</div>
+      <div class="account-name" id="accountName">Nick Chang</div>
+      <div class="account-meta" id="accountMeta">@nickai216 · LINE 已綁定</div>
       <div class="account-credit">⭐ 信用 100 · 加入於 2026/3</div>
+      <div id="liffStatus" style="margin-top:8px; font-size:10px; padding:3px 10px; border-radius:999px; display:inline-block; background:rgba(255,255,255,.2);">LIFF · 載入中…</div>
     </div>
 
     <div class="account-body">
@@ -2019,7 +2020,50 @@
     // 先嘗試 LIFF SDK init
     await initLiff();
 
-    // 設定 user badge（顯示真實 LINE 暱稱或 demo）
+    // 🆕 把所有顯示「Nick Chang」等 hardcoded 資訊改為真實 LINE 暱稱（若 LIFF 成功）
+    if (LIFF_READY && LIFF_PROFILE) {
+      const realName = LIFF_PROFILE.displayName || 'Nick Chang';
+      const realId = LIFF_PROFILE.userId ? '@' + LIFF_PROFILE.userId.slice(-8) : '@nickai216';
+      const realPic = LIFF_PROFILE.pictureUrl;
+
+      // 更新 auth screen
+      const authName = document.getElementById('authLineName');
+      const authId = document.getElementById('authLineId');
+      if (authName) authName.textContent = realName;
+      if (authId) authId.textContent = realId;
+
+      // 更新月曆 header
+      const calHdr = document.getElementById('calHeaderTitle');
+      if (calHdr) calHdr.textContent = `您好 ${realName}`;
+
+      // 更新 account screen
+      const accName = document.getElementById('accountName');
+      const accMeta = document.getElementById('accountMeta');
+      const accAvatar = document.getElementById('accountAvatar');
+      if (accName) accName.textContent = realName;
+      if (accMeta) accMeta.textContent = `${realId} · LINE 已綁定`;
+      if (accAvatar && realPic) {
+        accAvatar.innerHTML = `<img src="${realPic}" alt="${realName}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+      }
+
+      console.log(`🟢 已將畫面更新為 LINE 真實資料：${realName}`);
+
+      // 更新 LIFF 狀態徽章
+      const ls = document.getElementById('liffStatus');
+      if (ls) {
+        ls.textContent = `🟢 LIFF 已連線 · ${liff.getOS() || 'unknown'}`;
+        ls.style.background = 'rgba(132, 204, 22, 0.3)';
+      }
+    } else {
+      console.log('📴 使用 demo 模式顯示');
+      const ls = document.getElementById('liffStatus');
+      if (ls) {
+        ls.textContent = '📴 Demo 模式（非 LINE App 環境）';
+        ls.style.background = 'rgba(156, 163, 175, 0.3)';
+      }
+    }
+
+    // 設定 user badge
     const ub = document.getElementById('userBadge');
     if (ub) {
       const prefix = LIFF_READY ? '🟢 ' : (USE_REAL_API ? '🔌 ' : '📴 ');
