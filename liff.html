@@ -430,6 +430,9 @@
   .toast.error { background:var(--danger); }
   .toast.info { background:var(--info); }
 </style>
+
+<!-- 🔌 LINE LIFF SDK -->
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
 
@@ -669,7 +672,12 @@
   const API_BASE = 'https://nickleo9.zeabur.app/webhook';
   const REGISTER_URL = `${API_BASE}/foodtruck-register`;
 
-  // URL ?user=nick / ?user=amy / ?user=lin / ?user=chen 切換不同會員視角
+  // ============ 🔌 LINE LIFF 設定 ============
+  const LIFF_ID = '2010274155-Q5Mi8MQB';  // Food-car LIFF App
+  let LIFF_PROFILE = null;  // 從 LINE 取得的真實 profile（成功 init 後填）
+  let LIFF_READY = false;   // LIFF SDK 是否成功 init
+
+  // URL ?user=nick / ?user=amy / ?user=lin / ?user=chen 切換不同會員視角（demo 用）
   const URL_PARAMS = new URLSearchParams(location.search);
   // 🔌 後端 API 串接開關
   // 目前過渡期：前端純模擬，加 ?mode=real 才打 n8n webhook
@@ -682,7 +690,7 @@
     lin:  { lineUserId:'U_line_lin003',  label:'林姊' },
     chen: { lineUserId:'U_line_chen002', label:'陳大哥' }
   };
-  const CURRENT_USER = DEMO_USERS[DEMO_USER_KEY] || DEMO_USERS.nick;
+  let CURRENT_USER = DEMO_USERS[DEMO_USER_KEY] || DEMO_USERS.nick;
 
   // 前端 mock id (t1/t2/t3) 對應後端真實 ID (T_001/T_002/T_003)
   const TRUCK_ID_MAP = { t1:'T_001', t2:'T_002', t3:'T_003' };
@@ -1967,27 +1975,74 @@
     showToast('已重置所有資料 🔄', 'info');
   }
 
-  // Init
-  // 設定 user badge
-  const ub = document.getElementById('userBadge');
-  if (ub) {
-    ub.textContent = (USE_REAL_API ? '🔌 ' : '📴 ') + CURRENT_USER.label;
-    ub.style.background = USE_REAL_API ? '#06C755' : '#9ca3af';
+  // ===== 🔌 LIFF SDK 初始化 =====
+  // 在 LINE App 內開啟時自動取得真實 LINE 暱稱、ID、頭像
+  // 在外部瀏覽器開啟時 fallback 用 mock demo 資料
+  async function initLiff() {
+    if (typeof liff === 'undefined') {
+      console.log('⚠️ LIFF SDK 未載入（純瀏覽器模式）');
+      return false;
+    }
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      LIFF_READY = true;
+      console.log('✅ LIFF init 成功');
+
+      // 若在 LINE App 內已登入，取得 profile
+      if (liff.isLoggedIn()) {
+        const profile = await liff.getProfile();
+        LIFF_PROFILE = profile;
+        console.log('✅ 取得 LINE Profile:', profile.displayName, profile.userId);
+
+        // 覆蓋 CURRENT_USER 為真實 LINE 資料
+        CURRENT_USER = {
+          lineUserId: profile.userId,
+          label: profile.displayName,
+          pictureUrl: profile.pictureUrl
+        };
+        return true;
+      } else {
+        // 在外部瀏覽器（非 LINE App）打開的，引導登入
+        console.log('⚠️ 尚未登入 LINE');
+        // 不自動 redirect 避免 demo 模式被踢出
+        // liff.login();
+        return false;
+      }
+    } catch (err) {
+      console.log('⚠️ LIFF init 失敗:', err.message, '— 使用 demo 模式');
+      return false;
+    }
   }
-  initMyRegistrations();
-  renderCarMenu();
-  renderTruckList();
-  // 🆕 桌面版自動使用月曆網格 view
-  if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
-    STATE.calendarView = 'grid';
-    setTimeout(() => {
-      document.querySelectorAll('.view-toggle-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === 'grid');
-      });
-    }, 0);
-  }
-  renderCalendar();
-  startPromotedCountdown();
+
+  // ===== Init 主流程 =====
+  (async function init() {
+    // 先嘗試 LIFF SDK init
+    await initLiff();
+
+    // 設定 user badge（顯示真實 LINE 暱稱或 demo）
+    const ub = document.getElementById('userBadge');
+    if (ub) {
+      const prefix = LIFF_READY ? '🟢 ' : (USE_REAL_API ? '🔌 ' : '📴 ');
+      ub.textContent = prefix + CURRENT_USER.label;
+      ub.style.background = LIFF_READY ? '#06C755' : (USE_REAL_API ? '#06C755' : '#9ca3af');
+    }
+
+    initMyRegistrations();
+    renderCarMenu();
+    renderTruckList();
+
+    // 🆕 桌面版自動使用月曆網格 view
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
+      STATE.calendarView = 'grid';
+      setTimeout(() => {
+        document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.view === 'grid');
+        });
+      }, 0);
+    }
+    renderCalendar();
+    startPromotedCountdown();
+  })();
 </script>
 
 </body>
