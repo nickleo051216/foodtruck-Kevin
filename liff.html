@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>餐車市集排班系統 Demo · ZN Studio</title>
+<title>餐車市集排班系統 · ZN Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -433,26 +433,9 @@
 </head>
 <body>
 
-<div class="desktop-tag">💻 桌面瀏覽中（F12 切手機模擬）</div>
-<a href="/" class="demo-info" style="text-decoration:none; color:inherit; cursor:pointer;">📱 餐車排班系統 · <b>Demo</b> · ← 回首頁</a>
+<a href="/" class="demo-info" style="text-decoration:none; color:inherit; cursor:pointer;" title="回首頁">← 回首頁</a>
 
 <div class="phone">
-  <div class="demo-hint">
-    <span class="mode">DEMO · <b id="modeLabel">月曆主頁</b> · <span id="userBadge" style="background:#06C755;padding:1px 6px;border-radius:3px;font-size:9px;letter-spacing:0;">會員</span></span>
-    <div style="display:flex; gap:5px;">
-      <button onclick="switchScreen('community')">①</button>
-      <button onclick="switchScreen('auth')">②</button>
-      <button onclick="switchScreen('calendar')">③</button>
-      <button onclick="switchScreen('account')">④</button>
-      <button onclick="resetDemo()">重置</button>
-    </div>
-  </div>
-
-  <div class="status-bar">
-    <span>9:41</span>
-    <span style="font-size:8px;">• • •</span>
-    <span style="font-size:11px;">📶 5G  🔋 100%</span>
-  </div>
 
   <!-- 社群 -->
   <div class="screen" id="screen-community">
@@ -688,8 +671,9 @@
 
   // URL ?user=nick / ?user=amy / ?user=lin / ?user=chen 切換不同會員視角
   const URL_PARAMS = new URLSearchParams(location.search);
-  // 🆕 demo 預設 offline mock（避免後端 Sheets 殘留資料導致重複擋下）
-  // 要打真 webhook 才加 ?mode=real
+  // 🔌 後端 API 串接開關
+  // 目前過渡期：前端純模擬，加 ?mode=real 才打 n8n webhook
+  // 後端 workflow 全部準備好後，將改為預設 true
   const USE_REAL_API = URL_PARAMS.get('mode') === 'real';
   const DEMO_USER_KEY = URL_PARAMS.get('user') || 'nick';
   const DEMO_USERS = {
@@ -906,8 +890,6 @@
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById('screen-' + id).classList.add('active');
     STATE.currentScreen = id;
-    const labels = { community:'LINE 社群', auth:'LIFF 登入', calendar:'月曆主頁', my:'我的登記', account:'帳號設定' };
-    document.getElementById('modeLabel').textContent = labels[id] || id;
     if (id === 'calendar') renderCalendar();
     if (id === 'my') renderMyList();
   }
@@ -1982,7 +1964,7 @@
     selectCar(0);
     renderTruckList();
     switchScreen('calendar');
-    showToast('已重置所有 Demo 資料 🔄', 'info');
+    showToast('已重置所有資料 🔄', 'info');
   }
 
   // Init
