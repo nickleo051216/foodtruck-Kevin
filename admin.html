@@ -427,6 +427,86 @@
   .pwd-modal-error { display:none; background:#fee2e2; color:#991b1b; padding:8px 12px; border-radius:6px; font-size:12px; margin-top:8px; }
   .pwd-modal-error.show { display:block; }
   .pwd-modal-actions { display:flex; gap:8px; margin-top:18px; justify-content:flex-end; }
+
+  /* ==== 🆕 Plan B — 對帳審核頁 ==== */
+  .pay-stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:18px; }
+  @media(max-width:768px){ .pay-stats { grid-template-columns:repeat(2, 1fr); } }
+  .pay-stat-card { background:#fff; border-radius:10px; padding:14px 16px; border:1px solid var(--border); position:relative; overflow:hidden; }
+  .pay-stat-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--brand); }
+  .pay-stat-card.warn::before { background:var(--warn); }
+  .pay-stat-card.ok::before { background:var(--ok); }
+  .pay-stat-card.danger::before { background:var(--danger); }
+  .pay-stat-label { font-size:11px; color:#6b7280; margin-bottom:5px; font-weight:600; }
+  .pay-stat-value { font-size:22px; font-weight:700; font-family:'Inter',sans-serif; color:var(--text); letter-spacing:-0.3px; }
+  .pay-stat-meta { font-size:10px; color:#9ca3af; margin-top:3px; }
+
+  .pay-review-tabs { display:flex; gap:4px; margin-bottom:14px; background:#fff; padding:4px; border-radius:8px; border:1px solid var(--border); width:fit-content; }
+  .pay-review-tab { padding:7px 14px; border-radius:6px; font-size:13px; font-weight:600; color:#6b7280; cursor:pointer; transition:all .15s; }
+  .pay-review-tab:hover { color:var(--text); }
+  .pay-review-tab.active { background:var(--brand); color:#fff; }
+  .pay-review-tab .count { font-size:10px; background:rgba(0,0,0,.1); padding:1px 6px; border-radius:999px; margin-left:4px; font-family:'Inter',sans-serif; font-weight:700; }
+  .pay-review-tab.active .count { background:rgba(255,255,255,.25); color:#fff; }
+
+  .pay-review-list { display:flex; flex-direction:column; gap:12px; }
+
+  .pay-review-card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; display:grid; grid-template-columns:80px 1fr 220px; gap:16px; align-items:start; }
+  @media(max-width:900px){ .pay-review-card { grid-template-columns:1fr; } .pay-review-thumb { width:100%; height:160px; } }
+
+  .pay-review-thumb { width:80px; height:80px; border-radius:8px; background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; position:relative; flex-shrink:0; border:1px solid #dbeafe; transition:transform .2s; }
+  .pay-review-thumb:hover { transform:scale(1.05); }
+  .pay-review-thumb::after { content:'🔍'; position:absolute; bottom:4px; right:4px; font-size:10px; background:rgba(0,0,0,.6); color:#fff; padding:1px 4px; border-radius:3px; }
+
+  .pay-review-info { min-width:0; }
+  .pay-review-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+  .pay-review-owner { font-size:14px; font-weight:700; color:var(--text); }
+  .pay-review-handle { font-size:11px; color:#6b7280; font-family:'Inter',sans-serif; }
+  .pay-review-time { font-size:11px; color:#9ca3af; margin-left:auto; }
+
+  .pay-review-amount-row { display:flex; gap:14px; padding:8px 12px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:12px; }
+  .pay-review-amount-row b { font-family:'Inter',sans-serif; color:var(--text); }
+  .pay-review-amount-row .amt { color:#059669; font-size:15px; font-weight:700; }
+
+  .pay-review-sessions { font-size:11px; color:#6b7280; line-height:1.7; }
+  .pay-review-sessions .sess { display:inline-block; background:#eff6ff; color:#1e40af; padding:2px 7px; border-radius:4px; margin:0 4px 3px 0; font-family:'Inter',sans-serif; font-weight:600; }
+
+  .pay-review-actions { display:flex; flex-direction:column; gap:6px; }
+  @media(max-width:900px){ .pay-review-actions { flex-direction:row; } .pay-review-actions button { flex:1; } }
+  .pay-action-btn { padding:9px 14px; border:none; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .pay-action-btn.approve { background:var(--ok); color:#fff; }
+  .pay-action-btn.approve:hover { background:#059669; }
+  .pay-action-btn.reject { background:#fee2e2; color:#991b1b; }
+  .pay-action-btn.reject:hover { background:#fecaca; }
+  .pay-action-btn.detail { background:#f3f4f6; color:#374151; }
+  .pay-action-btn.detail:hover { background:#e5e7eb; }
+
+  .pay-status-badge { display:inline-block; padding:3px 9px; border-radius:999px; font-size:10px; font-weight:600; }
+  .pay-status-pending { background:#fef3c7; color:#92400e; }
+  .pay-status-approved { background:#d1fae5; color:#065f46; }
+  .pay-status-rejected { background:#fee2e2; color:#991b1b; }
+
+  /* AI Vision badge */
+  .ai-vision-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; background:linear-gradient(135deg,#a78bfa 0%,#7c3aed 100%); color:#fff; font-size:9px; font-weight:700; }
+
+  /* 截圖預覽 modal */
+  .img-preview-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
+  .img-preview-overlay.active { display:flex; }
+  .img-preview-box { max-width:90vw; max-height:90vh; background:#fff; border-radius:12px; padding:18px; }
+  .img-preview-img { width:300px; height:400px; background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:60px; color:#92400e; }
+  .img-preview-meta { margin-top:10px; font-size:11px; color:#6b7280; text-align:center; }
+
+  /* 退回原因 modal */
+  .reject-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:150; align-items:center; justify-content:center; }
+  .reject-modal-overlay.active { display:flex; }
+  .reject-modal { background:#fff; border-radius:12px; padding:22px; width:90%; max-width:420px; }
+  .reject-modal h3 { font-size:16px; font-weight:700; margin-bottom:6px; }
+  .reject-modal-sub { font-size:12px; color:#6b7280; margin-bottom:14px; }
+  .reject-modal textarea { width:100%; min-height:80px; padding:10px; border:1px solid var(--border); border-radius:7px; font-family:inherit; font-size:13px; box-sizing:border-box; resize:vertical; }
+  .reject-modal textarea:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(234,88,12,.1); }
+  .reject-preset-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .reject-preset-btn { padding:5px 10px; background:#f3f4f6; border:1px solid var(--border); border-radius:14px; font-size:11px; cursor:pointer; transition:all .15s; }
+  .reject-preset-btn:hover { background:#fee2e2; border-color:#fca5a5; color:#991b1b; }
+  .reject-modal-actions { display:flex; gap:8px; margin-top:16px; justify-content:flex-end; }
+
 </style>
 </head>
 <body>
@@ -488,6 +568,7 @@
 
   <div class="sidebar-section">監控</div>
   <div class="nav-item" onclick="switchPage('credit', this)"><span class="nav-icon">⭐</span><span class="nav-label">信用觀察</span><span class="nav-badge warn">2</span></div>
+  <div class="nav-item" onclick="switchPage('payment', this)"><span class="nav-icon">💰</span><span class="nav-label">對帳</span><span class="nav-badge" id="navBadgePayment">1</span></div>
   <div class="nav-item" onclick="switchPage('reports', this)"><span class="nav-icon">📈</span><span class="nav-label">報表</span></div>
 
   <div class="sidebar-section">系統</div>
@@ -916,6 +997,46 @@
       </div>
     </div>
 
+    <!-- ====== 🆕 Plan B Page: 對帳審核 ====== -->
+    <div class="page" id="page-payment">
+      <!-- 統計卡 -->
+      <div class="pay-stats">
+        <div class="pay-stat-card">
+          <div class="pay-stat-label">本月應收</div>
+          <div class="pay-stat-value" id="payStatTotal">NT$ 0</div>
+          <div class="pay-stat-meta">912 台車 · 預估</div>
+        </div>
+        <div class="pay-stat-card ok">
+          <div class="pay-stat-label">已核銷</div>
+          <div class="pay-stat-value" id="payStatPaid">NT$ 0</div>
+          <div class="pay-stat-meta">收款完成</div>
+        </div>
+        <div class="pay-stat-card warn">
+          <div class="pay-stat-label">待審核</div>
+          <div class="pay-stat-value" id="payStatPending">NT$ 0</div>
+          <div class="pay-stat-meta">截圖待驗證</div>
+        </div>
+        <div class="pay-stat-card danger">
+          <div class="pay-stat-label">逾期未繳</div>
+          <div class="pay-stat-value" id="payStatOverdue">NT$ 0</div>
+          <div class="pay-stat-meta">超過 5 號未繳</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="pay-review-tabs">
+        <div class="pay-review-tab active" onclick="switchPayReviewTab('pending', this)">⏳ 待審核 <span class="count" id="payTabCountPending">0</span></div>
+        <div class="pay-review-tab" onclick="switchPayReviewTab('approved', this)">✅ 已核銷 <span class="count" id="payTabCountApproved">0</span></div>
+        <div class="pay-review-tab" onclick="switchPayReviewTab('rejected', this)">❌ 已退回 <span class="count" id="payTabCountRejected">0</span></div>
+        <div class="pay-review-tab" onclick="switchPayReviewTab('all', this)">全部</div>
+      </div>
+
+      <!-- List -->
+      <div class="pay-review-list" id="payReviewList">
+        <!-- renderPayReviewList() -->
+      </div>
+    </div>
+
     <!-- ====== 🆕 Page: 設定 ====== -->
     <div class="page" id="page-settings">
       <div class="settings-grid">
@@ -1173,6 +1294,33 @@
     <div style="display:flex; gap:8px; margin-top:18px; justify-content:flex-end;">
       <button class="btn" onclick="closeEventModal()">取消</button>
       <button class="btn primary" onclick="doAddEvent()">建立包場</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🆕 截圖預覽 modal -->
+<div class="img-preview-overlay" id="imgPreview" onclick="closeImgPreview()">
+  <div class="img-preview-box" onclick="event.stopPropagation()">
+    <div class="img-preview-img" id="imgPreviewImg">🖼️</div>
+    <div class="img-preview-meta" id="imgPreviewMeta">點任意處關閉</div>
+  </div>
+</div>
+
+<!-- 🆕 退回原因 modal -->
+<div class="reject-modal-overlay" id="rejectModal">
+  <div class="reject-modal">
+    <h3>❌ 退回此筆對帳</h3>
+    <div class="reject-modal-sub">請輸入退回原因，將會推播給餐車主</div>
+    <textarea id="rejectReason" placeholder="例：截圖與金額不符 / 後五碼錯誤 / 重複繳費..."></textarea>
+    <div class="reject-preset-row">
+      <button class="reject-preset-btn" onclick="useRejectPreset(this)">截圖與金額不符</button>
+      <button class="reject-preset-btn" onclick="useRejectPreset(this)">後五碼錯誤</button>
+      <button class="reject-preset-btn" onclick="useRejectPreset(this)">重複繳費</button>
+      <button class="reject-preset-btn" onclick="useRejectPreset(this)">截圖模糊看不清</button>
+    </div>
+    <div class="reject-modal-actions">
+      <button class="pay-action-btn detail" onclick="closeRejectModal()">取消</button>
+      <button class="pay-action-btn reject" onclick="submitReject()">確認退回</button>
     </div>
   </div>
 </div>
@@ -1515,6 +1663,7 @@
     rules: ['特殊規則', '黑名單管理（後台限定）'],
     events: ['包場管理', 'EventBookings'],
     credit: ['信用觀察', '信用分 < 80 名單'],
+    payment: ['對帳審核', '場地費繳款 · 截圖辨識'],
     reports: ['報表', '月度數據 · 2026/6'],
     settings: ['設定', '系統設定 · 業主資料 · 業務規則']
   };
@@ -1527,9 +1676,326 @@
     const [t, s] = PAGE_TITLES[id];
     document.getElementById('pageTitle').firstChild.textContent = t + ' ';
     document.getElementById('pageTitleSub').textContent = s;
+    if (id === 'payment') renderPaymentReview();
   }
 
-  // ===== 🆕 Mock Data：跟 LIFF 端對齊 =====
+  // ============================================================
+  // 🆕 Plan B 功能 ④ 對帳審核（業主後台）
+  // ============================================================
+
+  // 場地費率（跟 LIFF 同步）
+  const VENUE_FEES_ADMIN = {
+    '南港餐車市集':  { AM: 300, PM: 300 },
+    '央北中山小熊':  { AM: 250, PM: 250 },
+    '三峽老街':      { AM: 200, PM: 200 },
+    '新店夜市':      { PM: 400 },
+    '蘆洲廟口':      { ALL: 350 }
+  };
+
+  function getAdminFee(sessionKey) {
+    const [venue, , slot] = sessionKey.split('|');
+    const fees = VENUE_FEES_ADMIN[venue];
+    return fees ? (fees[slot] || 0) : 0;
+  }
+
+  function getSlotLabelAdmin(slot) {
+    return { AM:'午場', PM:'晚場', ALL:'整天場' }[slot] || slot;
+  }
+
+  // 對帳審核資料 — 業主後台會收到所有餐車主上傳的繳款資料
+  let PAYMENT_REVIEWS = [
+    {
+      id: 'PR_001',
+      avatarText: 'N',
+      ownerName: 'Nick Chang',
+      handle: '@nickai216',
+      truckName: '泰沙了打抛飯',
+      month: '2026-05',
+      submittedAt: '今天 16:48',
+      amount: 500,
+      method: '銀行匯款',
+      last5: '67890',
+      paidDate: '2026-06-02',
+      screenshot: 'mock_kbank_500.jpg',
+      sessions: ['三峽老街|2026-05-03|PM', '南港餐車市集|2026-05-15|AM'],
+      status: 'pending',
+      aiScore: 0.92,  // AI 比對 信心分數
+      aiVerified: true
+    },
+    {
+      id: 'PR_002',
+      avatarText: '林',
+      ownerName: '林姐',
+      handle: '@lin_breakfast',
+      truckName: '林姐早餐車',
+      month: '2026-05',
+      submittedAt: '今天 14:22',
+      amount: 1200,
+      method: '銀行匯款',
+      last5: '23456',
+      paidDate: '2026-06-02',
+      screenshot: 'mock_ctbc_1200.jpg',
+      sessions: ['南港餐車市集|2026-05-01|AM', '南港餐車市集|2026-05-08|AM', '南港餐車市集|2026-05-15|AM', '南港餐車市集|2026-05-22|AM'],
+      status: 'pending',
+      aiScore: 0.88,
+      aiVerified: true
+    },
+    {
+      id: 'PR_003',
+      avatarText: '陳',
+      ownerName: '陳老闆',
+      handle: '@chen_thai',
+      truckName: '泰式打抛飯老陳',
+      month: '2026-05',
+      submittedAt: '昨天 19:30',
+      amount: 700,
+      method: '銀行匯款',
+      last5: '11223',
+      paidDate: '2026-06-01',
+      screenshot: 'mock_esun_700.jpg',
+      sessions: ['新店夜市|2026-05-04|PM', '新店夜市|2026-05-18|PM'],
+      status: 'approved',
+      approvedAt: '今天 09:05',
+      approvedBy: 'admin'
+    },
+    {
+      id: 'PR_004',
+      avatarText: '王',
+      ownerName: '王老闆',
+      handle: '@wang_takoyaki',
+      truckName: '王哥章魚燒',
+      month: '2026-04',
+      submittedAt: '2 天前 11:12',
+      amount: 800,
+      method: '銀行匯款',
+      last5: '99887',
+      paidDate: '2026-05-30',
+      screenshot: 'mock_post_800.jpg',
+      sessions: ['央北中山小熊|2026-04-08|PM', '央北中山小熊|2026-04-22|PM', '蘆洲廟口|2026-04-15|ALL'],
+      status: 'rejected',
+      rejectedAt: '昨天 10:20',
+      rejectReason: '截圖金額為 750 與您填寫的 800 不符，請確認後重新上傳'
+    },
+    {
+      id: 'PR_005',
+      avatarText: 'A',
+      ownerName: 'Amy 阿美',
+      handle: '@amy_drinks',
+      truckName: 'ZN 飲料',
+      month: '2026-05',
+      submittedAt: '今天 11:35',
+      amount: 350,
+      method: '銀行匯款',
+      last5: '55667',
+      paidDate: '2026-06-03',
+      screenshot: 'mock_fubon_350.jpg',
+      sessions: ['蘆洲廟口|2026-05-20|ALL'],
+      status: 'pending',
+      aiScore: 0.95,
+      aiVerified: true
+    }
+  ];
+
+  let _payReviewTab = 'pending';
+
+  function renderPaymentReview() {
+    // 統計
+    const total = 912 * 350;  // 預估
+    const paid = PAYMENT_REVIEWS.filter(p => p.status === 'approved').reduce((s, p) => s + p.amount, 0);
+    const pending = PAYMENT_REVIEWS.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0);
+    const overdue = 28500;  // demo 數字
+    document.getElementById('payStatTotal').textContent = `NT$ ${total.toLocaleString()}`;
+    document.getElementById('payStatPaid').textContent = `NT$ ${paid.toLocaleString()}`;
+    document.getElementById('payStatPending').textContent = `NT$ ${pending.toLocaleString()}`;
+    document.getElementById('payStatOverdue').textContent = `NT$ ${overdue.toLocaleString()}`;
+
+    // tab 數量
+    const pendingCount = PAYMENT_REVIEWS.filter(p => p.status === 'pending').length;
+    const approvedCount = PAYMENT_REVIEWS.filter(p => p.status === 'approved').length;
+    const rejectedCount = PAYMENT_REVIEWS.filter(p => p.status === 'rejected').length;
+    document.getElementById('payTabCountPending').textContent = pendingCount;
+    document.getElementById('payTabCountApproved').textContent = approvedCount;
+    document.getElementById('payTabCountRejected').textContent = rejectedCount;
+
+    // sidebar badge
+    const navBadge = document.getElementById('navBadgePayment');
+    if (navBadge) {
+      navBadge.textContent = pendingCount;
+      navBadge.style.display = pendingCount > 0 ? '' : 'none';
+    }
+
+    renderPayReviewList();
+  }
+
+  function switchPayReviewTab(tab, el) {
+    _payReviewTab = tab;
+    document.querySelectorAll('.pay-review-tab').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    renderPayReviewList();
+  }
+
+  function renderPayReviewList() {
+    const wrap = document.getElementById('payReviewList');
+    let items = PAYMENT_REVIEWS.slice();
+    if (_payReviewTab !== 'all') items = items.filter(p => p.status === _payReviewTab);
+
+    if (items.length === 0) {
+      const msg = _payReviewTab === 'pending' ? '太棒了！沒有待審核項目 🎉' :
+                  _payReviewTab === 'approved' ? '尚無已核銷紀錄' :
+                  _payReviewTab === 'rejected' ? '尚無退回紀錄' : '尚無對帳紀錄';
+      wrap.innerHTML = `<div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:40px 20px; text-align:center; color:#9ca3af; font-size:13px;">${msg}</div>`;
+      return;
+    }
+
+    let html = '';
+    items.forEach(p => {
+      const sessionList = (p.sessions || []).map(k => {
+        const [venue, date, slot] = k.split('|');
+        const [, mm, dd] = date.split('-');
+        const fee = getAdminFee(k);
+        return `<span class="sess">${parseInt(mm)}/${parseInt(dd)} ${venue.substring(0,4)} ${getSlotLabelAdmin(slot)} $${fee}</span>`;
+      }).join('');
+
+      const expectedTotal = (p.sessions || []).reduce((s, k) => s + getAdminFee(k), 0);
+      const diff = p.amount - expectedTotal;
+      const diffNote = diff === 0 ? '<span style="color:#059669; font-size:11px;">✓ 金額完全相符</span>' :
+                       diff > 0 ? `<span style="color:#92400e; font-size:11px;">⚠️ 多繳 NT$ ${diff}</span>` :
+                       `<span style="color:#991b1b; font-size:11px;">⚠️ 少繳 NT$ ${Math.abs(diff)}</span>`;
+
+      let statusBadge = '';
+      let actions = '';
+      if (p.status === 'pending') {
+        statusBadge = '<span class="pay-status-badge pay-status-pending">⏳ 待審核</span>';
+        if (p.aiVerified) {
+          statusBadge += ` <span class="ai-vision-badge">✨ AI 比對 ${Math.round(p.aiScore*100)}%</span>`;
+        }
+        actions = `
+          <button class="pay-action-btn approve" onclick="approvePayment('${p.id}')">✓ 核銷</button>
+          <button class="pay-action-btn reject" onclick="openRejectModal('${p.id}')">✗ 退回</button>
+          <button class="pay-action-btn detail" onclick="viewPaymentScreenshot('${p.id}')">🔍 看截圖</button>`;
+      } else if (p.status === 'approved') {
+        statusBadge = `<span class="pay-status-badge pay-status-approved">✓ 已核銷 · ${p.approvedAt}</span>`;
+        actions = `<button class="pay-action-btn detail" onclick="viewPaymentScreenshot('${p.id}')">🔍 看截圖</button>`;
+      } else {
+        statusBadge = `<span class="pay-status-badge pay-status-rejected">✗ 已退回 · ${p.rejectedAt}</span>`;
+        actions = `<button class="pay-action-btn detail" onclick="viewPaymentScreenshot('${p.id}')">🔍 看截圖</button>`;
+      }
+
+      const rejectReason = p.status === 'rejected' && p.rejectReason ?
+        `<div style="background:#fee2e2; color:#991b1b; padding:6px 10px; border-radius:6px; font-size:11px; margin-top:6px;">退回原因：${p.rejectReason}</div>` : '';
+
+      html += `
+        <div class="pay-review-card">
+          <div class="pay-review-thumb" onclick="viewPaymentScreenshot('${p.id}')">📄</div>
+          <div class="pay-review-info">
+            <div class="pay-review-head">
+              <span class="pay-review-owner">${p.ownerName}</span>
+              <span class="pay-review-handle">${p.handle}</span>
+              <span class="pay-review-time">${p.submittedAt}</span>
+            </div>
+            <div style="font-size:11px; color:#6b7280; margin-bottom:8px;">${p.truckName} · ${p.month} 月場地費</div>
+            <div class="pay-review-amount-row">
+              <span>申報金額 <b class="amt">NT$ ${p.amount.toLocaleString()}</b></span>
+              <span>應收 <b>NT$ ${expectedTotal.toLocaleString()}</b></span>
+              <span>後五碼 <b>${p.last5}</b></span>
+              <span>${diffNote}</span>
+            </div>
+            <div class="pay-review-sessions">
+              <span style="margin-right:4px;">場次：</span>${sessionList}
+            </div>
+            <div style="margin-top:8px;">${statusBadge}</div>
+            ${rejectReason}
+          </div>
+          <div class="pay-review-actions">${actions}</div>
+        </div>`;
+    });
+    wrap.innerHTML = html;
+  }
+
+  // 看截圖
+  function viewPaymentScreenshot(id) {
+    const p = PAYMENT_REVIEWS.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('imgPreviewImg').textContent = '🧾';
+    document.getElementById('imgPreviewMeta').innerHTML = `
+      <b>${p.screenshot}</b><br>
+      ${p.ownerName} · NT$ ${p.amount} · 後五碼 ${p.last5}<br>
+      <span style="font-size:10px; color:#9ca3af;">demo：實際版會顯示真實截圖</span>
+    `;
+    document.getElementById('imgPreview').classList.add('active');
+  }
+  function closeImgPreview() {
+    document.getElementById('imgPreview').classList.remove('active');
+  }
+
+  // 核銷
+  function approvePayment(id) {
+    const p = PAYMENT_REVIEWS.find(x => x.id === id);
+    if (!p) return;
+    p.status = 'approved';
+    p.approvedAt = formatNowAdmin();
+    p.approvedBy = 'admin';
+    showToastAdmin(`✓ 已核銷 ${p.ownerName} 的繳費 NT$ ${p.amount}`, 'success');
+    renderPaymentReview();
+  }
+
+  // 退回 modal
+  let _currentRejectId = null;
+  function openRejectModal(id) {
+    _currentRejectId = id;
+    document.getElementById('rejectReason').value = '';
+    document.getElementById('rejectModal').classList.add('active');
+    setTimeout(() => document.getElementById('rejectReason').focus(), 100);
+  }
+  function closeRejectModal() {
+    _currentRejectId = null;
+    document.getElementById('rejectModal').classList.remove('active');
+  }
+  function useRejectPreset(btn) {
+    document.getElementById('rejectReason').value = btn.textContent;
+  }
+  function submitReject() {
+    const reason = document.getElementById('rejectReason').value.trim();
+    if (!reason) {
+      alert('請輸入退回原因');
+      return;
+    }
+    const p = PAYMENT_REVIEWS.find(x => x.id === _currentRejectId);
+    if (!p) return;
+    p.status = 'rejected';
+    p.rejectedAt = formatNowAdmin();
+    p.rejectReason = reason;
+    showToastAdmin(`已退回 ${p.ownerName} 的繳費，將通知餐車主`, 'warn');
+    closeRejectModal();
+    renderPaymentReview();
+  }
+
+  function formatNowAdmin() {
+    const d = new Date();
+    return `今天 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  // toast（用既有的）
+  function showToastAdmin(msg, type) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'toast ' + (type || '') + ' show';
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // 初始化時刷新對帳統計（這樣 sidebar badge 可以正確顯示）
+  setTimeout(() => {
+    const pendingCount = PAYMENT_REVIEWS.filter(p => p.status === 'pending').length;
+    const navBadge = document.getElementById('navBadgePayment');
+    if (navBadge) {
+      navBadge.textContent = pendingCount;
+      navBadge.style.display = pendingCount > 0 ? '' : 'none';
+    }
+  }, 100);
+
+  // ============================================================
+  // (續) 原本的 Mock Data
   // 新車申請（LIFF 端餐車主新增餐車後進到這裡審核）
   let NEW_TRUCK_REVIEWS = [
     {

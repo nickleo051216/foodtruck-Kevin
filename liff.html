@@ -451,6 +451,162 @@
     from { opacity:0; transform:translateY(-4px); }
     to { opacity:1; transform:translateY(0); }
   }
+
+  /* ==== 🆕 Plan B 新功能樣式 ==== */
+
+  /* 🔔 通知鈴鐺 */
+  .bell-btn { position:relative; background:rgba(255,255,255,.2); border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; transition:all .2s; padding:0; }
+  .bell-btn:hover { background:rgba(255,255,255,.3); transform:scale(1.05); }
+  .bell-badge { position:absolute; top:-2px; right:-2px; background:var(--brand-red); color:#fff; font-size:9px; font-weight:700; font-family:'Inter',sans-serif; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; padding:0 4px; border:2px solid #fff; }
+  .bell-badge:empty, .bell-badge.zero { display:none; }
+  .cal-header-actions { display:flex; gap:8px; align-items:center; }
+
+  /* 4 級 bottom-nav 微調（更窄字） */
+  .bottom-nav.nav-4 .nav-item .nav-label { font-size:10px; }
+
+  /* ==== 💰 對帳 / 繳費頁 ==== */
+  .screen#screen-payment { display:none; }
+  .screen#screen-payment.active { display:flex; flex-direction:column; height:100%; }
+
+  .pay-header { background:linear-gradient(135deg,#10b981 0%,#059669 100%); color:#fff; padding:14px 16px 16px; flex-shrink:0; }
+  .pay-header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .pay-header-title { font-size:13px; opacity:.9; }
+  .pay-month-badge { background:rgba(255,255,255,.2); padding:4px 10px; border-radius:999px; font-size:11px; font-family:'Inter',sans-serif; font-weight:600; }
+
+  .pay-summary-card { background:rgba(255,255,255,.15); border-radius:12px; padding:14px; backdrop-filter:blur(8px); }
+  .pay-summary-label { font-size:11px; opacity:.85; margin-bottom:4px; }
+  .pay-summary-amount { font-size:32px; font-weight:700; font-family:'Inter',sans-serif; letter-spacing:-0.5px; }
+  .pay-summary-meta { font-size:11px; opacity:.85; margin-top:6px; }
+  .pay-summary-actions { display:flex; gap:8px; margin-top:12px; }
+  .pay-summary-btn { flex:1; padding:10px; background:#fff; color:#059669; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .pay-summary-btn:hover { transform:translateY(-1px); box-shadow:0 4px 8px rgba(0,0,0,.15); }
+  .pay-summary-btn.outline { background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.5); }
+
+  .pay-tabs { display:flex; background:#fff; border-bottom:1px solid var(--border); padding:0 12px; flex-shrink:0; }
+  .pay-tab { flex:1; text-align:center; padding:11px 4px; font-size:12px; font-weight:600; color:#666; cursor:pointer; position:relative; transition:color .15s; }
+  .pay-tab.active { color:#059669; }
+  .pay-tab.active::after { content:''; position:absolute; bottom:0; left:25%; right:25%; height:2px; background:#059669; border-radius:2px 2px 0 0; }
+  .pay-tab .count { font-size:10px; background:#fee; color:#991b1b; padding:1px 6px; border-radius:999px; margin-left:3px; font-weight:700; }
+  .pay-tab.active .count { background:#d1fae5; color:#065f46; }
+
+  .pay-list { flex:1; overflow-y:auto; padding:12px; background:var(--bg); }
+
+  .pay-card { background:#fff; border-radius:12px; padding:14px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,.04); border:1px solid var(--border); }
+  .pay-card.unpaid { border-left:3px solid var(--warn); }
+  .pay-card.paid { border-left:3px solid #10b981; }
+  .pay-card.rejected { border-left:3px solid var(--brand-red); }
+
+  .pay-card-row1 { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+  .pay-card-month { font-size:15px; font-weight:700; color:var(--text); }
+  .pay-card-amount { font-size:18px; font-weight:700; font-family:'Inter',sans-serif; }
+  .pay-card-amount.unpaid { color:var(--warn); }
+  .pay-card-amount.paid { color:#10b981; }
+
+  .pay-card-meta { font-size:11px; color:#666; line-height:1.6; }
+  .pay-card-meta b { color:var(--text); font-family:'Inter',sans-serif; }
+
+  .pay-status-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:10px; font-weight:600; margin-top:6px; }
+  .pay-status-pending { background:#fef3c7; color:#92400e; }
+  .pay-status-paid { background:#d1fae5; color:#065f46; }
+  .pay-status-rejected { background:#fee2e2; color:#991b1b; }
+
+  .pay-card-actions { margin-top:10px; display:flex; gap:8px; }
+  .pay-card-btn { flex:1; padding:9px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .pay-card-btn.primary { background:#10b981; color:#fff; }
+  .pay-card-btn.primary:hover { background:#059669; }
+  .pay-card-btn.outline { background:#f3f4f6; color:#374151; }
+
+  .pay-empty { text-align:center; padding:40px 20px; color:#9ca3af; }
+  .pay-empty-icon { font-size:48px; margin-bottom:10px; opacity:.4; }
+  .pay-empty-text { font-size:13px; }
+
+  /* ✨ AI OCR Modal */
+  .ocr-upload-box { border:2px dashed var(--border); border-radius:12px; padding:24px 16px; text-align:center; cursor:pointer; transition:all .2s; background:#fafafa; }
+  .ocr-upload-box:hover { border-color:#10b981; background:#f0fdf4; }
+  .ocr-upload-box.has-file { padding:12px; border-style:solid; border-color:#10b981; background:#f0fdf4; }
+  .ocr-upload-icon { font-size:36px; margin-bottom:8px; }
+  .ocr-upload-text { font-size:12px; color:#666; font-weight:600; }
+  .ocr-upload-hint { font-size:10px; color:#9ca3af; margin-top:4px; }
+  .ocr-preview { display:flex; gap:10px; align-items:center; text-align:left; }
+  .ocr-preview-img { width:48px; height:48px; border-radius:8px; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+  .ocr-preview-meta { flex:1; min-width:0; }
+  .ocr-preview-name { font-size:12px; font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ocr-preview-size { font-size:10px; color:#9ca3af; font-family:'Inter',sans-serif; margin-top:2px; }
+  .ocr-preview-clear { background:#fee2e2; color:#991b1b; border:none; width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:14px; flex-shrink:0; }
+
+  .ocr-analyzing { display:flex; align-items:center; gap:10px; padding:14px; background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); border-radius:10px; margin-top:10px; animation:pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity:1; }
+    50% { opacity:.6; }
+  }
+  .ocr-spinner { width:18px; height:18px; border:2px solid #93c5fd; border-top-color:#1d4ed8; border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .ocr-analyzing-text { font-size:12px; color:#1e40af; font-weight:600; }
+
+  .ocr-result-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%); color:#fff; font-size:9px; font-weight:700; margin-left:6px; }
+
+  .form-field { margin-bottom:12px; }
+  .form-field-label { display:flex; align-items:center; font-size:11px; font-weight:600; color:#374151; margin-bottom:5px; }
+  .form-field-input { width:100%; padding:9px 11px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; box-sizing:border-box; transition:border-color .15s; }
+  .form-field-input:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
+  .form-field-input.ai-filled { background:linear-gradient(to right, #fef3c7 0%, #fff 50%); }
+  .form-field-input:disabled { background:#f9fafb; color:#9ca3af; }
+
+  .session-checklist { background:#f9fafb; border-radius:8px; padding:10px; margin-bottom:12px; max-height:140px; overflow-y:auto; }
+  .session-checklist-title { font-size:11px; color:#666; margin-bottom:6px; font-weight:600; }
+  .session-check-item { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:12px; }
+  .session-check-item input[type="checkbox"] { width:16px; height:16px; accent-color:#10b981; cursor:pointer; }
+  .session-check-item label { flex:1; cursor:pointer; }
+  .session-check-fee { font-family:'Inter',sans-serif; font-weight:600; color:#10b981; font-size:12px; }
+
+  /* ==== 📍 報到打卡 Modal ==== */
+  .checkin-status { padding:14px; border-radius:12px; margin-bottom:14px; text-align:center; }
+  .checkin-status.checking { background:#eff6ff; color:#1e40af; }
+  .checkin-status.ok { background:#d1fae5; color:#065f46; }
+  .checkin-status.far { background:#fee2e2; color:#991b1b; }
+  .checkin-status-icon { font-size:32px; margin-bottom:6px; }
+  .checkin-status-text { font-size:13px; font-weight:600; margin-bottom:3px; }
+  .checkin-status-meta { font-size:11px; opacity:.85; font-family:'Inter',sans-serif; }
+
+  .checkin-info-row { display:flex; justify-content:space-between; padding:7px 0; font-size:12px; border-bottom:1px solid #f3f4f6; }
+  .checkin-info-row:last-child { border-bottom:none; }
+  .checkin-info-row span:first-child { color:#666; }
+  .checkin-info-row b { color:var(--text); font-weight:600; }
+
+  /* 卡片上的「報到打卡」按鈕 */
+  .checkin-btn-row { display:flex; gap:6px; margin-top:8px; }
+  .checkin-btn { flex:1; padding:8px; background:#dbeafe; color:#1e40af; border:none; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .checkin-btn:hover { background:#bfdbfe; }
+  .checkin-btn.done { background:#d1fae5; color:#065f46; cursor:default; }
+  .checkin-btn.miss { background:#fee2e2; color:#991b1b; cursor:default; }
+  .checkin-btn.future { background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
+
+  /* ==== 🔔 通知中心 Modal ==== */
+  .modal-overlay.full { align-items:flex-start; }
+  .modal.notif-modal { width:100%; max-width:none; height:100vh; border-radius:0; padding:0; display:flex; flex-direction:column; }
+
+  .notif-header { background:#fff; padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+  .notif-header-title { font-size:16px; font-weight:700; color:var(--text); }
+  .notif-header-actions { display:flex; gap:8px; align-items:center; }
+  .notif-mark-all { background:none; border:none; color:#3b82f6; font-size:11px; font-weight:600; cursor:pointer; padding:4px 8px; }
+  .notif-close { background:#f3f4f6; border:none; width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:14px; color:#666; }
+
+  .notif-list { flex:1; overflow-y:auto; background:var(--bg); padding:8px; }
+
+  .notif-item { background:#fff; border-radius:10px; padding:12px; margin-bottom:6px; display:flex; gap:10px; cursor:pointer; border:1px solid var(--border); transition:all .15s; position:relative; }
+  .notif-item:hover { box-shadow:0 2px 6px rgba(0,0,0,.06); }
+  .notif-item.unread { border-left:3px solid var(--brand-orange); background:#fff7ed; }
+  .notif-item.unread::after { content:''; position:absolute; top:14px; right:14px; width:8px; height:8px; background:var(--brand-orange); border-radius:50%; }
+
+  .notif-icon { font-size:22px; flex-shrink:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; background:#f3f4f6; border-radius:50%; }
+  .notif-content { flex:1; min-width:0; padding-right:14px; }
+  .notif-title-text { font-size:13px; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .notif-body-text { font-size:11px; color:#666; line-height:1.5; }
+  .notif-time { font-size:10px; color:#9ca3af; font-family:'Inter',sans-serif; margin-top:4px; }
+
+  .notif-empty { text-align:center; padding:60px 20px; color:#9ca3af; }
+  .notif-empty-icon { font-size:48px; margin-bottom:12px; opacity:.4; }
+
 </style>
 
 <!-- 🔌 LINE LIFF SDK -->
@@ -516,7 +672,13 @@
     <div class="cal-header">
       <div class="cal-header-top">
         <div class="cal-header-title" id="calHeaderTitle">您好 Nick Chang</div>
-        <div class="cal-header-credit">⭐ 信用 100</div>
+        <div class="cal-header-actions">
+          <button class="bell-btn" onclick="openNotifications()" title="通知">
+            🔔
+            <span class="bell-badge" id="bellBadgeCal"></span>
+          </button>
+          <div class="cal-header-credit">⭐ 信用 100</div>
+        </div>
       </div>
       <!-- 🆕 車輛下拉選單 -->
       <div class="car-dropdown" id="carDropdown">
@@ -555,12 +717,15 @@
     <!-- 🖥 桌面版專用：右側「我的登記」摘要 sidebar -->
     <div class="desktop-sidebar" id="desktopSidebar" style="display:none;"></div>
 
-    <div class="bottom-nav">
+    <div class="bottom-nav nav-4">
       <div class="nav-item active" onclick="switchScreen('calendar')">
         <div class="nav-icon">📅</div><div class="nav-label">場次</div>
       </div>
       <div class="nav-item" onclick="switchScreen('my')">
         <div class="nav-icon">📋</div><div class="nav-label">我的登記</div>
+      </div>
+      <div class="nav-item" onclick="switchScreen('payment')">
+        <div class="nav-icon">💰</div><div class="nav-label">對帳</div>
       </div>
       <div class="nav-item" onclick="switchScreen('account')">
         <div class="nav-icon">👤</div><div class="nav-label">帳號</div>
@@ -573,7 +738,13 @@
     <div class="cal-header" style="padding-bottom:16px;">
       <div class="cal-header-top">
         <div class="cal-header-title">我的登記紀錄</div>
-        <div class="cal-header-credit">⭐ 信用 100</div>
+        <div class="cal-header-actions">
+          <button class="bell-btn" onclick="openNotifications()" title="通知">
+            🔔
+            <span class="bell-badge" id="bellBadgeMy"></span>
+          </button>
+          <div class="cal-header-credit">⭐ 信用 100</div>
+        </div>
       </div>
     </div>
     <div class="my-tabs">
@@ -582,9 +753,10 @@
       <div class="my-tab" onclick="switchMyTab('history', this)">歷史</div>
     </div>
     <div class="my-list" id="myList"></div>
-    <div class="bottom-nav">
+    <div class="bottom-nav nav-4">
       <div class="nav-item" onclick="switchScreen('calendar')"><div class="nav-icon">📅</div><div class="nav-label">場次</div></div>
       <div class="nav-item active" onclick="switchScreen('my')"><div class="nav-icon">📋</div><div class="nav-label">我的登記</div></div>
+      <div class="nav-item" onclick="switchScreen('payment')"><div class="nav-icon">💰</div><div class="nav-label">對帳</div></div>
       <div class="nav-item" onclick="switchScreen('account')"><div class="nav-icon">👤</div><div class="nav-label">帳號</div></div>
     </div>
   </div>
@@ -667,10 +839,93 @@
 
     </div>
 
-    <div class="bottom-nav">
+    <div class="bottom-nav nav-4">
       <div class="nav-item" onclick="switchScreen('calendar')"><div class="nav-icon">📅</div><div class="nav-label">場次</div></div>
       <div class="nav-item" onclick="switchScreen('my')"><div class="nav-icon">📋</div><div class="nav-label">我的登記</div></div>
+      <div class="nav-item" onclick="switchScreen('payment')"><div class="nav-icon">💰</div><div class="nav-label">對帳</div></div>
       <div class="nav-item active" onclick="switchScreen('account')"><div class="nav-icon">👤</div><div class="nav-label">帳號</div></div>
+    </div>
+  </div>
+
+  <!-- 🆕 對帳 / 繳費 -->
+  <div class="screen" id="screen-payment">
+    <div class="pay-header">
+      <div class="pay-header-top">
+        <div class="pay-header-title">💰 對帳中心</div>
+        <div class="pay-month-badge" id="payCurrentMonth">2026/06</div>
+      </div>
+      <div class="pay-summary-card" id="paySummaryCard">
+        <div class="pay-summary-label">本月應繳場地費</div>
+        <div class="pay-summary-amount" id="paySummaryAmount">NT$ 0</div>
+        <div class="pay-summary-meta" id="paySummaryMeta">尚無未繳場次</div>
+        <div class="pay-summary-actions">
+          <button class="pay-summary-btn" id="payBtnPay" onclick="openPayModal()">我要繳費</button>
+          <button class="pay-summary-btn outline" onclick="showFeeRules()">查看費率</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pay-tabs">
+      <div class="pay-tab active" onclick="switchPayTab('unpaid', this)">未繳 <span class="count" id="payCountUnpaid">0</span></div>
+      <div class="pay-tab" onclick="switchPayTab('paid', this)">已繳 <span class="count" id="payCountPaid">0</span></div>
+      <div class="pay-tab" onclick="switchPayTab('all', this)">全部</div>
+    </div>
+
+    <div class="pay-list" id="payList">
+      <!-- renderPayList() 渲染 -->
+    </div>
+
+    <div class="bottom-nav nav-4">
+      <div class="nav-item" onclick="switchScreen('calendar')"><div class="nav-icon">📅</div><div class="nav-label">場次</div></div>
+      <div class="nav-item" onclick="switchScreen('my')"><div class="nav-icon">📋</div><div class="nav-label">我的登記</div></div>
+      <div class="nav-item active" onclick="switchScreen('payment')"><div class="nav-icon">💰</div><div class="nav-label">對帳</div></div>
+      <div class="nav-item" onclick="switchScreen('account')"><div class="nav-icon">👤</div><div class="nav-label">帳號</div></div>
+    </div>
+  </div>
+
+  <!-- 🔔 通知中心 Modal -->
+  <div class="modal-overlay full" id="notifModal" onclick="if(event.target === this) closeNotifications()">
+    <div class="modal notif-modal">
+      <div class="notif-header">
+        <div class="notif-header-title">🔔 通知中心</div>
+        <div class="notif-header-actions">
+          <button class="notif-mark-all" onclick="markAllNotifRead()">全部已讀</button>
+          <button class="notif-close" onclick="closeNotifications()">✕</button>
+        </div>
+      </div>
+      <div class="notif-list" id="notifList">
+        <!-- renderNotifList() 渲染 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 📍 報到打卡 Modal -->
+  <div class="modal-overlay" id="checkinModal" onclick="if(event.target === this) closeCheckinModal()">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">📍 場地報到打卡</div>
+      <div id="checkinBody">
+        <!-- 動態渲染 -->
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeCheckinModal()">取消</button>
+        <button class="modal-btn confirm" id="checkinConfirmBtn" onclick="doCheckin()" disabled style="opacity:.5;cursor:not-allowed;">確認打卡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💸 繳費 Modal -->
+  <div class="modal-overlay" id="payModal" onclick="if(event.target === this) closePayModal()">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">💸 上傳繳費紀錄</div>
+      <div id="payModalBody">
+        <!-- 動態渲染 -->
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closePayModal()">取消</button>
+        <button class="modal-btn confirm" id="paySubmitBtn" onclick="submitPayment()" disabled style="opacity:.5;cursor:not-allowed; background:#10b981;">送出對帳</button>
+      </div>
     </div>
   </div>
 
@@ -887,6 +1142,26 @@
     }
   };
 
+  // 🆕 Plan B — 場地費率（每場 NT$）
+  const VENUE_FEES = {
+    '南港餐車市集':  { AM: 300, PM: 300 },
+    '央北中山小熊':  { AM: 250, PM: 250 },
+    '三峽老街':      { AM: 200, PM: 200 },
+    '新店夜市':      { PM: 400 },
+    '蘆洲廟口':      { ALL: 350 }
+  };
+
+  // 🆕 Plan B — 場地 GPS 座標（用於報到打卡距離驗證）
+  const VENUE_GPS = {
+    '南港餐車市集':  { lat: 25.054, lng: 121.601 },
+    '央北中山小熊':  { lat: 25.013, lng: 121.529 },
+    '三峽老街':      { lat: 24.934, lng: 121.371 },
+    '新店夜市':      { lat: 24.978, lng: 121.541 },
+    '蘆洲廟口':      { lat: 25.084, lng: 121.470 }
+  };
+
+  const CHECKIN_RADIUS_M = 500;  // 半徑 500 公尺內視為到場
+
   // helper：取得場地時段顯示名稱
   function getSlotLabel(venue, slot) {
     return (VENUE_CONFIG[venue] && VENUE_CONFIG[venue].labels[slot]) || slot;
@@ -1019,6 +1294,137 @@
     ];
   }
 
+  // 🆕 Plan B — 報到打卡紀錄（key: sessionKey, value: { checkedAt, lat, lng })
+  let CHECKINS = {};
+
+  function initCheckins() {
+    // demo：5/15 那場已經補打卡完成
+    CHECKINS = {
+      '南港餐車市集|2026-05-15|AM': { checkedAt: '5/15 10:08', distance: 120 }
+    };
+  }
+
+  // 🆕 Plan B — 繳費紀錄
+  // 每筆：{ id, month, amount, status, paidAt, method, last5, screenshot, sessions[], note, approvedAt, rejectReason }
+  // status: 'pending' | 'paid' | 'rejected'
+  let PAYMENTS = [];
+  let _payCounter = 0;
+  const makePayId = () => 'PAY_' + String(++_payCounter).padStart(3, '0');
+
+  function initPayments() {
+    _payCounter = 0;
+    PAYMENTS = [
+      {
+        id: makePayId(),
+        month: '2026-04',
+        amount: 1200,
+        status: 'paid',
+        paidAt: '5/3 14:23',
+        approvedAt: '5/3 19:42',
+        method: '銀行匯款',
+        last5: '12345',
+        sessions: ['三峽老街|2026-04-05|PM', '三峽老街|2026-04-12|PM', '南港餐車市集|2026-04-19|AM', '南港餐車市集|2026-04-26|AM'],
+        note: '4 月場地費 4 場'
+      },
+      {
+        id: makePayId(),
+        month: '2026-05',
+        amount: 500,
+        status: 'pending',
+        paidAt: '6/2 16:48',
+        method: '銀行匯款',
+        last5: '67890',
+        sessions: ['三峽老街|2026-05-03|PM', '南港餐車市集|2026-05-15|AM'],
+        note: '5 月場地費 2 場（等業主確認）'
+      }
+    ];
+  }
+
+  // 🆕 Plan B — 通知中心
+  // 每筆：{ id, type, icon, title, body, time, timestamp, read, action }
+  let NOTIFICATIONS = [];
+  let _notifCounter = 0;
+  const makeNotifId = () => 'N_' + String(++_notifCounter).padStart(3, '0');
+
+  function initNotifications() {
+    _notifCounter = 0;
+    NOTIFICATIONS = [
+      {
+        id: makeNotifId(),
+        type: 'promotion',
+        icon: '🎉',
+        title: '候補已遞補上！',
+        body: '您 6/24 央北中山小熊 午場的候補已遞補，請於 30 分鐘內到「我的登記」確認',
+        time: '3 分鐘前',
+        timestamp: Date.now() - 3 * 60 * 1000,
+        read: false,
+        action: { screen: 'my', tab: 'confirmed' }
+      },
+      {
+        id: makeNotifId(),
+        type: 'payment_reminder',
+        icon: '💰',
+        title: '5 月場地費已收到',
+        body: '您 6/2 匯款 NT$ 500（後五碼 67890）已收到，業主審核中，預計 1 個工作天內完成核銷',
+        time: '2 小時前',
+        timestamp: Date.now() - 2 * 60 * 60 * 1000,
+        read: false,
+        action: { screen: 'payment' }
+      },
+      {
+        id: makeNotifId(),
+        type: 'announcement',
+        icon: '📢',
+        title: '7 月排班登記開放',
+        body: 'Kevin 哥：7 月排班 6/28 開放登記，請各位老闆把握時間。新增「線上對帳」功能，匯款後可上傳截圖。',
+        time: '今天 09:15',
+        timestamp: Date.now() - 5 * 60 * 60 * 1000,
+        read: false,
+        action: null
+      },
+      {
+        id: makeNotifId(),
+        type: 'review_approved',
+        icon: '✅',
+        title: '修改申請已通過',
+        body: '您申請修改「黑熊烤玉米」的食物類型為「日式」已通過審核',
+        time: '昨天 18:32',
+        timestamp: Date.now() - 24 * 60 * 60 * 1000,
+        read: true,
+        action: { screen: 'account' }
+      },
+      {
+        id: makeNotifId(),
+        type: 'checkin_reminder',
+        icon: '📍',
+        title: '別忘了報到打卡',
+        body: '您今天 6/20 在南港餐車市集 晚場有場次，到場後記得在 LIFF 點「📍 報到打卡」，避免缺席扣分',
+        time: '今天 08:00',
+        timestamp: Date.now() - 8 * 60 * 60 * 1000,
+        read: true,
+        action: { screen: 'my' }
+      }
+    ];
+  }
+
+  // 計算未讀通知數
+  function unreadNotifCount() {
+    return NOTIFICATIONS.filter(n => !n.read).length;
+  }
+
+  // 更新所有鈴鐺紅點
+  function refreshBellBadges() {
+    const count = unreadNotifCount();
+    const text = count > 99 ? '99+' : (count > 0 ? String(count) : '');
+    ['bellBadgeCal', 'bellBadgeMy'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = text;
+        el.classList.toggle('zero', count === 0);
+      }
+    });
+  }
+
   let STATE = {
     currentScreen: 'calendar',
     currentMonth: '2026-06',
@@ -1037,7 +1443,660 @@
     STATE.currentScreen = id;
     if (id === 'calendar') renderCalendar();
     if (id === 'my') renderMyList();
+    if (id === 'payment') renderPayment();
   }
+
+  // ============================================================
+  // 🆕 Plan B 功能 ① 對帳 / 繳費
+  // ============================================================
+  let _payTab = 'unpaid';
+  let _payModalState = {
+    selectedSessions: [],   // 勾選要繳費的場次 sessionKey
+    screenshot: null,        // File object
+    ocrDone: false,
+    amount: null,
+    last5: '',
+    paidDate: ''
+  };
+
+  // 計算指定月份「我應繳」的場次（已 completed 但還沒繳費的）
+  function calcUnpaidSessions(yyyymm) {
+    // 取得已經繳過的 sessionKeys
+    const paidKeys = new Set();
+    PAYMENTS.forEach(p => {
+      if (p.status === 'paid' || p.status === 'pending') {
+        (p.sessions || []).forEach(k => paidKeys.add(k));
+      }
+    });
+    // 找出當月所有 completed/confirmed 場次
+    return MY_REGISTRATIONS.filter(r => {
+      if (r.status !== 'completed' && r.status !== 'confirmed') return false;
+      if (paidKeys.has(r.sessionKey)) return false;
+      const [venue, date] = r.sessionKey.split('|');
+      return date.startsWith(yyyymm);
+    });
+  }
+
+  function getSessionFee(sessionKey) {
+    const [venue, , slot] = sessionKey.split('|');
+    const fees = VENUE_FEES[venue];
+    if (!fees) return 0;
+    return fees[slot] || 0;
+  }
+
+  // 渲染對帳頁
+  function renderPayment() {
+    // 本月應繳卡
+    const currentMonth = '2026-06';
+    document.getElementById('payCurrentMonth').textContent = '2026/' + currentMonth.split('-')[1];
+    const unpaidSessions = calcUnpaidSessions(currentMonth);
+    const total = unpaidSessions.reduce((sum, r) => sum + getSessionFee(r.sessionKey), 0);
+    document.getElementById('paySummaryAmount').textContent = `NT$ ${total.toLocaleString()}`;
+    if (unpaidSessions.length > 0) {
+      document.getElementById('paySummaryMeta').textContent = `共 ${unpaidSessions.length} 場待繳`;
+      document.getElementById('payBtnPay').style.display = '';
+    } else {
+      document.getElementById('paySummaryMeta').textContent = '本月暫無待繳場次 ✨';
+      document.getElementById('payBtnPay').style.display = 'none';
+    }
+
+    // 計算 tab 數量
+    const unpaidCount = PAYMENTS.filter(p => p.status === 'pending').length + (unpaidSessions.length > 0 ? 1 : 0);
+    const paidCount = PAYMENTS.filter(p => p.status === 'paid').length;
+    document.getElementById('payCountUnpaid').textContent = unpaidCount;
+    document.getElementById('payCountPaid').textContent = paidCount;
+
+    renderPayList();
+  }
+
+  function switchPayTab(tab, el) {
+    _payTab = tab;
+    document.querySelectorAll('.pay-tab').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    renderPayList();
+  }
+
+  function renderPayList() {
+    const wrap = document.getElementById('payList');
+    let items = [];
+
+    // 「本月應繳」當作虛擬卡放在最上面（如果有未繳場次）
+    const currentMonth = '2026-06';
+    const unpaidSessions = calcUnpaidSessions(currentMonth);
+    if (unpaidSessions.length > 0 && (_payTab === 'unpaid' || _payTab === 'all')) {
+      const total = unpaidSessions.reduce((sum, r) => sum + getSessionFee(r.sessionKey), 0);
+      items.push({
+        virtual: true,
+        month: currentMonth,
+        amount: total,
+        sessionCount: unpaidSessions.length,
+        status: 'unpaid'
+      });
+    }
+
+    // 加入實際 PAYMENTS
+    let filtered = PAYMENTS.slice();
+    if (_payTab === 'unpaid') filtered = filtered.filter(p => p.status === 'pending');
+    else if (_payTab === 'paid') filtered = filtered.filter(p => p.status === 'paid');
+    items = items.concat(filtered.sort((a, b) => (b.month || '').localeCompare(a.month || '')));
+
+    if (items.length === 0) {
+      wrap.innerHTML = `
+        <div class="pay-empty">
+          <div class="pay-empty-icon">📭</div>
+          <div class="pay-empty-text">${_payTab === 'paid' ? '尚無已繳紀錄' : _payTab === 'unpaid' ? '太棒了！沒有待繳款項 🎉' : '尚無對帳紀錄'}</div>
+        </div>`;
+      return;
+    }
+
+    let html = '';
+    items.forEach(it => {
+      if (it.virtual) {
+        const [y, m] = it.month.split('-');
+        html += `
+          <div class="pay-card unpaid">
+            <div class="pay-card-row1">
+              <div>
+                <div class="pay-card-month">${y}/${m} 場地費</div>
+                <div class="pay-card-meta">共 <b>${it.sessionCount}</b> 場待繳</div>
+              </div>
+              <div class="pay-card-amount unpaid">NT$ ${it.amount.toLocaleString()}</div>
+            </div>
+            <span class="pay-status-badge pay-status-pending">⏳ 尚未上傳匯款</span>
+            <div class="pay-card-actions">
+              <button class="pay-card-btn primary" onclick="openPayModal()">📤 上傳匯款</button>
+              <button class="pay-card-btn outline" onclick="showPayDetail('virtual','${it.month}')">查看明細</button>
+            </div>
+          </div>`;
+      } else {
+        const [y, m] = (it.month || '').split('-');
+        const statusBadge = it.status === 'paid' ?
+          `<span class="pay-status-badge pay-status-paid">✓ 已核銷 · ${it.approvedAt || ''}</span>` :
+          it.status === 'pending' ?
+          `<span class="pay-status-badge pay-status-pending">⏳ 業主審核中</span>` :
+          `<span class="pay-status-badge pay-status-rejected">✗ 已退回</span>`;
+        const cls = it.status === 'paid' ? 'paid' : it.status === 'pending' ? 'unpaid' : 'rejected';
+        const amtCls = it.status === 'paid' ? 'paid' : 'unpaid';
+        html += `
+          <div class="pay-card ${cls}">
+            <div class="pay-card-row1">
+              <div>
+                <div class="pay-card-month">${y}/${m} 場地費</div>
+                <div class="pay-card-meta">${it.note || ''}</div>
+              </div>
+              <div class="pay-card-amount ${amtCls}">NT$ ${(it.amount||0).toLocaleString()}</div>
+            </div>
+            <div class="pay-card-meta">
+              繳款日：<b>${it.paidAt || '-'}</b> · 後五碼：<b>${it.last5 || '-'}</b>
+            </div>
+            ${statusBadge}
+            <div class="pay-card-actions">
+              <button class="pay-card-btn outline" onclick="showPayDetail('${it.id}')">查看明細</button>
+            </div>
+          </div>`;
+      }
+    });
+    wrap.innerHTML = html;
+  }
+
+  function showFeeRules() {
+    const rows = Object.keys(VENUE_FEES).map(v => {
+      const fees = VENUE_FEES[v];
+      const lines = Object.keys(fees).map(slot => `${getSlotLabel(v, slot)} NT$ ${fees[slot]}`).join(' · ');
+      return `<div style="padding:8px 0; border-bottom:1px solid #f3f4f6; font-size:13px;">
+        <b>${v}</b><br>
+        <span style="font-size:11px; color:#666;">${lines}</span>
+      </div>`;
+    }).join('');
+    document.getElementById('modalTitle').textContent = '💰 場地費率表';
+    document.getElementById('modalBody').innerHTML = `
+      <div style="font-size:12px; color:#666; margin-bottom:10px;">每場次費用如下，月底結算</div>
+      ${rows}
+      <div style="margin-top:12px; padding:10px; background:#fef3c7; border-radius:8px; font-size:11px; color:#92400e;">
+        💡 提醒：每月 5 日前繳清上月場地費，逾期將影響下月排班優先順位
+      </div>`;
+    document.getElementById('modalConfirmBtn').textContent = '我知道了';
+    document.getElementById('modalConfirmBtn').onclick = closeModal;
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function showPayDetail(id, month) {
+    let pay;
+    let sessions = [];
+    if (id === 'virtual') {
+      sessions = calcUnpaidSessions(month);
+    } else {
+      pay = PAYMENTS.find(p => p.id === id);
+      if (!pay) return;
+      sessions = (pay.sessions || []).map(k => ({ sessionKey: k }));
+    }
+
+    const rows = sessions.map(r => {
+      const [venue, date, slot] = r.sessionKey.split('|');
+      const fee = getSessionFee(r.sessionKey);
+      const [, mm, dd] = date.split('-');
+      return `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f3f4f6; font-size:12px;">
+        <span>${parseInt(mm)}/${parseInt(dd)} ${venue} ${getSlotLabel(venue, slot)}</span>
+        <b style="font-family:'Inter',sans-serif; color:#10b981;">NT$ ${fee}</b>
+      </div>`;
+    }).join('');
+    const total = sessions.reduce((s, r) => s + getSessionFee(r.sessionKey), 0);
+
+    document.getElementById('modalTitle').textContent = `📋 對帳明細`;
+    document.getElementById('modalBody').innerHTML = `
+      <div style="font-size:12px; color:#666; margin-bottom:8px;">包含以下 ${sessions.length} 場次</div>
+      ${rows}
+      <div style="display:flex; justify-content:space-between; padding:10px 0 2px; font-size:14px; font-weight:700;">
+        <span>應繳總計</span>
+        <span style="font-family:'Inter',sans-serif; color:#059669;">NT$ ${total.toLocaleString()}</span>
+      </div>
+      ${pay && pay.status === 'paid' ? `<div style="margin-top:8px; padding:8px; background:#d1fae5; border-radius:6px; font-size:11px; color:#065f46;">✓ 業主已於 ${pay.approvedAt} 核銷此筆</div>` : ''}`;
+    document.getElementById('modalConfirmBtn').textContent = '關閉';
+    document.getElementById('modalConfirmBtn').onclick = closeModal;
+    document.getElementById('modal').classList.add('active');
+  }
+
+  // ──── 繳費 Modal ────
+  function openPayModal() {
+    const currentMonth = '2026-06';
+    const unpaidSessions = calcUnpaidSessions(currentMonth);
+    if (unpaidSessions.length === 0) {
+      showToast('本月暫無待繳場次', 'success');
+      return;
+    }
+
+    // 預設全部勾選
+    _payModalState = {
+      selectedSessions: unpaidSessions.map(r => r.sessionKey),
+      screenshot: null,
+      ocrDone: false,
+      amount: null,
+      last5: '',
+      paidDate: ''
+    };
+
+    renderPayModalBody();
+    document.getElementById('payModal').classList.add('active');
+    updatePaySubmitBtn();
+  }
+
+  function renderPayModalBody() {
+    const currentMonth = '2026-06';
+    const unpaidSessions = calcUnpaidSessions(currentMonth);
+    const total = unpaidSessions.filter(r => _payModalState.selectedSessions.includes(r.sessionKey))
+      .reduce((s, r) => s + getSessionFee(r.sessionKey), 0);
+
+    const sessionList = unpaidSessions.map(r => {
+      const [venue, date, slot] = r.sessionKey.split('|');
+      const fee = getSessionFee(r.sessionKey);
+      const [, mm, dd] = date.split('-');
+      const checked = _payModalState.selectedSessions.includes(r.sessionKey);
+      return `<div class="session-check-item">
+        <input type="checkbox" id="ck_${r.id}" ${checked?'checked':''} onchange="togglePaySession('${r.sessionKey}', this.checked)">
+        <label for="ck_${r.id}">${parseInt(mm)}/${parseInt(dd)} ${venue} ${getSlotLabel(venue, slot)}</label>
+        <span class="session-check-fee">NT$ ${fee}</span>
+      </div>`;
+    }).join('');
+
+    const aiFilledClass = _payModalState.ocrDone ? 'ai-filled' : '';
+    const aiBadge = _payModalState.ocrDone ? '<span class="ocr-result-badge">✨ AI 自動填寫</span>' : '';
+
+    document.getElementById('payModalBody').innerHTML = `
+      <div class="session-checklist">
+        <div class="session-checklist-title">勾選要一起繳費的場次</div>
+        ${sessionList}
+        <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px solid #e5e7eb; font-size:13px; font-weight:700; margin-top:6px;">
+          <span>應繳總計</span>
+          <span style="font-family:'Inter',sans-serif; color:#10b981;" id="payModalTotal">NT$ ${total.toLocaleString()}</span>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <div class="form-field-label">📷 上傳匯款截圖</div>
+        <div class="ocr-upload-box ${_payModalState.screenshot ? 'has-file' : ''}" onclick="document.getElementById('payFileInput').click()">
+          ${_payModalState.screenshot ? `
+            <div class="ocr-preview">
+              <div class="ocr-preview-img">🖼️</div>
+              <div class="ocr-preview-meta">
+                <div class="ocr-preview-name">${_payModalState.screenshot.name}</div>
+                <div class="ocr-preview-size">${(_payModalState.screenshot.size/1024).toFixed(1)} KB</div>
+              </div>
+              <button class="ocr-preview-clear" onclick="event.stopPropagation(); clearPayScreenshot();">✕</button>
+            </div>
+          ` : `
+            <div class="ocr-upload-icon">📸</div>
+            <div class="ocr-upload-text">點擊上傳匯款截圖</div>
+            <div class="ocr-upload-hint">支援 JPG / PNG · AI 自動辨識金額、後五碼</div>
+          `}
+        </div>
+        <input type="file" id="payFileInput" accept="image/*" style="display:none;" onchange="handlePayScreenshot(this.files[0])">
+      </div>
+
+      <div id="ocrAnalyzingArea"></div>
+
+      <div class="form-field">
+        <div class="form-field-label">
+          💰 匯款金額 (NT$) ${aiBadge}
+        </div>
+        <input type="number" class="form-field-input ${aiFilledClass}" id="payAmount" value="${_payModalState.amount || ''}" placeholder="${total}" oninput="_payModalState.amount=parseInt(this.value)||null; updatePaySubmitBtn();">
+      </div>
+
+      <div class="form-field">
+        <div class="form-field-label">
+          🔢 帳號後五碼 ${aiBadge}
+        </div>
+        <input type="text" class="form-field-input ${aiFilledClass}" id="payLast5" value="${_payModalState.last5}" maxlength="5" placeholder="例：12345" oninput="_payModalState.last5=this.value; updatePaySubmitBtn();">
+      </div>
+
+      <div class="form-field">
+        <div class="form-field-label">
+          📅 匯款日期 ${aiBadge}
+        </div>
+        <input type="date" class="form-field-input ${aiFilledClass}" id="payDate" value="${_payModalState.paidDate || '2026-06-03'}" oninput="_payModalState.paidDate=this.value; updatePaySubmitBtn();">
+      </div>
+
+      <div style="background:#fef3c7; border-radius:8px; padding:10px; font-size:11px; color:#92400e; line-height:1.5;">
+        💡 送出後業主將於 1 ~ 3 個工作天內審核，審核結果會推播通知您
+      </div>
+    `;
+  }
+
+  function togglePaySession(key, checked) {
+    if (checked) {
+      if (!_payModalState.selectedSessions.includes(key)) _payModalState.selectedSessions.push(key);
+    } else {
+      _payModalState.selectedSessions = _payModalState.selectedSessions.filter(k => k !== key);
+    }
+    // 更新總額
+    const total = _payModalState.selectedSessions.reduce((s, k) => s + getSessionFee(k), 0);
+    const totalEl = document.getElementById('payModalTotal');
+    if (totalEl) totalEl.textContent = `NT$ ${total.toLocaleString()}`;
+    const amtEl = document.getElementById('payAmount');
+    if (amtEl) amtEl.placeholder = total;
+    updatePaySubmitBtn();
+  }
+
+  function handlePayScreenshot(file) {
+    if (!file) return;
+    _payModalState.screenshot = file;
+    _payModalState.ocrDone = false;
+    renderPayModalBody();
+    runAiOcr();
+  }
+
+  function clearPayScreenshot() {
+    _payModalState.screenshot = null;
+    _payModalState.ocrDone = false;
+    _payModalState.amount = null;
+    _payModalState.last5 = '';
+    renderPayModalBody();
+    updatePaySubmitBtn();
+  }
+
+  // ✨ AI OCR 辨識（demo 用 mock，正式版接 Claude Vision API）
+  function runAiOcr() {
+    const area = document.getElementById('ocrAnalyzingArea');
+    if (!area) return;
+    area.innerHTML = `
+      <div class="ocr-analyzing">
+        <div class="ocr-spinner"></div>
+        <div class="ocr-analyzing-text">✨ AI 辨識中... 正在讀取截圖內容</div>
+      </div>`;
+    // mock 1.5 秒
+    setTimeout(() => {
+      // 根據勾選場次自動填金額
+      const total = _payModalState.selectedSessions.reduce((s, k) => s + getSessionFee(k), 0);
+      _payModalState.amount = total;
+      _payModalState.last5 = String(Math.floor(10000 + Math.random() * 90000));
+      _payModalState.paidDate = new Date().toISOString().split('T')[0];
+      _payModalState.ocrDone = true;
+      area.innerHTML = `
+        <div style="background:#d1fae5; border-radius:8px; padding:10px; font-size:11px; color:#065f46; margin-top:-2px; margin-bottom:10px;">
+          ✅ AI 已自動填寫金額、後五碼、日期，您可手動修正
+        </div>`;
+      renderPayModalBody();
+      // re-render 後 area 會被清掉，要重新插
+      setTimeout(() => {
+        const a2 = document.getElementById('ocrAnalyzingArea');
+        if (a2) a2.innerHTML = `
+          <div style="background:#d1fae5; border-radius:8px; padding:10px; font-size:11px; color:#065f46; margin-top:-2px; margin-bottom:10px;">
+            ✅ AI 已自動辨識完成（demo 模擬，正式版接 Claude Vision API）
+          </div>`;
+      }, 10);
+      updatePaySubmitBtn();
+    }, 1500);
+  }
+
+  function updatePaySubmitBtn() {
+    const btn = document.getElementById('paySubmitBtn');
+    if (!btn) return;
+    const ok = _payModalState.screenshot && _payModalState.amount && _payModalState.last5 && _payModalState.last5.length === 5 && _payModalState.selectedSessions.length > 0;
+    btn.disabled = !ok;
+    btn.style.opacity = ok ? '1' : '.5';
+    btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+  }
+
+  function closePayModal() {
+    document.getElementById('payModal').classList.remove('active');
+  }
+
+  function submitPayment() {
+    const newPay = {
+      id: makePayId(),
+      month: '2026-06',
+      amount: _payModalState.amount,
+      status: 'pending',
+      paidAt: formatNow(),
+      method: '銀行匯款',
+      last5: _payModalState.last5,
+      screenshot: _payModalState.screenshot ? _payModalState.screenshot.name : null,
+      sessions: _payModalState.selectedSessions.slice(),
+      note: `6 月場地費 ${_payModalState.selectedSessions.length} 場（等業主確認）`
+    };
+    PAYMENTS.push(newPay);
+
+    // 推一筆通知
+    NOTIFICATIONS.unshift({
+      id: makeNotifId(),
+      type: 'payment_reminder',
+      icon: '💰',
+      title: '匯款資料已送出',
+      body: `您匯款 NT$ ${newPay.amount}（後五碼 ${newPay.last5}）已送出，業主審核中`,
+      time: '剛剛',
+      timestamp: Date.now(),
+      read: false,
+      action: { screen: 'payment' }
+    });
+
+    closePayModal();
+    showToast('✅ 已送出對帳，業主審核中', 'success');
+    refreshBellBadges();
+    renderPayment();
+  }
+
+  // ============================================================
+  // 🆕 Plan B 功能 ② GPS 報到打卡
+  // ============================================================
+  let _checkinContext = null;  // { regId, sessionKey, currentDistance, currentLat, currentLng, allowed }
+
+  // Haversine 公式 — 計算兩點距離（公尺）
+  function haversineDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const toRad = d => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat/2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLng/2) ** 2;
+    return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  }
+
+  // 從 sessionKey 取得日期 yyyy-mm-dd
+  function isCheckinAvailable(sessionKey) {
+    const [, date] = sessionKey.split('|');
+    return date === TODAY;  // demo 簡化：當天才能打卡
+  }
+
+  function isCheckinExpired(sessionKey) {
+    const [, date] = sessionKey.split('|');
+    return date < TODAY;
+  }
+
+  function openCheckinModal(regId) {
+    const r = MY_REGISTRATIONS.find(x => x.id === regId);
+    if (!r) return;
+    _checkinContext = {
+      regId,
+      sessionKey: r.sessionKey,
+      currentDistance: null,
+      currentLat: null,
+      currentLng: null,
+      allowed: false
+    };
+    const [venue, date, slot] = r.sessionKey.split('|');
+    const [, mm, dd] = date.split('-');
+    document.getElementById('checkinBody').innerHTML = `
+      <div class="checkin-info-row"><span>場地</span><b>${venue}</b></div>
+      <div class="checkin-info-row"><span>場次</span><b>${parseInt(mm)}/${parseInt(dd)} ${getSlotLabel(venue, slot)}</b></div>
+      <div class="checkin-info-row"><span>時間</span><b>${getSlotHours(venue, slot)}</b></div>
+      <div class="checkin-info-row"><span>規則</span><b style="font-size:11px;">需於場地半徑 ${CHECKIN_RADIUS_M} 公尺內</b></div>
+
+      <div class="checkin-status checking" id="checkinStatus">
+        <div class="checkin-status-icon">📡</div>
+        <div class="checkin-status-text">正在取得您的位置...</div>
+        <div class="checkin-status-meta">請允許瀏覽器存取定位</div>
+      </div>
+    `;
+    document.getElementById('checkinConfirmBtn').disabled = true;
+    document.getElementById('checkinConfirmBtn').style.opacity = '.5';
+    document.getElementById('checkinConfirmBtn').style.cursor = 'not-allowed';
+    document.getElementById('checkinModal').classList.add('active');
+    requestLocation();
+  }
+
+  function requestLocation() {
+    if (!navigator.geolocation) {
+      showCheckinError('您的裝置不支援定位功能');
+      return;
+    }
+
+    // demo 模式：直接給場地附近座標（避免每次都要實際允許 GPS）
+    // 正式版會用真實 navigator.geolocation.getCurrentPosition
+    const useDemoGPS = true;
+
+    if (useDemoGPS) {
+      setTimeout(() => {
+        const [venue] = _checkinContext.sessionKey.split('|');
+        const target = VENUE_GPS[venue];
+        if (!target) return showCheckinError('場地座標未設定');
+        // 模擬：80% 機率在場地附近（隨機 50-400m）；20% 機率在 800-1500m
+        const inRange = Math.random() < 0.8;
+        const offset = inRange ? (0.001 + Math.random() * 0.003) : (0.008 + Math.random() * 0.005);
+        const angle = Math.random() * Math.PI * 2;
+        const lat = target.lat + Math.cos(angle) * offset;
+        const lng = target.lng + Math.sin(angle) * offset;
+        evaluateLocation(lat, lng);
+      }, 1200);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      pos => evaluateLocation(pos.coords.latitude, pos.coords.longitude),
+      err => showCheckinError(err.code === 1 ? '您拒絕了定位授權' : '無法取得位置，請稍後再試'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  function evaluateLocation(lat, lng) {
+    const [venue] = _checkinContext.sessionKey.split('|');
+    const target = VENUE_GPS[venue];
+    const dist = haversineDistance(lat, lng, target.lat, target.lng);
+    _checkinContext.currentLat = lat;
+    _checkinContext.currentLng = lng;
+    _checkinContext.currentDistance = dist;
+    _checkinContext.allowed = dist <= CHECKIN_RADIUS_M;
+
+    const statusEl = document.getElementById('checkinStatus');
+    if (!statusEl) return;
+    if (_checkinContext.allowed) {
+      statusEl.className = 'checkin-status ok';
+      statusEl.innerHTML = `
+        <div class="checkin-status-icon">✓</div>
+        <div class="checkin-status-text">已在場地附近，可以打卡</div>
+        <div class="checkin-status-meta">距離場地約 ${dist} 公尺</div>`;
+      const btn = document.getElementById('checkinConfirmBtn');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    } else {
+      statusEl.className = 'checkin-status far';
+      statusEl.innerHTML = `
+        <div class="checkin-status-icon">⚠️</div>
+        <div class="checkin-status-text">您離場地過遠</div>
+        <div class="checkin-status-meta">距離場地約 ${dist} 公尺 (需 ≤ ${CHECKIN_RADIUS_M}m)</div>
+        <div style="margin-top:8px; font-size:11px;">請到場地附近再打卡</div>`;
+    }
+  }
+
+  function showCheckinError(msg) {
+    const statusEl = document.getElementById('checkinStatus');
+    if (!statusEl) return;
+    statusEl.className = 'checkin-status far';
+    statusEl.innerHTML = `
+      <div class="checkin-status-icon">✗</div>
+      <div class="checkin-status-text">${msg}</div>
+      <div class="checkin-status-meta">請檢查定位設定後重試</div>`;
+  }
+
+  function closeCheckinModal() {
+    document.getElementById('checkinModal').classList.remove('active');
+    _checkinContext = null;
+  }
+
+  function doCheckin() {
+    if (!_checkinContext || !_checkinContext.allowed) return;
+    CHECKINS[_checkinContext.sessionKey] = {
+      checkedAt: formatNow(),
+      distance: _checkinContext.currentDistance,
+      lat: _checkinContext.currentLat,
+      lng: _checkinContext.currentLng
+    };
+    // 推一筆通知
+    const [venue, date, slot] = _checkinContext.sessionKey.split('|');
+    NOTIFICATIONS.unshift({
+      id: makeNotifId(),
+      type: 'checkin_reminder',
+      icon: '✓',
+      title: '打卡成功',
+      body: `已記錄 ${venue} ${getSlotLabel(venue, slot)} 報到時間，信用 +0`,
+      time: '剛剛',
+      timestamp: Date.now(),
+      read: false,
+      action: { screen: 'my' }
+    });
+    closeCheckinModal();
+    showToast(`✓ 已成功打卡，距離 ${_checkinContext ? _checkinContext.currentDistance : 0}m`, 'success');
+    refreshBellBadges();
+    renderMyList();
+  }
+
+  // ============================================================
+  // 🆕 Plan B 功能 ③ 通知中心
+  // ============================================================
+  function openNotifications() {
+    renderNotifList();
+    document.getElementById('notifModal').classList.add('active');
+  }
+
+  function closeNotifications() {
+    document.getElementById('notifModal').classList.remove('active');
+  }
+
+  function renderNotifList() {
+    const wrap = document.getElementById('notifList');
+    if (NOTIFICATIONS.length === 0) {
+      wrap.innerHTML = `
+        <div class="notif-empty">
+          <div class="notif-empty-icon">🔕</div>
+          <div>目前沒有通知</div>
+        </div>`;
+      return;
+    }
+    let html = '';
+    NOTIFICATIONS.forEach(n => {
+      html += `
+        <div class="notif-item ${n.read ? '' : 'unread'}" onclick="onNotifClick('${n.id}')">
+          <div class="notif-icon">${n.icon}</div>
+          <div class="notif-content">
+            <div class="notif-title-text">${n.title}</div>
+            <div class="notif-body-text">${n.body}</div>
+            <div class="notif-time">${n.time}</div>
+          </div>
+        </div>`;
+    });
+    wrap.innerHTML = html;
+  }
+
+  function onNotifClick(id) {
+    const n = NOTIFICATIONS.find(x => x.id === id);
+    if (!n) return;
+    n.read = true;
+    refreshBellBadges();
+    if (n.action && n.action.screen) {
+      closeNotifications();
+      switchScreen(n.action.screen);
+    } else {
+      renderNotifList();
+    }
+  }
+
+  function markAllNotifRead() {
+    NOTIFICATIONS.forEach(n => n.read = true);
+    refreshBellBadges();
+    renderNotifList();
+    showToast('已標記為全部已讀', 'success');
+  }
+
 
   // 🆕 車輛下拉選單
   function toggleCarDropdown() {
@@ -1765,6 +2824,19 @@
       const truckLine = `<div style="font-size:11px; color:#666; margin-top:2px;">${truck.emoji} ${truck.name}</div>`;
 
       if (r.status === 'confirmed') {
+        // 🆕 Plan B：報到打卡按鈕狀態判斷
+        let checkinBtnHtml = '';
+        const checkin = CHECKINS[r.sessionKey];
+        if (checkin) {
+          checkinBtnHtml = `<button class="checkin-btn done">✓ 已報到 ${checkin.checkedAt}（${checkin.distance}m）</button>`;
+        } else if (isCheckinExpired(r.sessionKey)) {
+          checkinBtnHtml = `<button class="checkin-btn miss">⚠️ 未報到</button>`;
+        } else if (isCheckinAvailable(r.sessionKey)) {
+          checkinBtnHtml = `<button class="checkin-btn" onclick="openCheckinModal('${r.id}')">📍 報到打卡</button>`;
+        } else {
+          checkinBtnHtml = `<button class="checkin-btn future" disabled>📍 當天才能打卡</button>`;
+        }
+
         html += `
           <div class="session-card registered" style="margin-bottom:8px;">
             <div class="session-row1">
@@ -1779,7 +2851,8 @@
               <span class="session-tag tag-registered">已確認</span>
             </div>
             <div class="session-note">登記時間：${r.registeredAt || '-'}</div>
-            <button onclick="cancelRegistration('${r.id}')" style="margin-top:10px; width:100%; padding:9px; background:#fee2e2; color:#991b1b; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">取消登記</button>
+            <div class="checkin-btn-row">${checkinBtnHtml}</div>
+            <button onclick="cancelRegistration('${r.id}')" style="margin-top:8px; width:100%; padding:9px; background:#fee2e2; color:#991b1b; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">取消登記</button>
           </div>`;
       } else if (r.status === 'waiting') {
         const pct = s.wl ? Math.round((s.wl[0] / s.wl[1]) * 100) : 0;
@@ -2207,6 +3280,11 @@
     TRUCKS.splice(0, TRUCKS.length, ...initialTrucks);
     // 還原我的登記
     initMyRegistrations();
+    // 🆕 Plan B：還原新功能資料
+    initCheckins();
+    initPayments();
+    initNotifications();
+    refreshBellBadges();
     // 還原 STATE
     STATE.currentTruckIdx = 0;
     STATE.currentMonth = '2026-06';
@@ -2317,6 +3395,12 @@
     }
 
     initMyRegistrations();
+    // 🆕 Plan B：初始化新功能資料
+    initCheckins();
+    initPayments();
+    initNotifications();
+    refreshBellBadges();
+
     renderCarMenu();
     renderTruckList();
 
