@@ -429,6 +429,28 @@
   .toast.success { background:var(--line-green); }
   .toast.error { background:var(--danger); }
   .toast.info { background:var(--info); }
+
+  /* 🆕 Emoji Picker */
+  .emoji-picker { background:#f9fafb; border-radius:10px; padding:10px; margin-top:6px; border:1px solid #e5e7eb; }
+  .emoji-cat-tabs { display:flex; gap:4px; margin-bottom:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; }
+  .emoji-cat-tabs::-webkit-scrollbar { height:4px; }
+  .emoji-cat-tabs::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:2px; }
+  .emoji-cat-tab { flex-shrink:0; padding:5px 12px; font-size:11px; border:1px solid #e5e7eb; background:#fff; border-radius:999px; cursor:pointer; font-family:inherit; color:#6b7280; font-weight:600; white-space:nowrap; }
+  .emoji-cat-tab.active { background:var(--brand-orange); color:#fff; border-color:var(--brand-orange); }
+  .emoji-grid { display:grid; grid-template-columns:repeat(8, 1fr); gap:4px; max-height:160px; overflow-y:auto; padding:2px; }
+  .emoji-grid-item { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; border-radius:6px; background:#fff; border:1px solid transparent; transition:all .15s; }
+  .emoji-grid-item:hover { background:#fff7ed; border-color:var(--brand-orange); transform:scale(1.1); }
+  .emoji-grid-item.selected { background:#fff7ed; border-color:var(--brand-orange); box-shadow:0 0 0 2px rgba(234,88,12,.2); }
+  .emoji-hint { font-size:10px; color:#9ca3af; margin-top:6px; line-height:1.4; }
+
+  /* 🆕 食物類型下拉 + 自由輸入 */
+  .food-type-wrap { position:relative; }
+  .food-type-custom { display:none; margin-top:6px; }
+  .food-type-custom.show { display:block; animation:slideDown .2s ease-out; }
+  @keyframes slideDown {
+    from { opacity:0; transform:translateY(-4px); }
+    to { opacity:1; transform:translateY(0); }
+  }
 </style>
 
 <!-- 🔌 LINE LIFF SDK -->
@@ -709,6 +731,120 @@
     { id:'t2', name:'ZN 飲料', emoji:'🧋', type:'餐車', food:'飲料茶飲', plate:'XYZ-5678', status:'active', blocked:['南港餐車市集'] },
     { id:'t3', name:'黑熊烤玉米', emoji:'🌽', type:'落地攤', food:'燒烤', plate:null, status:'active', blocked:[] }
   ];
+
+  // 🆕 餐點類型預設清單（涵蓋常見餐車）
+  const FOOD_TYPES = [
+    '泰式料理', '日式料理', '韓式料理', '越南料理',
+    '中式小吃', '中式熱炒', '義式料理', '美式料理', '墨西哥料理',
+    '燒烤', '炸物', '雞排', '火鍋', '滷味', '關東煮',
+    '麵食', '米飯類', '便當', '包子饅頭',
+    '飲料茶飲', '咖啡', '果汁', '冰沙',
+    '甜點', '蛋糕', '冰品', '鬆餅',
+    '早餐', '早午餐', '輕食沙拉',
+    '海鮮', '牛排', '燒肉',
+    '其他'
+  ];
+
+  // 🆕 Emoji 分類庫（餐車主題）
+  const EMOJI_CATEGORIES = {
+    hot:   { label: '🔥 熱門',  emojis: ['🚐','🍔','🍕','🌮','🍜','🍱','🥟','🌽','🍢','🧋','☕','🍡','🍗','🍣','🍦','🍩','🎂','🍰','🥤','🍻'] },
+    asian: { label: '🍱 亞洲',  emojis: ['🍜','🍝','🍱','🍚','🍙','🍘','🍣','🍤','🥟','🥠','🥮','🍢','🍡','🍥','🍛','🥘','🍲','🥗','🍢','🍳'] },
+    west:  { label: '🍔 西式',  emojis: ['🍔','🍟','🌭','🥪','🌮','🌯','🥙','🥫','🍕','🥖','🥐','🥨','🧇','🥞','🥓','🍖','🥩','🍗','🍳','🧀'] },
+    bbq:   { label: '🔥 燒烤',  emojis: ['🍗','🍖','🥩','🌽','🍢','🍡','🥓','🍤','🦐','🦀','🐙','🦞','🍢','🍙','🔥','🥘'] },
+    drink: { label: '🥤 飲料',  emojis: ['🥤','🧋','☕','🍵','🧃','🥛','🍶','🍷','🍺','🍻','🥂','🍹','🍸','🍾','🥃','🧉','🧊'] },
+    sweet: { label: '🍰 甜點',  emojis: ['🍰','🎂','🧁','🍩','🍪','🍦','🍨','🍧','🍮','🍯','🥧','🍭','🍬','🍫','🍡','🍢','🌰','🥧'] },
+    fruit: { label: '🍓 水果',  emojis: ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑'] },
+    car:   { label: '🚐 車輛',  emojis: ['🚐','🚚','🚛','🛻','🚗','🚙','🏪','🏬','🛒','🍴','🥢','🥡','📦','🎪','⭐','🌟','✨','💫'] }
+  };
+
+  // 🆕 取得食物類型欄位的值（處理「其他」自由輸入）
+  function getFoodTypeValue(selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return '';
+    if (sel.value === '__custom__') {
+      const custom = document.getElementById(selectId + '_custom');
+      return custom ? custom.value.trim() : '';
+    }
+    return sel.value;
+  }
+
+  // 🆕 切換「其他」自由輸入框顯隱
+  function onFoodTypeChange(selectId) {
+    const sel = document.getElementById(selectId);
+    const custom = document.getElementById(selectId + '_custom');
+    if (!sel || !custom) return;
+    if (sel.value === '__custom__') {
+      custom.classList.add('show');
+      setTimeout(() => custom.focus(), 100);
+    } else {
+      custom.classList.remove('show');
+      custom.value = '';
+    }
+  }
+
+  // 🆕 建立食物類型欄位 HTML
+  function buildFoodTypeField(selectId, currentVal) {
+    const isCustom = currentVal && !FOOD_TYPES.includes(currentVal) && currentVal !== '其他';
+    const options = ['<option value="">請選擇餐點類別…</option>']
+      .concat(FOOD_TYPES.map(f => `<option value="${f}" ${f === currentVal ? 'selected' : ''}>${f}</option>`))
+      .concat([`<option value="__custom__" ${isCustom ? 'selected' : ''}>📝 自行輸入</option>`])
+      .join('');
+    return `
+      <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">餐點類別 <span style="color:var(--danger);">*</span></label>
+      <div class="food-type-wrap">
+        <select class="modal-input" id="${selectId}" style="width:100%; cursor:pointer; margin-bottom:0;" onchange="onFoodTypeChange('${selectId}')">${options}</select>
+        <input type="text" class="modal-input food-type-custom ${isCustom ? 'show' : ''}" id="${selectId}_custom" value="${isCustom ? currentVal.replace(/"/g, '&quot;') : ''}" placeholder="請輸入餐點類別 例如：手工餃子" style="width:100%;">
+      </div>`;
+  }
+
+  // 🆕 切換 Emoji 分類
+  function switchEmojiCat(inputId, cat) {
+    // 更新 tab active 狀態
+    const tabs = document.getElementById(inputId + '_tabs');
+    if (tabs) {
+      [...tabs.children].forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.cat === cat);
+      });
+    }
+    // 重渲染 grid
+    const currentVal = (document.getElementById(inputId) || {}).value || '';
+    const grid = document.getElementById(inputId + '_grid');
+    if (grid && EMOJI_CATEGORIES[cat]) {
+      grid.innerHTML = EMOJI_CATEGORIES[cat].emojis
+        .map(e => `<div class="emoji-grid-item ${e === currentVal ? 'selected' : ''}" onclick="selectEmoji('${inputId}','${e}')">${e}</div>`)
+        .join('');
+    }
+  }
+
+  // 🆕 選 emoji
+  function selectEmoji(inputId, emoji) {
+    const input = document.getElementById(inputId);
+    if (input) input.value = emoji;
+    const grid = document.getElementById(inputId + '_grid');
+    if (grid) {
+      [...grid.children].forEach(item => {
+        item.classList.toggle('selected', item.textContent === emoji);
+      });
+    }
+  }
+
+  // 🆕 建立 Emoji Picker 欄位 HTML
+  function buildEmojiPickerField(inputId, currentVal) {
+    const cats = Object.entries(EMOJI_CATEGORIES);
+    const firstKey = cats[0][0];
+    return `
+      <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">代表 Emoji <span style="font-size:10px; color:#9ca3af; font-weight:500;">（可從下方挑選，或直接輸入）</span></label>
+      <input type="text" class="modal-input" id="${inputId}" value="${currentVal}" maxlength="2" style="width:100%; text-align:center; font-size:24px; padding:8px; margin-bottom:0;">
+      <div class="emoji-picker">
+        <div class="emoji-cat-tabs" id="${inputId}_tabs">
+          ${cats.map(([k, v], i) => `<button type="button" class="emoji-cat-tab ${i === 0 ? 'active' : ''}" data-cat="${k}" onclick="switchEmojiCat('${inputId}','${k}')">${v.label}</button>`).join('')}
+        </div>
+        <div class="emoji-grid" id="${inputId}_grid">
+          ${EMOJI_CATEGORIES[firstKey].emojis.map(e => `<div class="emoji-grid-item ${e === currentVal ? 'selected' : ''}" onclick="selectEmoji('${inputId}','${e}')">${e}</div>`).join('')}
+        </div>
+        <div class="emoji-hint">💡 找不到合適的？在最上方輸入框直接打字（Win + . 或 Mac ⌃⌘空白也可以叫出系統 emoji 選擇器）</div>
+      </div>`;
+  }
   // 🆕 備份 TRUCKS 初始狀態，給 resetDemo 用
   const INITIAL_TRUCKS_JSON = JSON.stringify(TRUCKS);
 
@@ -944,13 +1080,16 @@
     listEl.innerHTML = TRUCKS.map((t, i) => `
       <div class="truck-card">
         <div class="truck-card-avatar">${t.emoji}</div>
-        <div class="truck-card-info">
+        <div class="truck-card-info" onclick="openEditTruckModal(${i})" style="cursor:pointer;">
           <div class="truck-card-name">${t.name}</div>
           <div class="truck-card-meta">${t.type} · ${t.food}${t.plate ? ' · 車牌 ' + t.plate : ''}</div>
         </div>
-        <span class="truck-card-status ${t.status === 'pending' ? 'pending' : ''}" style="${t.status === 'pending' ? 'background:#dbeafe; color:#1e40af;' : ''}">
-          ${t.status === 'pending' ? '審核中' : '啟用中'}
-        </span>
+        <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+          <span class="truck-card-status ${t.status === 'pending' ? 'pending' : ''}" style="${t.status === 'pending' ? 'background:#dbeafe; color:#1e40af;' : ''}">
+            ${t.status === 'pending' ? '審核中' : '啟用中'}
+          </span>
+          <button onclick="openEditTruckModal(${i})" style="background:#fff7ed; color:#b45309; border:1px solid #fed7aa; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit;">✏️ 編輯</button>
+        </div>
       </div>
     `).join('');
   }
@@ -975,18 +1114,12 @@
             <option value="落地攤">🏪 落地攤（無車牌）</option>
           </select>
         </div>
-        <div>
-          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">餐點類別 <span style="color:var(--danger);">*</span></label>
-          <input type="text" class="modal-input" id="addTruckFood" placeholder="例：日式料理 / 飲料茶飲" style="width:100%;">
-        </div>
+        <div>${buildFoodTypeField('addTruckFood', '')}</div>
         <div>
           <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">車牌（餐車類型才需要）</label>
           <input type="text" class="modal-input" id="addTruckPlate" placeholder="例：ABC-1234" style="width:100%;">
         </div>
-        <div>
-          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">代表 Emoji</label>
-          <input type="text" class="modal-input" id="addTruckEmoji" placeholder="🍔" value="🚐" maxlength="2" style="width:100%; text-align:center; font-size:18px;">
-        </div>
+        <div>${buildEmojiPickerField('addTruckEmoji', '🚐')}</div>
       </div>`;
     const btn = document.getElementById('modalConfirmBtn');
     btn.style.display = '';
@@ -1001,12 +1134,12 @@
   function doAddTruck() {
     const name = document.getElementById('addTruckName').value.trim();
     const type = document.getElementById('addTruckType').value;
-    const food = document.getElementById('addTruckFood').value.trim();
+    const food = getFoodTypeValue('addTruckFood');
     const plate = document.getElementById('addTruckPlate').value.trim();
     const emoji = document.getElementById('addTruckEmoji').value.trim() || '🚐';
 
     if (!name) { showToast('請填寫餐車名稱', 'error'); return; }
-    if (!food) { showToast('請填寫餐點類別', 'error'); return; }
+    if (!food) { showToast('請選擇或輸入餐點類別', 'error'); return; }
 
     // 避免重複
     if (TRUCKS.some(t => t.name === name)) {
@@ -1029,6 +1162,114 @@
     renderTruckList();
     renderCarMenu();
     showToast(`「${name}」已送出審核 📋 24 小時內生效`, 'success');
+  }
+
+  // 🆕 開「編輯餐車」modal
+  function openEditTruckModal(idx) {
+    const t = TRUCKS[idx];
+    if (!t) return;
+    STATE.pendingAction = 'edit_truck';
+    STATE.editTruckIdx = idx;
+    document.getElementById('modalTitle').textContent = `編輯餐車 · ${t.name}`;
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-info" style="margin-bottom:12px; padding:10px 12px; background:#fff7ed; border-radius:8px; font-size:12px; color:#92400e; line-height:1.6;">
+        ✏️ 修改餐車資料需審核<br>送出後 24 小時內生效，期間維持原資料運作
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">餐車名稱 <span style="color:var(--danger);">*</span></label>
+          <input type="text" class="modal-input" id="editTruckName" value="${t.name.replace(/"/g, '&quot;')}" style="width:100%;">
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">類型</label>
+          <select class="modal-input" id="editTruckType" style="width:100%; cursor:pointer;">
+            <option value="餐車" ${t.type === '餐車' ? 'selected' : ''}>🚐 餐車（含車牌）</option>
+            <option value="落地攤" ${t.type === '落地攤' ? 'selected' : ''}>🏪 落地攤（無車牌）</option>
+          </select>
+        </div>
+        <div>${buildFoodTypeField('editTruckFood', t.food || '')}</div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:4px;">車牌（餐車類型才需要）</label>
+          <input type="text" class="modal-input" id="editTruckPlate" value="${t.plate || ''}" style="width:100%;">
+        </div>
+        <div>${buildEmojiPickerField('editTruckEmoji', t.emoji)}</div>
+        <div style="margin-top:6px; padding:10px; background:#fef2f2; border-radius:6px; border-left:3px solid #ef4444;">
+          <div style="font-size:11px; color:#991b1b; font-weight:600; margin-bottom:4px;">⚠️ 危險區域</div>
+          <button type="button" onclick="confirmDeleteTruck(${idx})" style="background:#fff; color:#dc2626; border:1px solid #fecaca; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; font-family:inherit; font-weight:600;">🗑️ 停用此餐車</button>
+          <div style="font-size:10px; color:#7f1d1d; margin-top:4px;">停用後該餐車不再出現於排班；已登記場次仍會保留</div>
+        </div>
+      </div>`;
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.style.display = '';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.className = 'modal-btn confirm';
+    btn.textContent = '送出審核';
+    document.getElementById('modal').classList.add('show');
+  }
+
+  // 🆕 實際執行編輯餐車
+  function doEditTruck() {
+    const idx = STATE.editTruckIdx;
+    const t = TRUCKS[idx];
+    if (!t) { closeModal(); return; }
+
+    const name = document.getElementById('editTruckName').value.trim();
+    const type = document.getElementById('editTruckType').value;
+    const food = getFoodTypeValue('editTruckFood');
+    const plate = document.getElementById('editTruckPlate').value.trim();
+    const emoji = document.getElementById('editTruckEmoji').value.trim() || t.emoji;
+
+    if (!name) { showToast('請填寫餐車名稱', 'error'); return; }
+    if (!food) { showToast('請選擇或輸入餐點類別', 'error'); return; }
+
+    // 避免改成跟其他車相同名稱
+    if (TRUCKS.some((other, i) => i !== idx && other.name === name)) {
+      showToast(`「${name}」已存在其他餐車`, 'error');
+      return;
+    }
+
+    // 檢查是否真的有變動
+    const noChange = t.name === name && t.type === type && t.food === food
+                  && (t.plate || '') === plate && t.emoji === emoji;
+    if (noChange) {
+      showToast('沒有任何變動', 'info');
+      closeModal();
+      return;
+    }
+
+    // 更新（標記為 pending 等審核）
+    t.name = name;
+    t.type = type;
+    t.food = food;
+    t.plate = plate || null;
+    t.emoji = emoji;
+    t.status = 'pending';  // 改完進審核
+
+    closeModal();
+    renderTruckList();
+    renderCarMenu();
+    showToast(`「${name}」修改已送出審核 ✏️ 24 小時內生效`, 'success');
+  }
+
+  // 🆕 確認停用餐車
+  function confirmDeleteTruck(idx) {
+    const t = TRUCKS[idx];
+    if (!t) return;
+    if (!confirm(`確定停用「${t.name}」？\n\n停用後該餐車不再出現於排班；已登記的場次仍會保留。\n如需重新啟用，請聯絡管理員。`)) return;
+
+    TRUCKS.splice(idx, 1);
+
+    // 若當前選擇的車剛好是被刪的，切到第一台
+    if (STATE.currentTruckIdx >= TRUCKS.length) {
+      STATE.currentTruckIdx = 0;
+    }
+
+    closeModal();
+    renderTruckList();
+    renderCarMenu();
+    selectCar(STATE.currentTruckIdx);
+    showToast(`「${t.name}」已停用`, 'info');
   }
 
   // 🆕 切換列表/網格 view
@@ -1832,6 +2073,10 @@
   async function doConfirm() {
     if (STATE.pendingAction === 'add_truck') {
       doAddTruck();
+      return;
+    }
+    if (STATE.pendingAction === 'edit_truck') {
+      doEditTruck();
       return;
     }
     closeModal();
