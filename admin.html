@@ -277,9 +277,197 @@
     }
     .sidebar-toggle { display:none; }
   }
+
+  /* 🆕 ===== 登入畫面 ===== */
+  #login-screen {
+    position:fixed; inset:0; z-index:9999;
+    background:linear-gradient(135deg, #fff7ed 0%, #fed7aa 50%, #ffedd5 100%);
+    display:none; align-items:center; justify-content:center;
+    padding:20px; overflow-y:auto;
+  }
+  #login-screen.show { display:flex; }
+  .login-card {
+    background:#fff; border-radius:20px; padding:36px 32px 28px;
+    box-shadow:0 30px 60px -15px rgba(0,0,0,.15), 0 4px 12px rgba(0,0,0,.05);
+    width:100%; max-width:400px;
+    animation:loginSlideIn .35s ease-out;
+  }
+  @keyframes loginSlideIn {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .login-header { text-align:center; margin-bottom:24px; }
+  .login-logo {
+    width:64px; height:64px; border-radius:16px;
+    background:linear-gradient(135deg, var(--brand), var(--danger));
+    margin:0 auto 12px; display:flex; align-items:center; justify-content:center;
+    font-size:30px;
+    box-shadow:0 8px 20px -4px rgba(234,88,12,.4);
+  }
+  .login-title { font-size:22px; font-weight:800; color:#1a1a1a; margin-bottom:4px; }
+  .login-subtitle { font-size:12px; color:var(--text-3); font-family:'Inter',sans-serif; letter-spacing:.3px; }
+  .login-field { margin-bottom:14px; }
+  .login-field label {
+    display:block; font-size:12px; font-weight:600;
+    color:var(--text-2); margin-bottom:6px;
+  }
+  .login-field input {
+    width:100%; padding:11px 14px; font-size:14px;
+    border:1.5px solid var(--border); border-radius:10px;
+    font-family:inherit; transition:border-color .15s, box-shadow .15s;
+    background:#fff; color:var(--text);
+  }
+  .login-field input:focus {
+    outline:none; border-color:var(--brand);
+    box-shadow:0 0 0 3px rgba(234,88,12,.1);
+  }
+  .login-error {
+    background:#fee2e2; color:#991b1b;
+    padding:10px 14px; border-radius:8px;
+    font-size:12px; margin-bottom:12px;
+    border-left:3px solid var(--danger);
+    display:none;
+    animation:shake .3s ease-in-out;
+  }
+  .login-error.show { display:block; }
+  @keyframes shake {
+    0%, 100% { transform:translateX(0); }
+    25% { transform:translateX(-4px); }
+    75% { transform:translateX(4px); }
+  }
+  .login-remember {
+    display:flex; align-items:center; gap:6px;
+    font-size:12px; color:var(--text-2);
+    margin-bottom:16px; cursor:pointer; user-select:none;
+  }
+  .login-remember input[type="checkbox"] { cursor:pointer; }
+  .login-btn {
+    width:100%; padding:13px;
+    background:linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color:#fff; border:none; border-radius:10px;
+    font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
+    transition:transform .15s, box-shadow .15s;
+    box-shadow:0 4px 12px -2px rgba(234,88,12,.4);
+  }
+  .login-btn:hover {
+    transform:translateY(-1px);
+    box-shadow:0 8px 20px -4px rgba(234,88,12,.5);
+  }
+  .login-btn:active { transform:translateY(0); }
+  .login-demo-hint {
+    margin-top:14px; padding:10px 14px;
+    background:#fff7ed; border-radius:8px;
+    font-size:11px; color:#9a3412;
+    border:1px dashed #fdba74;
+    display:flex; align-items:center; gap:8px;
+  }
+  .login-demo-hint b { color:#7c2d12; font-family:'Inter',sans-serif; font-weight:700; }
+  .login-footer {
+    text-align:center; margin-top:18px;
+    color:var(--text-3); font-size:11px; line-height:1.6;
+  }
+  .login-footer a { color:var(--brand); text-decoration:none; }
+
+  /* 登出按鈕（topbar）*/
+  .topbar-btn.logout { color:var(--text-3); }
+  .topbar-btn.logout:hover { background:#fef2f2; color:var(--danger); border-color:#fecaca; }
+
+  /* 🆕 ===== 設定頁 ===== */
+  .settings-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(380px, 1fr)); gap:16px; align-items:start; }
+  .settings-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); gap:12px; }
+  .settings-row:last-child { border-bottom:none; }
+  .settings-row-info { flex:1; min-width:0; }
+  .settings-row-label { font-size:11px; color:var(--text-3); font-weight:600; margin-bottom:3px; letter-spacing:.3px; }
+  .settings-row-value { font-size:14px; font-weight:600; }
+  .settings-row-meta { font-size:11px; color:var(--text-3); margin-top:3px; line-height:1.5; }
+
+  .settings-form-row { padding:10px 0; border-bottom:1px solid #f3f4f6; }
+  .settings-form-row:last-child { border-bottom:none; }
+  .settings-form-row label { display:block; font-size:11px; color:var(--text-3); font-weight:600; margin-bottom:6px; letter-spacing:.3px; }
+  .settings-form-row label .meta { color:#9ca3af; font-weight:400; margin-left:4px; }
+  .settings-form-row input, .settings-form-row select { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; background:#fff; }
+  .settings-form-row input:focus, .settings-form-row select:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(234,88,12,.08); }
+  .settings-form-row .help-text { font-size:11px; color:var(--text-3); margin-top:5px; line-height:1.5; }
+  .settings-form-row .input-with-suffix { display:flex; gap:6px; align-items:center; }
+  .settings-form-row .input-with-suffix input { flex:1; }
+  .settings-form-row .input-with-suffix .suffix { font-size:12px; color:var(--text-2); white-space:nowrap; }
+
+  .toggle-switch { width:44px; height:24px; background:#cbd5e1; border-radius:999px; position:relative; cursor:pointer; transition:background .2s; flex-shrink:0; }
+  .toggle-switch.on { background:var(--success); }
+  .toggle-switch::after { content:""; position:absolute; top:2px; left:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 2px 4px rgba(0,0,0,.15); }
+  .toggle-switch.on::after { transform:translateX(20px); }
+
+  .danger-zone { border:1px solid #fecaca; background:#fef2f2; border-radius:10px; padding:14px; }
+  .danger-zone-title { font-size:12px; color:#991b1b; font-weight:700; margin-bottom:6px; }
+  .danger-zone-desc { font-size:11px; color:#7f1d1d; line-height:1.5; margin-bottom:10px; }
+  .btn.danger-solid { background:var(--danger); color:#fff; border-color:var(--danger); }
+  .btn.danger-solid:hover { background:#b91c1c; }
+
+  .about-row { display:flex; padding:8px 0; font-size:13px; border-bottom:1px solid #f3f4f6; }
+  .about-row:last-child { border-bottom:none; }
+  .about-row .about-label { width:100px; color:var(--text-3); flex-shrink:0; font-size:12px; }
+  .about-row .about-value { font-weight:500; word-break:break-all; }
+  .about-row a { color:var(--brand); text-decoration:none; }
+  .about-row a:hover { text-decoration:underline; }
+
+  /* 🆕 修改密碼 modal */
+  .pwd-modal { background:#fff; border-radius:12px; padding:24px; width:440px; max-width:calc(100vw - 40px); box-shadow:0 20px 50px rgba(0,0,0,.2); }
+  .pwd-modal-title { font-size:18px; font-weight:700; margin-bottom:6px; }
+  .pwd-modal-sub { font-size:12px; color:var(--text-3); margin-bottom:16px; line-height:1.5; }
+  .pwd-modal-field { margin-bottom:12px; }
+  .pwd-modal-field label { display:block; font-size:12px; font-weight:600; color:#555; margin-bottom:5px; }
+  .pwd-modal-field label .required { color:#dc2626; margin-left:2px; }
+  .pwd-modal-field input { width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:7px; font-family:inherit; font-size:13px; }
+  .pwd-modal-field input:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(234,88,12,.1); }
+  .pwd-strength { display:flex; gap:3px; margin-top:6px; }
+  .pwd-strength-bar { flex:1; height:3px; background:#e5e7eb; border-radius:2px; transition:background .2s; }
+  .pwd-strength-bar.weak { background:#ef4444; }
+  .pwd-strength-bar.medium { background:#f59e0b; }
+  .pwd-strength-bar.strong { background:#10b981; }
+  .pwd-modal-error { display:none; background:#fee2e2; color:#991b1b; padding:8px 12px; border-radius:6px; font-size:12px; margin-top:8px; }
+  .pwd-modal-error.show { display:block; }
+  .pwd-modal-actions { display:flex; gap:8px; margin-top:18px; justify-content:flex-end; }
 </style>
 </head>
 <body>
+
+<!-- 🆕 登入畫面 -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">🚐</div>
+      <div class="login-title">餐車市集後台</div>
+      <div class="login-subtitle">ADMIN · ZN Studio</div>
+    </div>
+
+    <form id="loginForm" onsubmit="event.preventDefault(); doLogin();" autocomplete="on">
+      <div class="login-field">
+        <label for="loginUser">帳號</label>
+        <input type="text" id="loginUser" name="username" placeholder="請輸入帳號" autocomplete="username" required>
+      </div>
+      <div class="login-field">
+        <label for="loginPass">密碼</label>
+        <input type="password" id="loginPass" name="password" placeholder="請輸入密碼" autocomplete="current-password" required>
+      </div>
+
+      <div class="login-error" id="loginError">⚠️ 帳號或密碼錯誤，請重試</div>
+
+      <label class="login-remember">
+        <input type="checkbox" id="loginRemember">
+        <span>記住我（30 天內免登入）</span>
+      </label>
+
+      <button type="submit" class="login-btn">登入後台</button>
+    </form>
+
+    <div class="login-footer">
+      ⚠️ 此後台僅供業主使用<br>
+      忘記密碼？請聯絡 <a href="https://lin.ee/Faz0doj" target="_blank">ZN Studio</a>
+    </div>
+  </div>
+</div>
+
+<!-- 主畫面（登入後才顯示） -->
 
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -301,6 +489,9 @@
   <div class="sidebar-section">監控</div>
   <div class="nav-item" onclick="switchPage('credit', this)"><span class="nav-icon">⭐</span><span class="nav-label">信用觀察</span><span class="nav-badge warn">2</span></div>
   <div class="nav-item" onclick="switchPage('reports', this)"><span class="nav-icon">📈</span><span class="nav-label">報表</span></div>
+
+  <div class="sidebar-section">系統</div>
+  <div class="nav-item" onclick="switchPage('settings', this)"><span class="nav-icon">⚙️</span><span class="nav-label">設定</span></div>
 
   <a href="/" style="display:flex; align-items:center; gap:8px; padding:8px 14px; margin:8px 12px 0; font-size:12px; color:rgba(255,255,255,.6); text-decoration:none; border-radius:6px; transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='transparent'">
     <span style="font-size:14px;">←</span>
@@ -327,6 +518,7 @@
       <button class="topbar-btn">🔔 通知</button>
       <button class="topbar-btn">📥 匯出</button>
       <button class="topbar-btn primary">＋ 月度推播</button>
+      <button class="topbar-btn logout" onclick="doLogout()" title="登出後台">🚪 登出</button>
     </div>
   </header>
 
@@ -724,6 +916,216 @@
       </div>
     </div>
 
+    <!-- ====== 🆕 Page: 設定 ====== -->
+    <div class="page" id="page-settings">
+      <div class="settings-grid">
+
+        <!-- 🔐 帳號安全 -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔐 帳號安全</span>
+          </div>
+          <div class="card-body">
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">登入密碼</div>
+                <div class="settings-row-value">••••••••</div>
+                <div class="settings-row-meta">建議定期更換密碼，至少 6 個字元</div>
+              </div>
+              <button class="btn primary" onclick="openChangePasswordModal()">修改密碼</button>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">登入帳號</div>
+                <div class="settings-row-value">admin</div>
+                <div class="settings-row-meta">demo 階段固定為 admin，正式版可自訂</div>
+              </div>
+              <span class="badge neutral">不可改</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">登入記錄</div>
+                <div class="settings-row-value" id="lastLoginTime">─</div>
+                <div class="settings-row-meta">最近一次成功登入</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 👤 業主資料 -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">👤 業主資料</span>
+            <span class="card-title-meta">顯示在後台導覽列</span>
+          </div>
+          <div class="card-body">
+            <div class="settings-form-row">
+              <label>業主名稱</label>
+              <input type="text" id="setOwnerName" placeholder="例：王老闆" oninput="updateSetting('ownerName', this.value)">
+              <div class="help-text">顯示在側邊欄底部</div>
+            </div>
+            <div class="settings-form-row">
+              <label>聯絡 Email</label>
+              <input type="email" id="setOwnerEmail" placeholder="例：boss@example.com" oninput="updateSetting('ownerEmail', this.value)">
+            </div>
+            <div class="settings-form-row">
+              <label>聯絡電話</label>
+              <input type="tel" id="setOwnerPhone" placeholder="例：0912-345-678" oninput="updateSetting('ownerPhone', this.value)">
+            </div>
+            <div class="settings-form-row">
+              <label>公司 / 品牌名稱</label>
+              <input type="text" id="setBrandName" placeholder="例：北部餐車聯盟" oninput="updateSetting('brandName', this.value)">
+              <div class="help-text">顯示在頁首 logo 旁邊</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⚙️ 業務規則 -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">⚙️ 業務規則</span>
+            <span class="card-title-meta">套用至 LIFF 端與後台</span>
+          </div>
+          <div class="card-body">
+            <div class="settings-form-row">
+              <label>候補佇列上限 <span class="meta">（候補名額 = 容量 × 比例）</span></label>
+              <select id="setWaitlistRatio" onchange="updateSetting('waitlistRatio', this.value)">
+                <option value="0.8">0.8 倍（保守）</option>
+                <option value="1">1 倍（建議）</option>
+                <option value="1.5">1.5 倍（彈性）</option>
+                <option value="2">2 倍（寬鬆）</option>
+              </select>
+              <div class="help-text">例如場地容量 5 台、比例 1.5 → 候補上限 8 位</div>
+            </div>
+            <div class="settings-form-row">
+              <label>取消扣分天數</label>
+              <div class="input-with-suffix">
+                <input type="number" id="setCancelDays" min="0" max="14" oninput="updateSetting('cancelPenaltyDays', parseInt(this.value)||0)">
+                <span class="suffix">天內取消扣分</span>
+              </div>
+              <div class="help-text">距離場次少於此天數取消會扣信用分</div>
+            </div>
+            <div class="settings-form-row">
+              <label>取消扣分點數</label>
+              <div class="input-with-suffix">
+                <input type="number" id="setCancelPoints" min="1" max="50" oninput="updateSetting('cancelPenaltyPoints', parseInt(this.value)||5)">
+                <span class="suffix">點</span>
+              </div>
+            </div>
+            <div class="settings-form-row">
+              <label>信用觀察門檻</label>
+              <div class="input-with-suffix">
+                <input type="number" id="setCreditThreshold" min="50" max="100" oninput="updateSetting('creditThreshold', parseInt(this.value)||80)">
+                <span class="suffix">分以下進入觀察</span>
+              </div>
+              <div class="help-text">低於此分數車主會出現在「信用觀察」頁</div>
+            </div>
+            <div class="settings-form-row">
+              <label>候補遞補確認時限</label>
+              <div class="input-with-suffix">
+                <input type="number" id="setPromoteTimeout" min="5" max="120" oninput="updateSetting('promoteTimeoutMin', parseInt(this.value)||30)">
+                <span class="suffix">分鐘</span>
+              </div>
+              <div class="help-text">候補遞補上後須於此時間內確認，否則轉給下一位</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🔔 通知 -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔔 通知設定</span>
+          </div>
+          <div class="card-body">
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-value">LINE OA 推播</div>
+                <div class="settings-row-meta">新登記、取消、候補遞補時推播給業主</div>
+              </div>
+              <div class="toggle-switch" id="toggleLineOA" onclick="toggleSetting('notifyLineOA', this)"></div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-value">每日營運摘要</div>
+                <div class="settings-row-meta">每天早上 09:00 推播當日場次摘要</div>
+              </div>
+              <div class="toggle-switch" id="toggleDailySummary" onclick="toggleSetting('notifyDailySummary', this)"></div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-value">Email 通知</div>
+                <div class="settings-row-meta">重大事件 Email 副本</div>
+              </div>
+              <div class="toggle-switch" id="toggleEmail" onclick="toggleSetting('notifyEmail', this)"></div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-value">缺席自動扣分</div>
+                <div class="settings-row-meta">當天場次車主未到自動扣 15 分（需 LIFF 報到打卡）</div>
+              </div>
+              <div class="toggle-switch" id="toggleAutoDeduct" onclick="toggleSetting('autoDeductCredit', this)"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 💾 資料管理 -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">💾 資料管理</span>
+          </div>
+          <div class="card-body">
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-value">📥 匯出全部資料</div>
+                <div class="settings-row-meta">含場地、餐車、排班、信用紀錄（CSV 格式）</div>
+              </div>
+              <button class="btn">匯出</button>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-value">📤 匯入餐車清單</div>
+                <div class="settings-row-meta">CSV 格式批量匯入新車</div>
+              </div>
+              <button class="btn">上傳</button>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-value">📊 同步 Google Sheets</div>
+                <div class="settings-row-meta">最後同步：剛剛</div>
+              </div>
+              <button class="btn">立即同步</button>
+            </div>
+
+            <div class="danger-zone" style="margin-top:14px;">
+              <div class="danger-zone-title">⚠️ 危險區域</div>
+              <div class="danger-zone-desc">重置所有設定回到預設值。已建立的場次、餐車、信用紀錄不會被刪除。</div>
+              <button class="btn danger-solid" onclick="resetAllSettings()">重置所有設定</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ℹ️ 關於 -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">ℹ️ 關於系統</span>
+          </div>
+          <div class="card-body">
+            <div class="about-row"><span class="about-label">系統名稱</span><span class="about-value">餐車市集排班系統</span></div>
+            <div class="about-row"><span class="about-label">版本</span><span class="about-value">v1.0 · 2026 / 06 / 03</span></div>
+            <div class="about-row"><span class="about-label">後端</span><span class="about-value">n8n on Zeabur (v2.2.5)</span></div>
+            <div class="about-row"><span class="about-label">資料庫</span><span class="about-value">Google Sheets</span></div>
+            <div class="about-row"><span class="about-label">通知</span><span class="about-value">LINE OA Messaging API</span></div>
+            <div class="about-row"><span class="about-label">前端部署</span><span class="about-value">Vercel</span></div>
+            <div class="about-row"><span class="about-label">LIFF 端</span><span class="about-value"><a href="/liff" target="_blank">/liff</a></span></div>
+            <div class="about-row"><span class="about-label">開發者</span><span class="about-value">Nick Chang · ZN Studio</span></div>
+            <div class="about-row"><span class="about-label">聯絡</span><span class="about-value"><a href="mailto:nickleo051216@gmail.com">nickleo051216@gmail.com</a> / 0932-684-051</span></div>
+            <div class="about-row"><span class="about-label">技術支援</span><span class="about-value"><a href="https://lin.ee/Faz0doj" target="_blank">LINE OA</a> · <a href="https://portaly.cc/zn.studio" target="_blank">ZN Studio</a></span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -778,6 +1180,316 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // 🆕 ============ 登入驗證 ============
+  // demo 階段：預設密碼 88888888，使用者改過後存在 localStorage
+  // 簽約後可改成 LINE Login 或後端驗證
+  const ADMIN_USER = 'admin';
+  const DEFAULT_ADMIN_PASS = '88888888';
+  function getAdminPass() {
+    return localStorage.getItem('admin_pass') || DEFAULT_ADMIN_PASS;
+  }
+
+  // 🆕 ============ 業主設定 ============
+  const DEFAULT_SETTINGS = {
+    ownerName: '管理員',
+    ownerEmail: '',
+    ownerPhone: '',
+    brandName: '餐車市集',
+    waitlistRatio: '1',
+    cancelPenaltyDays: 3,
+    cancelPenaltyPoints: 5,
+    creditThreshold: 80,
+    promoteTimeoutMin: 30,
+    notifyLineOA: true,
+    notifyDailySummary: true,
+    notifyEmail: false,
+    autoDeductCredit: true
+  };
+
+  function loadSettings() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+      return { ...DEFAULT_SETTINGS, ...saved };
+    } catch { return { ...DEFAULT_SETTINGS }; }
+  }
+
+  function saveSettings(settings) {
+    localStorage.setItem('admin_settings', JSON.stringify(settings));
+  }
+
+  function updateSetting(key, value) {
+    const settings = loadSettings();
+    settings[key] = value;
+    saveSettings(settings);
+    // 即時反映到 UI
+    if (key === 'ownerName') {
+      const nameEl = document.querySelector('.sidebar-user-name');
+      if (nameEl) nameEl.textContent = value || '管理員';
+    }
+  }
+
+  function toggleSetting(key, el) {
+    const settings = loadSettings();
+    settings[key] = !settings[key];
+    saveSettings(settings);
+    el.classList.toggle('on', settings[key]);
+    if (typeof showToast === 'function') {
+      const labels = {
+        notifyLineOA: 'LINE OA 推播',
+        notifyDailySummary: '每日營運摘要',
+        notifyEmail: 'Email 通知',
+        autoDeductCredit: '缺席自動扣分'
+      };
+      showToast(`${labels[key] || '設定'} 已${settings[key] ? '開啟' : '關閉'}`, 'info');
+    }
+  }
+
+  function renderSettings() {
+    const s = loadSettings();
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+    const setToggle = (id, on) => { const el = document.getElementById(id); if (el) el.classList.toggle('on', !!on); };
+
+    setVal('setOwnerName', s.ownerName);
+    setVal('setOwnerEmail', s.ownerEmail);
+    setVal('setOwnerPhone', s.ownerPhone);
+    setVal('setBrandName', s.brandName);
+    setVal('setWaitlistRatio', s.waitlistRatio);
+    setVal('setCancelDays', s.cancelPenaltyDays);
+    setVal('setCancelPoints', s.cancelPenaltyPoints);
+    setVal('setCreditThreshold', s.creditThreshold);
+    setVal('setPromoteTimeout', s.promoteTimeoutMin);
+
+    setToggle('toggleLineOA', s.notifyLineOA);
+    setToggle('toggleDailySummary', s.notifyDailySummary);
+    setToggle('toggleEmail', s.notifyEmail);
+    setToggle('toggleAutoDeduct', s.autoDeductCredit);
+
+    // 更新側邊欄業主名稱
+    const nameEl = document.querySelector('.sidebar-user-name');
+    if (nameEl && s.ownerName) nameEl.textContent = s.ownerName;
+
+    // 最後登入時間
+    const lastLogin = localStorage.getItem('admin_last_login');
+    const ll = document.getElementById('lastLoginTime');
+    if (ll) ll.textContent = lastLogin || '本次首次登入';
+  }
+
+  function resetAllSettings() {
+    if (!confirm('確定要重置所有設定回到預設值嗎？\n\n影響：業主資料、業務規則、通知設定都會回到預設。\n不影響：登入密碼、場次/餐車/信用資料。')) return;
+    localStorage.removeItem('admin_settings');
+    renderSettings();
+    if (typeof showToast === 'function') showToast('✓ 所有設定已重置', 'info');
+  }
+
+  // 🆕 修改密碼 modal
+  function openChangePasswordModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay show';
+    modal.id = 'changePasswordModal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1100; padding:20px;';
+    modal.onclick = (e) => { if (e.target === modal) closeChangePasswordModal(); };
+    modal.innerHTML = `
+      <div class="pwd-modal">
+        <div class="pwd-modal-title">🔐 修改登入密碼</div>
+        <div class="pwd-modal-sub">修改成功後將自動登出，需用新密碼重新登入</div>
+
+        <div class="pwd-modal-field">
+          <label>目前密碼<span class="required">*</span></label>
+          <input type="password" id="oldPass" placeholder="輸入目前密碼" autocomplete="current-password">
+        </div>
+        <div class="pwd-modal-field">
+          <label>新密碼<span class="required">*</span></label>
+          <input type="password" id="newPass" placeholder="至少 6 個字元" autocomplete="new-password" oninput="updatePwdStrength()">
+          <div class="pwd-strength" id="pwdStrength">
+            <div class="pwd-strength-bar"></div>
+            <div class="pwd-strength-bar"></div>
+            <div class="pwd-strength-bar"></div>
+            <div class="pwd-strength-bar"></div>
+          </div>
+          <div style="font-size:11px; color:var(--text-3); margin-top:4px;" id="pwdStrengthText">至少 6 個字元，建議混合英數字</div>
+        </div>
+        <div class="pwd-modal-field">
+          <label>確認新密碼<span class="required">*</span></label>
+          <input type="password" id="newPassConfirm" placeholder="再次輸入新密碼" autocomplete="new-password">
+        </div>
+
+        <div class="pwd-modal-error" id="pwdError"></div>
+
+        <div class="pwd-modal-actions">
+          <button class="btn" onclick="closeChangePasswordModal()">取消</button>
+          <button class="btn primary" onclick="doChangePassword()">確認修改</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    setTimeout(() => modal.querySelector('#oldPass').focus(), 100);
+  }
+
+  function closeChangePasswordModal() {
+    const m = document.getElementById('changePasswordModal');
+    if (m) m.remove();
+  }
+
+  function updatePwdStrength() {
+    const pwd = document.getElementById('newPass').value;
+    const bars = document.querySelectorAll('#pwdStrength .pwd-strength-bar');
+    const text = document.getElementById('pwdStrengthText');
+    let strength = 0;
+    if (pwd.length >= 6) strength++;
+    if (pwd.length >= 10) strength++;
+    if (/[a-zA-Z]/.test(pwd) && /[0-9]/.test(pwd)) strength++;
+    if (/[^a-zA-Z0-9]/.test(pwd)) strength++;
+    const labels = ['', '弱', '普通', '中等', '強'];
+    const classes = ['', 'weak', 'weak', 'medium', 'strong'];
+    bars.forEach((b, i) => {
+      b.className = 'pwd-strength-bar';
+      if (i < strength) b.classList.add(classes[strength]);
+    });
+    if (text) text.textContent = pwd.length === 0 ? '至少 6 個字元，建議混合英數字' :
+      strength <= 1 ? '⚠️ 強度：弱（建議加長或加入數字）' :
+      strength === 2 ? '強度：普通' :
+      strength === 3 ? '強度：中等' : '✓ 強度：強';
+  }
+
+  function doChangePassword() {
+    const oldPass = document.getElementById('oldPass').value;
+    const newPass = document.getElementById('newPass').value;
+    const conf = document.getElementById('newPassConfirm').value;
+    const err = document.getElementById('pwdError');
+    err.classList.remove('show');
+
+    if (!oldPass || !newPass || !conf) {
+      err.textContent = '⚠️ 請填寫所有欄位';
+      err.classList.add('show');
+      return;
+    }
+    if (oldPass !== getAdminPass()) {
+      err.textContent = '⚠️ 目前密碼錯誤';
+      err.classList.add('show');
+      document.getElementById('oldPass').focus();
+      return;
+    }
+    if (newPass.length < 6) {
+      err.textContent = '⚠️ 新密碼至少 6 個字元';
+      err.classList.add('show');
+      return;
+    }
+    if (newPass !== conf) {
+      err.textContent = '⚠️ 兩次新密碼不一致';
+      err.classList.add('show');
+      document.getElementById('newPassConfirm').focus();
+      return;
+    }
+    if (newPass === oldPass) {
+      err.textContent = '⚠️ 新密碼不能跟舊密碼相同';
+      err.classList.add('show');
+      return;
+    }
+
+    // 存新密碼
+    localStorage.setItem('admin_pass', newPass);
+    closeChangePasswordModal();
+    if (typeof showToast === 'function') showToast('✓ 密碼修改成功，3 秒後重新登入', 'success');
+    setTimeout(() => {
+      sessionStorage.removeItem('admin_logged_in');
+      localStorage.removeItem('admin_remember');
+      location.reload();
+    }, 3000);
+  }
+
+  function checkLogin() {
+    // session 已登入（瀏覽器關掉就失效）
+    const sessionLogged = sessionStorage.getItem('admin_logged_in') === 'true';
+    if (sessionLogged) { showAdminApp(); return; }
+
+    // 「記住我」30 天內
+    const remembered = localStorage.getItem('admin_remember');
+    if (remembered) {
+      try {
+        const data = JSON.parse(remembered);
+        if (data.expiresAt && Date.now() < data.expiresAt) {
+          sessionStorage.setItem('admin_logged_in', 'true');
+          showAdminApp();
+          return;
+        }
+        // 過期清掉
+        localStorage.removeItem('admin_remember');
+      } catch (e) {
+        localStorage.removeItem('admin_remember');
+      }
+    }
+    showLogin();
+  }
+
+  function showLogin() {
+    document.getElementById('login-screen').classList.add('show');
+    // 隱藏主內容（用 visibility 而非 display 避免 flex 重排破壞 layout）
+    const sb = document.querySelector('.sidebar');
+    const mn = document.querySelector('.main');
+    if (sb) sb.style.visibility = 'hidden';
+    if (mn) mn.style.visibility = 'hidden';
+    setTimeout(() => {
+      const u = document.getElementById('loginUser');
+      if (u) u.focus();
+    }, 150);
+  }
+
+  function showAdminApp() {
+    document.getElementById('login-screen').classList.remove('show');
+    const sb = document.querySelector('.sidebar');
+    const mn = document.querySelector('.main');
+    if (sb) sb.style.visibility = '';
+    if (mn) mn.style.visibility = '';
+  }
+
+  function doLogin() {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const remember = document.getElementById('loginRemember').checked;
+    const errorEl = document.getElementById('loginError');
+
+    if (user === ADMIN_USER && pass === getAdminPass()) {
+      errorEl.classList.remove('show');
+      sessionStorage.setItem('admin_logged_in', 'true');
+      // 記錄登入時間
+      const now = new Date();
+      const stamp = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      localStorage.setItem('admin_last_login', stamp);
+      if (remember) {
+        const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;  // 30 天
+        localStorage.setItem('admin_remember', JSON.stringify({ expiresAt }));
+      }
+      showAdminApp();
+      // 登入後清密碼欄
+      document.getElementById('loginPass').value = '';
+      // 提示
+      setTimeout(() => {
+        if (typeof showToast === 'function') showToast('✓ 歡迎回來', 'success');
+      }, 100);
+    } else {
+      errorEl.classList.add('show');
+      errorEl.textContent = user.length === 0 || pass.length === 0
+        ? '⚠️ 請輸入完整帳號與密碼'
+        : '⚠️ 帳號或密碼錯誤，請重試';
+      // 清密碼 + 重新 focus
+      document.getElementById('loginPass').value = '';
+      document.getElementById('loginPass').focus();
+    }
+  }
+
+  function doLogout() {
+    if (!confirm('確定要登出後台嗎？')) return;
+    sessionStorage.removeItem('admin_logged_in');
+    localStorage.removeItem('admin_remember');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginRemember').checked = false;
+    document.getElementById('loginError').classList.remove('show');
+    showLogin();
+  }
+
+  // 立即執行登入檢查（在其他初始化之前）
+  checkLogin();
+
   // 🆕 折疊/展開側欄
   function toggleSidebar() {
     document.querySelector('.sidebar').classList.toggle('collapsed');
@@ -803,7 +1515,8 @@
     rules: ['特殊規則', '黑名單管理（後台限定）'],
     events: ['包場管理', 'EventBookings'],
     credit: ['信用觀察', '信用分 < 80 名單'],
-    reports: ['報表', '月度數據 · 2026/6']
+    reports: ['報表', '月度數據 · 2026/6'],
+    settings: ['設定', '系統設定 · 業主資料 · 業務規則']
   };
 
   function switchPage(id, el) {
@@ -1161,6 +1874,7 @@
   renderAutoApply();
   renderEvents();
   updateKPIs();
+  renderSettings();  // 🆕 載入業主設定
 </script>
 
 </body>
