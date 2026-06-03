@@ -686,7 +686,7 @@
           <div class="car-avatar" id="carAvatar">🍜</div>
           <div class="car-info">
             <div class="car-name" id="carName">泰沙了打抛飯</div>
-            <div class="car-meta" id="carMeta">餐車 · 泰式料理</div>
+            <div class="car-meta" id="carMeta">餐車 · 泰式料理 · 車牌 ABC-1234</div>
           </div>
           <span class="car-arrow">▾</span>
         </div>
@@ -2111,7 +2111,7 @@
     const t = TRUCKS[idx];
     document.getElementById('carAvatar').textContent = t.emoji;
     document.getElementById('carName').textContent = t.name;
-    document.getElementById('carMeta').textContent = `${t.type} · ${t.food}`;
+    document.getElementById('carMeta').textContent = `${t.type} · ${t.food}${t.plate ? ' · 車牌 ' + t.plate : ''}`;
     closeCarDropdown();
     showToast(`已切換為「${t.name}」`);
     renderCalendar();
@@ -2123,7 +2123,7 @@
         <div class="car-option-avatar">${t.emoji}</div>
         <div class="car-option-info">
           <div class="car-option-name">${t.name}</div>
-          <div class="car-option-meta">${t.type} · ${t.food}</div>
+          <div class="car-option-meta">${t.type} · ${t.food}${t.plate ? ' · 車牌 ' + t.plate : ''}</div>
         </div>
         <span class="car-option-check ${i===STATE.currentTruckIdx?'':'hidden'}">✓</span>
       </div>
@@ -2659,7 +2659,7 @@
       <div class="modal-info" style="margin-bottom:8px;">
         <div class="modal-row"><span class="label">場地</span><span class="value">${venue}</span></div>
         <div class="modal-row"><span class="label">日期</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${wd}）</span></div>
-        <div class="modal-row"><span class="label">餐車</span><span class="value">${truck.emoji} ${truck.name}</span></div>
+        <div class="modal-row"><span class="label">餐車</span><span class="value">${truck.emoji} ${truck.name}${truck.plate ? ' · ' + truck.plate : ''}</span></div>
       </div>
       <div class="slot-picker-grid">`;
 
@@ -2821,7 +2821,7 @@
       const [, mm, dd] = s.d.split('-');
       const dateText = `${parseInt(mm)}/${parseInt(dd)}（${s.wd}）`;
       const truck = TRUCKS.find(x => x.id === r.truckId) || TRUCKS[0];
-      const truckLine = `<div style="font-size:11px; color:#666; margin-top:2px;">${truck.emoji} ${truck.name}</div>`;
+      const truckLine = `<div style="font-size:11px; color:#666; margin-top:2px;">${truck.emoji} ${truck.name}${truck.plate ? ' · ' + truck.plate : ''}</div>`;
 
       if (r.status === 'confirmed') {
         // 🆕 Plan B：報到打卡按鈕狀態判斷
@@ -2993,7 +2993,7 @@
       <div class="modal-info">
         <div class="modal-row"><span class="label">場地</span><span class="value">${s.venue}</span></div>
         <div class="modal-row"><span class="label">日期 / 時段</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${s.wd}）${slotText}</span></div>
-        <div class="modal-row"><span class="label">餐車</span><span class="value">${truck.emoji} ${truck.name}</span></div>
+        <div class="modal-row"><span class="label">餐車</span><span class="value">${truck.emoji} ${truck.name}${truck.plate ? ' · ' + truck.plate : ''}</span></div>
         <div class="modal-row"><span class="label">登記時間</span><span class="value">${r.registeredAt}</span></div>
         <div class="modal-row"><span class="label">距離場次</span><span class="value">${daysUntil} 天後</span></div>
       </div>
@@ -3109,7 +3109,7 @@
         <div class="modal-row"><span class="label">場地</span><span class="value">${s.venue}</span></div>
         <div class="modal-row"><span class="label">日期</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${s.wd}）</span></div>
         <div class="modal-row"><span class="label">時段</span><span class="value">${slot}</span></div>
-        <div class="modal-row"><span class="label">餐車</span><span class="value">${t.emoji} ${t.name}</span></div>
+        <div class="modal-row"><span class="label">餐車</span><span class="value">${t.emoji} ${t.name}${t.plate ? ' · ' + t.plate : ''}</span></div>
         ${action === 'waitlist' ? `<div class="modal-row" style="color:var(--warn);"><span class="label">⚠️ 候補</span><span class="value">將是第 ${s.wl[0]+1} 位 / 上限 ${s.wl[1]}</span></div>` : ''}
       </div>`;
     const btn = document.getElementById('modalConfirmBtn');
