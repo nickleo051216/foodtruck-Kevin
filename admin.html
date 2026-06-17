@@ -507,6 +507,210 @@
   .reject-preset-btn:hover { background:#fee2e2; border-color:#fca5a5; color:#991b1b; }
   .reject-modal-actions { display:flex; gap:8px; margin-top:16px; justify-content:flex-end; }
 
+  /* ╔══════════════════════════════════════════╗
+     ║  🆕 v1.4 Admin 完善：A + B + 空狀態          ║
+     ╚══════════════════════════════════════════╝ */
+
+  /* ─── 空狀態（同 LIFF）─── */
+  .empty-state-admin {
+    text-align: center;
+    padding: 56px 24px 40px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    animation: emptyFadeInAdm .4s ease-out;
+  }
+  @keyframes emptyFadeInAdm {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .empty-state-admin .empty-icon-wrap {
+    width: 80px; height: 80px;
+    margin: 0 auto 18px;
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.08), rgba(59, 130, 246, 0.08));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px dashed rgba(5, 150, 105, 0.25);
+  }
+  .empty-state-admin .empty-icon { font-size: 38px; opacity: 0.7; }
+  .empty-state-admin .empty-title {
+    font-size: 15px; font-weight: 700;
+    color: var(--text); margin-bottom: 6px;
+  }
+  .empty-state-admin .empty-hint {
+    font-size: 12px; color: var(--text-3);
+    line-height: 1.6;
+  }
+  .empty-state-admin.success .empty-icon-wrap {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.15), rgba(16, 185, 129, 0.1));
+    border-color: rgba(5, 150, 105, 0.4);
+  }
+
+  /* ─── Rule Edit Modal ─── */
+  .rule-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 1100; padding: 20px;
+  }
+  .rule-modal-overlay.show { display: flex; }
+  .rule-modal-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    width: 520px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: ruleModalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes ruleModalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .rule-modal-title {
+    font-size: 18px; font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .rule-modal-subtitle {
+    font-size: 12px; color: var(--text-3);
+    margin-bottom: 16px;
+  }
+  .rule-form-row { margin-bottom: 14px; }
+  .rule-form-label {
+    font-size: 12px; font-weight: 600;
+    color: #555; margin-bottom: 5px; display: block;
+  }
+  .rule-form-label .required { color: var(--danger); margin-left: 2px; }
+  .rule-form-input,
+  .rule-form-select,
+  .rule-form-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .rule-form-input:focus,
+  .rule-form-select:focus,
+  .rule-form-textarea:focus {
+    outline: none;
+    border-color: var(--accent, #059669);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+  }
+  .rule-form-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+  .rule-form-hint {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .rule-preview-box {
+    background: var(--warn-bg, #fef3c7);
+    border-left: 3px solid var(--warn, #f59e0b);
+    padding: 12px 14px;
+    border-radius: 7px;
+    margin-top: 10px;
+  }
+  .rule-preview-label {
+    font-size: 10px; font-weight: 700;
+    color: #92400e; letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .rule-preview-text {
+    font-size: 12px; color: #78350f;
+    line-height: 1.6;
+  }
+  .rule-preview-text:empty::before {
+    content: '（餐車主將看到的訊息會在這預覽）';
+    color: #d1d5db; font-style: italic;
+  }
+  .rule-modal-actions {
+    display: flex; gap: 8px;
+    margin-top: 18px;
+    justify-content: space-between;
+  }
+  .rule-modal-actions .btn-group-right {
+    display: flex; gap: 8px;
+  }
+  .rule-btn-delete {
+    background: #fff;
+    color: var(--danger);
+    border: 1px solid #fca5a5;
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .rule-btn-delete:hover {
+    background: #fee2e2;
+  }
+
+  /* Rule card 增強 - clickable */
+  .rule-card {
+    transition: box-shadow .15s, transform .15s;
+  }
+  .rule-card.has-rules .rule-blocked-truck {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .rule-card.has-rules .rule-blocked-truck:hover {
+    background: #fecaca;
+  }
+
+  /* Rule chip 顯示 reason snippet */
+  .rule-blocked-truck-reason {
+    display: block;
+    font-size: 10px;
+    color: var(--danger);
+    opacity: 0.85;
+    margin-top: 3px;
+    padding: 0;
+    background: transparent;
+    font-weight: 400;
+    line-height: 1.4;
+    border: none;
+    border-radius: 0;
+    width: 100%;
+  }
+  .rule-blocked-truck {
+    flex-direction: column;
+    align-items: flex-start !important;
+    padding: 7px 11px !important;
+    border-radius: 8px !important;
+  }
+  .rule-blocked-truck-head {
+    display: flex; align-items: center;
+    gap: 4px; width: 100%;
+    justify-content: space-between;
+  }
+  .rule-blocked-truck-del {
+    cursor: pointer;
+    opacity: 0.6;
+    font-size: 13px;
+    transition: opacity .15s, color .15s;
+  }
+  .rule-blocked-truck-del:hover {
+    opacity: 1;
+    color: #991b1b;
+  }
+
+  /* Toast 強化（同 LIFF）*/
+  .toast { display: flex; align-items: center; gap: 8px; }
+  .toast::before { font-weight: 700; font-size: 14px; display: inline-block; }
+  .toast.success::before { content: '✓'; }
+  .toast.error::before { content: '⚠'; }
+  .toast.info::before { content: 'ⓘ'; }
+
 </style>
 </head>
 <body>
@@ -881,38 +1085,12 @@
         <div class="card-header">
           <div>
             <span class="card-title">特殊規則 · 黑名單管理</span>
-            <span class="card-title-meta">⚠️ 此標籤僅後台可見，車主端會顯示「此據點本月暫不開放」</span>
+            <span class="card-title-meta">⚠️ 此標籤僅後台可見，車主端會顯示您填寫的詳細原因</span>
           </div>
-          <button class="btn primary">＋ 新增規則</button>
+          <button class="btn primary" onclick="openAddRuleModal()">＋ 新增規則</button>
         </div>
-        <div class="rules-grid">
-          <div class="rule-card">
-            <div class="rule-venue">📍 南港餐車市集 <span class="badge danger">1 筆</span></div>
-            <div>
-              <span class="rule-blocked-truck">🧋 ZN 飲料 <small>· 飲料品項衝突</small> ✕</span>
-            </div>
-            <button class="rule-add-btn">＋ 加入黑名單</button>
-          </div>
-          <div class="rule-card">
-            <div class="rule-venue">📍 新店夜市 <span class="badge danger">1 筆</span></div>
-            <div>
-              <span class="rule-blocked-truck">🍜 泰沙了打抛飯 <small>· 場地方拒絕</small> ✕</span>
-            </div>
-            <button class="rule-add-btn">＋ 加入黑名單</button>
-          </div>
-          <div class="rule-card">
-            <div class="rule-venue">📍 三峽老街 <span class="badge danger">2 筆</span></div>
-            <div>
-              <span class="rule-blocked-truck">🌮 墨西哥捲 <small>· 重複品項</small> ✕</span>
-              <span class="rule-blocked-truck">🍔 速食堡 <small>· 場地調整</small> ✕</span>
-            </div>
-            <button class="rule-add-btn">＋ 加入黑名單</button>
-          </div>
-          <div class="rule-card">
-            <div class="rule-venue">📍 央北中山小熊 <span class="badge neutral">0 筆</span></div>
-            <div class="rule-empty">尚無特殊規則</div>
-            <button class="rule-add-btn">＋ 加入黑名單</button>
-          </div>
+        <div class="rules-grid" id="rulesGrid">
+          <!-- 由 JS 動態渲染 -->
         </div>
       </div>
     </div>
@@ -1325,6 +1503,62 @@
   </div>
 </div>
 
+<!-- 🆕 v1.4 規則編輯 modal -->
+<div class="rule-modal-overlay" id="ruleModal" onclick="if(event.target===this) closeRuleModal()">
+  <div class="rule-modal-box">
+    <div class="rule-modal-title" id="ruleModalTitle">新增黑名單規則</div>
+    <div class="rule-modal-subtitle">設定特定餐車不能登記某場地的限制原因</div>
+
+    <div class="rule-form-row">
+      <label class="rule-form-label">場地 <span class="required">*</span></label>
+      <select class="rule-form-select" id="ruleVenue">
+        <option value="">請選擇場地</option>
+        <option value="南港餐車市集">📍 南港餐車市集</option>
+        <option value="央北中山小熊">📍 央北中山小熊</option>
+        <option value="三峽老街">📍 三峽老街</option>
+        <option value="新店夜市">📍 新店夜市</option>
+        <option value="蘆洲廟口">📍 蘆洲廟口</option>
+      </select>
+    </div>
+
+    <div class="rule-form-row">
+      <label class="rule-form-label">餐車 <span class="required">*</span></label>
+      <select class="rule-form-select" id="ruleTruck">
+        <option value="">請選擇餐車</option>
+        <option value="t1|🍜|泰沙了打抛飯">🍜 泰沙了打抛飯</option>
+        <option value="t2|🧋|ZN 飲料">🧋 ZN 飲料</option>
+        <option value="t3|🌽|黑熊烤玉米">🌽 黑熊烤玉米</option>
+        <option value="t4|🌮|墨西哥捲">🌮 墨西哥捲</option>
+        <option value="t5|🍔|速食堡">🍔 速食堡</option>
+      </select>
+    </div>
+
+    <div class="rule-form-row">
+      <label class="rule-form-label">短標籤（後台識別用）</label>
+      <input type="text" class="rule-form-input" id="ruleTag" placeholder="例：飲料品項衝突 / 車型不符" maxlength="20">
+      <div class="rule-form-hint">最多 20 字，僅後台可見</div>
+    </div>
+
+    <div class="rule-form-row">
+      <label class="rule-form-label">給餐車主看的詳細原因 <span class="required">*</span></label>
+      <textarea class="rule-form-textarea" id="ruleReason" placeholder="例：此場地僅開放熟食類餐車，飲料車暫不適用" oninput="updateRulePreview()" maxlength="100"></textarea>
+      <div class="rule-form-hint">最多 100 字。餐車主在 App 點「未開放 ⓘ」時看到的訊息</div>
+      <div class="rule-preview-box">
+        <div class="rule-preview-label">📱 餐車主將看到</div>
+        <div class="rule-preview-text" id="rulePreviewText"></div>
+      </div>
+    </div>
+
+    <div class="rule-modal-actions">
+      <button class="rule-btn-delete" id="ruleDeleteBtn" onclick="doDeleteRule()" style="display:none;">🗑 刪除此規則</button>
+      <div class="btn-group-right" style="margin-left:auto;">
+        <button class="btn" onclick="closeRuleModal()">取消</button>
+        <button class="btn primary" onclick="doSaveRule()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1677,6 +1911,7 @@
     document.getElementById('pageTitle').firstChild.textContent = t + ' ';
     document.getElementById('pageTitleSub').textContent = s;
     if (id === 'payment') renderPaymentReview();
+    if (id === 'rules') renderRules();  // 🆕 v1.4
   }
 
   // ============================================================
@@ -1798,6 +2033,174 @@
 
   let _payReviewTab = 'pending';
 
+  // ╔══════════════════════════════════════════╗
+  // ║  🆕 v1.4 RULES 黑名單規則系統                 ║
+  // ║  與 LIFF v1.4 blockedReasons 同步             ║
+  // ╚══════════════════════════════════════════╝
+  let RULES = [
+    { id:'r1', venue:'南港餐車市集', truckId:'t2', truckEmoji:'🧋', truckName:'ZN 飲料',
+      tag:'飲料品項衝突',
+      reason:'此場地僅開放熟食類餐車，飲料車暫不適用' },
+    { id:'r2', venue:'新店夜市', truckId:'t1', truckEmoji:'🍜', truckName:'泰沙了打抛飯',
+      tag:'車型上限',
+      reason:'此場地車型上限為輕食類，本車型暫不在開放名單' },
+    { id:'r3', venue:'三峽老街', truckId:'t4', truckEmoji:'🌮', truckName:'墨西哥捲',
+      tag:'重複品項',
+      reason:'本月已有同類型餐車登記，避免品項重複此次未開放' },
+    { id:'r4', venue:'三峽老街', truckId:'t5', truckEmoji:'🍔', truckName:'速食堡',
+      tag:'場地調整',
+      reason:'本場地本月進行動線調整，速食車型暫停登記一個月' }
+  ];
+
+  const ALL_VENUES = ['南港餐車市集', '央北中山小熊', '三峽老街', '新店夜市', '蘆洲廟口'];
+  let _editingRuleId = null; // 編輯中的 rule id（null = 新增模式）
+
+  function renderRules() {
+    const grid = document.getElementById('rulesGrid');
+    if (!grid) return;
+
+    // 把 RULES 按 venue 分組
+    const byVenue = {};
+    ALL_VENUES.forEach(v => byVenue[v] = []);
+    RULES.forEach(r => {
+      if (!byVenue[r.venue]) byVenue[r.venue] = [];
+      byVenue[r.venue].push(r);
+    });
+
+    let html = '';
+    Object.entries(byVenue).forEach(([venue, rules]) => {
+      const count = rules.length;
+      const badgeClass = count > 0 ? 'danger' : 'neutral';
+      const hasRules = count > 0 ? 'has-rules' : '';
+
+      let rulesHtml = '';
+      if (count > 0) {
+        rules.forEach(r => {
+          const safeReason = (r.reason || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+          rulesHtml += `
+            <span class="rule-blocked-truck" onclick="openEditRuleModal('${r.id}')">
+              <span class="rule-blocked-truck-head">
+                <span>${r.truckEmoji} ${r.truckName} <small>· ${r.tag || ''}</small></span>
+                <span class="rule-blocked-truck-del" onclick="event.stopPropagation(); doQuickDelete('${r.id}')" title="刪除">✕</span>
+              </span>
+              <span class="rule-blocked-truck-reason">${safeReason}</span>
+            </span>`;
+        });
+      } else {
+        rulesHtml = '<div class="rule-empty">尚無特殊規則</div>';
+      }
+
+      html += `
+        <div class="rule-card ${hasRules}">
+          <div class="rule-venue">📍 ${venue} <span class="badge ${badgeClass}">${count} 筆</span></div>
+          <div>${rulesHtml}</div>
+          <button class="rule-add-btn" onclick="openAddRuleModal('${venue}')">＋ 加入黑名單</button>
+        </div>`;
+    });
+    grid.innerHTML = html;
+  }
+
+  function openAddRuleModal(presetVenue) {
+    _editingRuleId = null;
+    document.getElementById('ruleModalTitle').textContent = '新增黑名單規則';
+    document.getElementById('ruleVenue').value = presetVenue || '';
+    document.getElementById('ruleTruck').value = '';
+    document.getElementById('ruleTag').value = '';
+    document.getElementById('ruleReason').value = '';
+    document.getElementById('rulePreviewText').textContent = '';
+    document.getElementById('ruleDeleteBtn').style.display = 'none';
+    document.getElementById('ruleModal').classList.add('show');
+  }
+
+  function openEditRuleModal(ruleId) {
+    const r = RULES.find(x => x.id === ruleId);
+    if (!r) return;
+    _editingRuleId = ruleId;
+    document.getElementById('ruleModalTitle').textContent = '編輯黑名單規則';
+    document.getElementById('ruleVenue').value = r.venue;
+    document.getElementById('ruleTruck').value = `${r.truckId}|${r.truckEmoji}|${r.truckName}`;
+    document.getElementById('ruleTag').value = r.tag || '';
+    document.getElementById('ruleReason').value = r.reason || '';
+    document.getElementById('rulePreviewText').textContent = r.reason || '';
+    document.getElementById('ruleDeleteBtn').style.display = '';
+    document.getElementById('ruleModal').classList.add('show');
+  }
+
+  function closeRuleModal() {
+    document.getElementById('ruleModal').classList.remove('show');
+    _editingRuleId = null;
+  }
+
+  function updateRulePreview() {
+    const text = document.getElementById('ruleReason').value;
+    document.getElementById('rulePreviewText').textContent = text;
+  }
+
+  function doSaveRule() {
+    const venue = document.getElementById('ruleVenue').value;
+    const truckVal = document.getElementById('ruleTruck').value;
+    const tag = document.getElementById('ruleTag').value.trim();
+    const reason = document.getElementById('ruleReason').value.trim();
+
+    if (!venue) { showToast('請選擇場地', 'error'); return; }
+    if (!truckVal) { showToast('請選擇餐車', 'error'); return; }
+    if (!reason) { showToast('請填寫詳細原因（給餐車主看的）', 'error'); return; }
+
+    const [truckId, truckEmoji, truckName] = truckVal.split('|');
+
+    if (_editingRuleId) {
+      // 編輯
+      const r = RULES.find(x => x.id === _editingRuleId);
+      if (r) {
+        r.venue = venue;
+        r.truckId = truckId;
+        r.truckEmoji = truckEmoji;
+        r.truckName = truckName;
+        r.tag = tag;
+        r.reason = reason;
+      }
+      showToast(`✓ 已更新「${truckName} × ${venue}」規則`, 'success');
+    } else {
+      // 檢查重複
+      const dup = RULES.find(x => x.venue === venue && x.truckId === truckId);
+      if (dup) {
+        showToast(`此餐車已存在「${venue}」的規則，請改編輯`, 'error');
+        return;
+      }
+      // 新增
+      const newId = 'r' + Date.now();
+      RULES.push({
+        id: newId,
+        venue, truckId, truckEmoji, truckName,
+        tag, reason
+      });
+      showToast(`✓ 已新增「${truckName} 不可上 ${venue}」規則`, 'success');
+    }
+    closeRuleModal();
+    renderRules();
+  }
+
+  function doDeleteRule() {
+    if (!_editingRuleId) return;
+    const r = RULES.find(x => x.id === _editingRuleId);
+    if (!r) return;
+    if (!confirm(`確定刪除「${r.truckName} 不可上 ${r.venue}」這條規則？`)) return;
+    RULES = RULES.filter(x => x.id !== _editingRuleId);
+    showToast(`已刪除「${r.truckName} × ${r.venue}」規則`, 'success');
+    closeRuleModal();
+    renderRules();
+  }
+
+  function doQuickDelete(ruleId) {
+    const r = RULES.find(x => x.id === ruleId);
+    if (!r) return;
+    if (!confirm(`快速刪除「${r.truckName} 不可上 ${r.venue}」？`)) return;
+    RULES = RULES.filter(x => x.id !== ruleId);
+    showToast(`已刪除「${r.truckName} × ${r.venue}」規則`, 'success');
+    renderRules();
+  }
+  // ── End of v1.4 Rules system ──
+
   function renderPaymentReview() {
     // 統計
     const total = 912 * 350;  // 預估
@@ -1840,10 +2243,20 @@
     if (_payReviewTab !== 'all') items = items.filter(p => p.status === _payReviewTab);
 
     if (items.length === 0) {
-      const msg = _payReviewTab === 'pending' ? '太棒了！沒有待審核項目 🎉' :
-                  _payReviewTab === 'approved' ? '尚無已核銷紀錄' :
-                  _payReviewTab === 'rejected' ? '尚無退回紀錄' : '尚無對帳紀錄';
-      wrap.innerHTML = `<div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:40px 20px; text-align:center; color:#9ca3af; font-size:13px;">${msg}</div>`;
+      // 🆕 v1.4 強化空狀態：icon + 詳細說明
+      const emptyMap = {
+        pending:  { icon:'🎉', title:'太棒了！沒有待審核項目', hint:'所有對帳已處理完畢，可以稍微放鬆一下', cls:'success' },
+        approved: { icon:'📋', title:'尚無已核銷紀錄', hint:'核銷後的對帳會出現在這裡<br>方便您查閱歷史紀錄', cls:'' },
+        rejected: { icon:'✅', title:'尚無退回紀錄', hint:'退回的對帳會在這裡顯示<br>目前沒有需要處理的項目', cls:'' },
+        all:      { icon:'📭', title:'尚無對帳紀錄', hint:'本月還沒有任何對帳上傳<br>餐車主上傳後會出現在這', cls:'' }
+      };
+      const cfg = emptyMap[_payReviewTab] || emptyMap.all;
+      wrap.innerHTML = `
+        <div class="empty-state-admin ${cfg.cls}">
+          <div class="empty-icon-wrap"><div class="empty-icon">${cfg.icon}</div></div>
+          <div class="empty-title">${cfg.title}</div>
+          <div class="empty-hint">${cfg.hint}</div>
+        </div>`;
       return;
     }
 

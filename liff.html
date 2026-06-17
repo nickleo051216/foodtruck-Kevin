@@ -607,12 +607,280 @@
   .notif-empty { text-align:center; padding:60px 20px; color:#9ca3af; }
   .notif-empty-icon { font-size:48px; margin-bottom:12px; opacity:.4; }
 
+  /* ╔══════════════════════════════════════════╗
+     ║  🆕 v1.4 Demo 完善：4 項升級樣式             ║
+     ╚══════════════════════════════════════════╝ */
+
+  /* ─── ① Splash Screen 進場動畫 ─── */
+  .splash-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #fde9d8 0%, #f4d8c4 100%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99999;
+    transition: opacity .5s ease, visibility .5s ease;
+  }
+  .splash-screen.fade-out {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .splash-content {
+    text-align: center;
+    animation: splashFadeIn .6s ease-out;
+  }
+  @keyframes splashFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .splash-truck {
+    font-size: 88px;
+    margin-bottom: 8px;
+    animation: truckBounce 1.4s ease-in-out infinite;
+    filter: drop-shadow(0 8px 16px rgba(234, 88, 12, 0.25));
+  }
+  @keyframes truckBounce {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+  }
+  .splash-brand {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--line-green);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+  .splash-title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .splash-subtitle {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 32px;
+  }
+  .splash-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(6, 199, 85, 0.15);
+    border-top-color: var(--line-green);
+    border-radius: 50%;
+    animation: splashSpin 0.9s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes splashSpin {
+    to { transform: rotate(360deg); }
+  }
+  .splash-text {
+    font-size: 13px;
+    color: #4b5563;
+    font-weight: 500;
+    min-height: 18px;
+    transition: opacity .3s;
+  }
+  .splash-dots::after {
+    display: inline-block;
+    width: 16px;
+    text-align: left;
+    animation: splashDots 1.4s steps(4, end) infinite;
+    content: '';
+  }
+  @keyframes splashDots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+  }
+
+  /* ─── ② Empty State 強化 ─── */
+  .empty-state {
+    text-align: center;
+    padding: 56px 24px 40px;
+    animation: emptyFadeIn .4s ease-out;
+  }
+  @keyframes emptyFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .empty-icon-wrap {
+    width: 88px; height: 88px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, rgba(6, 199, 85, 0.08), rgba(234, 88, 12, 0.08));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px dashed rgba(6, 199, 85, 0.25);
+  }
+  .empty-icon {
+    font-size: 44px;
+    opacity: 0.6;
+  }
+  .empty-title {
+    font-size: 16px;
+    color: #374151;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .empty-hint {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .empty-cta {
+    background: var(--line-green);
+    color: white;
+    border: none;
+    padding: 11px 28px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(6, 199, 85, 0.32);
+    transition: transform .2s, box-shadow .2s;
+    font-family: inherit;
+  }
+  .empty-cta:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 8px rgba(6, 199, 85, 0.32);
+  }
+  .empty-cta-secondary {
+    background: white;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    padding: 11px 28px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 8px;
+    font-family: inherit;
+  }
+
+  /* ─── ③ 黑名單原因 Tooltip ─── */
+  .slot-mini.blocked {
+    cursor: help;
+    position: relative;
+  }
+  .slot-mini.blocked .info-icon {
+    display: inline-block;
+    margin-left: 4px;
+    color: var(--warn);
+    font-weight: 700;
+    font-size: 11px;
+  }
+  /* Desktop hover tooltip */
+  @media (hover: hover) and (pointer: fine) {
+    .slot-mini.blocked:hover::after {
+      content: attr(data-reason);
+      position: absolute;
+      bottom: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a1a;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      width: max-content;
+      max-width: 220px;
+      white-space: normal;
+      line-height: 1.5;
+      z-index: 1000;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      animation: tooltipIn .15s ease-out;
+    }
+    .slot-mini.blocked:hover::before {
+      content: '';
+      position: absolute;
+      bottom: calc(100% + 2px); left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1a1a1a;
+      z-index: 1000;
+    }
+  }
+  @keyframes tooltipIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* Restriction Modal（手機點擊版） */
+  .restriction-modal-content {
+    text-align: center;
+    padding: 8px 4px;
+  }
+  .restriction-modal-icon {
+    font-size: 52px;
+    margin-bottom: 14px;
+  }
+  .restriction-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+  }
+  .restriction-modal-reason {
+    background: var(--warn-bg);
+    color: #92400e;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.7;
+    border-left: 3px solid var(--warn);
+    text-align: left;
+    margin-bottom: 14px;
+  }
+  .restriction-modal-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    line-height: 1.6;
+  }
+
+  /* ─── ④ Toast 強化（icon prefix） ─── */
+  .toast {
+    padding: 12px 22px 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast::before {
+    font-weight: 700;
+    font-size: 14px;
+    display: inline-block;
+  }
+  .toast.success::before { content: '✓'; }
+  .toast.error::before { content: '⚠'; }
+  .toast.info::before { content: 'ⓘ'; }
+  .toast.show {
+    animation: toastBounce .35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes toastBounce {
+    0% { opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.9); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+
 </style>
 
 <!-- 🔌 LINE LIFF SDK -->
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
+
+<!-- 🆕 v1.4 Splash Screen 進場動畫 -->
+<div id="splashScreen" class="splash-screen">
+  <div class="splash-content">
+    <div class="splash-truck">🚐</div>
+    <div class="splash-brand">ZN STUDIO</div>
+    <div class="splash-title">餐車市集排班</div>
+    <div class="splash-subtitle">Food Truck Scheduling System</div>
+    <div class="splash-spinner"></div>
+    <div class="splash-text">
+      <span id="splashText">準備您的場次資料</span><span class="splash-dots"></span>
+    </div>
+  </div>
+</div>
 
 <a href="/" class="demo-info" style="text-decoration:none; color:inherit; cursor:pointer;" title="回首頁">← 回首頁</a>
 
@@ -982,9 +1250,12 @@
   };
 
   let TRUCKS = [
-    { id:'t1', name:'泰沙了打抛飯', emoji:'🍜', type:'餐車', food:'泰式料理', plate:'ABC-1234', status:'active', blocked:['新店夜市'] },
-    { id:'t2', name:'ZN 飲料', emoji:'🧋', type:'餐車', food:'飲料茶飲', plate:'XYZ-5678', status:'active', blocked:['南港餐車市集'] },
-    { id:'t3', name:'黑熊烤玉米', emoji:'🌽', type:'落地攤', food:'燒烤', plate:null, status:'active', blocked:[] }
+    { id:'t1', name:'泰沙了打抛飯', emoji:'🍜', type:'餐車', food:'泰式料理', plate:'ABC-1234', status:'active', blocked:['新店夜市'],
+      blockedReasons:{ '新店夜市':'此場地車型上限為輕食類，本車型暫不在開放名單' } },
+    { id:'t2', name:'ZN 飲料', emoji:'🧋', type:'餐車', food:'飲料茶飲', plate:'XYZ-5678', status:'active', blocked:['南港餐車市集'],
+      blockedReasons:{ '南港餐車市集':'此場地僅開放熟食類餐車，飲料車暫不適用' } },
+    { id:'t3', name:'黑熊烤玉米', emoji:'🌽', type:'落地攤', food:'燒烤', plate:null, status:'active', blocked:[],
+      blockedReasons:{} }
   ];
 
   // 🆕 餐點類型預設清單（涵蓋常見餐車）
@@ -1102,6 +1373,46 @@
   }
   // 🆕 備份 TRUCKS 初始狀態，給 resetDemo 用
   const INITIAL_TRUCKS_JSON = JSON.stringify(TRUCKS);
+
+  // ╔══════════════════════════════════════════╗
+  // ║  🆕 v1.4 黑名單原因系統                      ║
+  // ╚══════════════════════════════════════════╝
+  function getRestrictionReason(truckId, venue) {
+    const truck = TRUCKS.find(t => t.id === truckId);
+    if (truck && truck.blockedReasons && truck.blockedReasons[venue]) {
+      return truck.blockedReasons[venue];
+    }
+    // Fallback：通用訊息
+    return `「${venue}」目前未開放您餐車的車型登記。如有疑問，請洽業主管理員確認車型分類。`;
+  }
+
+  // 顯示「未開放」原因 Modal（手機點擊版）
+  function showRestrictionModal(venue, reason, event) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    const modal = document.getElementById('modal');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    const cancelBtn = document.querySelector('.modal-actions .modal-btn.cancel');
+
+    title.textContent = '此場地未開放';
+    body.innerHTML = `
+      <div class="restriction-modal-content">
+        <div class="restriction-modal-icon">🚫</div>
+        <div class="restriction-modal-title">${venue}</div>
+        <div class="restriction-modal-reason">${reason}</div>
+        <div class="restriction-modal-hint">
+          您可以查看其他場地的可登記時段，<br>或聯繫業主管理員了解詳情。
+        </div>
+      </div>
+    `;
+    if (confirmBtn) confirmBtn.style.display = 'none';
+    if (cancelBtn) cancelBtn.textContent = '我知道了';
+    modal.classList.add('show');
+  }
 
   // 🆕 場地時段配置 — 對應後端 venues 表的 openDays / capacity
   const VENUE_CONFIG = {
@@ -2437,12 +2748,23 @@
         const allowed = s.truckOk === 'all' || s.truckOk.includes(currentTruck.id);
         const slotLabel = getSlotLabel(s.venue, s.slot);
         let key = '', label = '';
-        if (!allowed) { key = ''; label = '未開放'; }
+        let reason = '';
+        if (!allowed) {
+          key = 'blocked';
+          label = '未開放';
+          reason = getRestrictionReason(currentTruck.id, s.venue);
+        }
         else if (s.status === 'event') { key = 'event'; label = '🎪 包場'; }
         else if (s.status === 'waitlist-full') { key = 'waitlist-full'; label = '已額滿'; }
         else if (s.status === 'registered') { key = 'registered'; label = '✅ 已登記'; }
         else if (s.status === 'available') { key = 'available'; label = `剩 ${s.cap[1]-s.cap[0]}/${s.cap[1]}`; }
         else if (s.status === 'full') { key = 'full'; label = `候補 ${s.wl[0]}/${s.wl[1]}`; }
+        // 🆕 v1.4 黑名單 chip 加 tooltip / click 原因
+        if (key === 'blocked') {
+          const safeReason = reason.replace(/"/g, '&quot;');
+          const safeVenue = s.venue.replace(/'/g, "\\'");
+          return `<span class="slot-mini blocked" data-reason="${safeReason}" onclick="showRestrictionModal('${safeVenue}', '${safeReason}', event)">${slotLabel} · ${label}<span class="info-icon">ⓘ</span></span>`;
+        }
         return `<span class="slot-mini ${key}">${slotLabel} · ${label}</span>`;
       }).join('');
 
@@ -2611,6 +2933,13 @@
         const chips = allSlots.map((s, i) => {
           const st = slotStatuses[i];
           const slotLabel = getSlotLabel(s.venue, s.slot);
+          // 🆕 v1.4 黑名單 chip 加 tooltip / click 原因
+          if (st.key === 'blocked') {
+            const reason = getRestrictionReason(currentTruck.id, s.venue);
+            const safeReason = reason.replace(/"/g, '&quot;');
+            const safeVenue = s.venue.replace(/'/g, "\\'");
+            return `<span class="slot-mini blocked" data-reason="${safeReason}" onclick="showRestrictionModal('${safeVenue}', '${safeReason}', event)">${slotLabel} · ${st.label}<span class="info-icon">ⓘ</span></span>`;
+          }
           return `<span class="slot-mini ${st.key}">${slotLabel} · ${st.label}</span>`;
         }).join('');
 
@@ -2806,10 +3135,20 @@
     else                                          items = MY_REGISTRATIONS.filter(r => r.status === 'completed');
 
     if (items.length === 0) {
-      const msg = STATE.currentMyTab === 'confirmed' ? '尚無已確認的登記，至月曆挑場次吧'
-                : STATE.currentMyTab === 'waiting'   ? '目前沒有候補中的登記'
-                : '尚無歷史紀錄';
-      list.innerHTML = `<div style="text-align:center; color:#9ca3af; padding:48px 16px; font-size:13px;">${msg}</div>`;
+      // 🆕 v1.4 強化空狀態：icon + CTA
+      const emptyConfig = {
+        confirmed: { icon: '📅', title: '還沒有已確認的登記', hint: '到月曆挑個喜歡的場次吧～<br>場地多、時段多，總有適合您的', cta: '前往月曆挑場次', ctaAction: "switchScreen('calendar')" },
+        waiting:   { icon: '⏳', title: '目前沒有候補中的登記', hint: '當熱門場地額滿時，<br>您可以加入候補，有人取消會自動遞補', cta: '查看可登記場次', ctaAction: "switchScreen('calendar')" },
+        history:   { icon: '📚', title: '尚無歷史紀錄', hint: '完成的場次會出現在這裡，<br>讓您回顧出攤過的時光', cta: '前往月曆', ctaAction: "switchScreen('calendar')" }
+      };
+      const cfg = emptyConfig[STATE.currentMyTab] || emptyConfig.confirmed;
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon-wrap"><div class="empty-icon">${cfg.icon}</div></div>
+          <div class="empty-title">${cfg.title}</div>
+          <div class="empty-hint">${cfg.hint}</div>
+          <button class="empty-cta" onclick="${cfg.ctaAction}">${cfg.cta} →</button>
+        </div>`;
       return;
     }
 
@@ -3340,8 +3679,17 @@
 
   // ===== Init 主流程 =====
   (async function init() {
+    // 🆕 v1.4 記錄啟動時間（給 splash 用）
+    window._splashStartedAt = Date.now();
+    const updateSplash = (text) => {
+      const el = document.getElementById('splashText');
+      if (el) el.textContent = text;
+    };
+
+    updateSplash('連接 LINE 服務');
     // 先嘗試 LIFF SDK init
     await initLiff();
+    updateSplash('準備您的場次資料');
 
     // 🆕 把所有顯示「Nick Chang」等 hardcoded 資訊改為真實 LINE 暱稱（若 LIFF 成功）
     if (LIFF_READY && LIFF_PROFILE) {
@@ -3415,6 +3763,25 @@
     }
     renderCalendar();
     startPromotedCountdown();
+
+    // 🆕 v1.4 Splash Screen 結束（最少顯示 800ms 讓動畫完整呈現）
+    const splashStartedAt = window._splashStartedAt || Date.now();
+    const elapsed = Date.now() - splashStartedAt;
+    const minDelay = Math.max(0, 800 - elapsed);
+    setTimeout(() => {
+      const splash = document.getElementById('splashScreen');
+      if (splash) {
+        const splashText = document.getElementById('splashText');
+        if (splashText) splashText.textContent = '準備就緒 ✓';
+        const dots = document.querySelector('.splash-dots');
+        if (dots) dots.style.display = 'none';
+        // 再延後 200ms fade out
+        setTimeout(() => {
+          splash.classList.add('fade-out');
+          setTimeout(() => splash.remove(), 500);
+        }, 200);
+      }
+    }, minDelay);
   })();
 </script>
 
