@@ -449,7 +449,7 @@
 
   .pay-review-list { display:flex; flex-direction:column; gap:12px; }
 
-  .pay-review-card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; display:grid; grid-template-columns:80px 1fr 220px; gap:16px; align-items:start; }
+  .pay-review-card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; display:grid; grid-template-columns:80px 1fr; gap:14px 16px; align-items:start; }
   @media(max-width:900px){ .pay-review-card { grid-template-columns:1fr; } .pay-review-thumb { width:100%; height:160px; } }
 
   .pay-review-thumb { width:80px; height:80px; border-radius:8px; background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; position:relative; flex-shrink:0; border:1px solid #dbeafe; transition:transform .2s; }
@@ -469,11 +469,11 @@
   .pay-review-sessions { font-size:11px; color:#6b7280; line-height:1.7; }
   .pay-review-sessions .sess { display:inline-block; background:#eff6ff; color:#1e40af; padding:2px 7px; border-radius:4px; margin:0 4px 3px 0; font-family:'Inter',sans-serif; font-weight:600; }
 
-  .pay-review-actions { display:flex; flex-direction:column; gap:6px; }
-  @media(max-width:900px){ .pay-review-actions { flex-direction:row; } .pay-review-actions button { flex:1; } }
-  .pay-action-btn { padding:9px 14px; border:none; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
-  .pay-action-btn.approve { background:var(--ok); color:#fff; }
-  .pay-action-btn.approve:hover { background:#059669; }
+  .pay-review-actions { display:flex; flex-direction:row; gap:8px; justify-content:flex-end; grid-column:1 / -1; padding-top:14px; border-top:1px dashed #e5e7eb; margin-top:4px; flex-wrap:wrap; }
+  @media(max-width:900px){ .pay-review-actions { flex-direction:row; flex-wrap:wrap; } .pay-review-actions button { flex:1; min-width:100px; } }
+  .pay-action-btn { padding:11px 20px; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .15s; min-width:100px; }
+  .pay-action-btn.approve { background:var(--ok); color:#fff; box-shadow:0 2px 6px rgba(16,185,129,0.3); }
+  .pay-action-btn.approve:hover { background:#059669; transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,0.4); }
   .pay-action-btn.reject { background:#fee2e2; color:#991b1b; }
   .pay-action-btn.reject:hover { background:#fecaca; }
   .pay-action-btn.detail { background:#f3f4f6; color:#374151; }
@@ -1079,12 +1079,12 @@
       </div>
     </div>
 
-    <!-- ====== Page: 特殊規則 (黑名單) ====== -->
+    <!-- ====== Page: 特殊規則 (限制名單) ====== -->
     <div class="page" id="page-rules">
       <div class="card">
         <div class="card-header">
           <div>
-            <span class="card-title">特殊規則 · 黑名單管理</span>
+            <span class="card-title">特殊規則 · 限制名單</span>
             <span class="card-title-meta">⚠️ 此標籤僅後台可見，車主端會顯示您填寫的詳細原因</span>
           </div>
           <button class="btn primary" onclick="openAddRuleModal()">＋ 新增規則</button>
@@ -1506,7 +1506,7 @@
 <!-- 🆕 v1.4 規則編輯 modal -->
 <div class="rule-modal-overlay" id="ruleModal" onclick="if(event.target===this) closeRuleModal()">
   <div class="rule-modal-box">
-    <div class="rule-modal-title" id="ruleModalTitle">新增黑名單規則</div>
+    <div class="rule-modal-title" id="ruleModalTitle">新增限制規則</div>
     <div class="rule-modal-subtitle">設定特定餐車不能登記某場地的限制原因</div>
 
     <div class="rule-form-row">
@@ -1894,7 +1894,7 @@
     review: ['待審核', '社群暱稱修改申請'],
     venues: ['場地管理', '5 個據點'],
     trucks: ['餐車總覽', '912 台車輛'],
-    rules: ['特殊規則', '黑名單管理（後台限定）'],
+    rules: ['特殊規則', '限制名單管理（後台限定）'],
     events: ['包場管理', 'EventBookings'],
     credit: ['信用觀察', '信用分 < 80 名單'],
     payment: ['對帳審核', '場地費繳款 · 截圖辨識'],
@@ -2034,7 +2034,7 @@
   let _payReviewTab = 'pending';
 
   // ╔══════════════════════════════════════════╗
-  // ║  🆕 v1.4 RULES 黑名單規則系統                 ║
+  // ║  🆕 v1.4 RULES 限制規則系統                   ║
   // ║  與 LIFF v1.4 blockedReasons 同步             ║
   // ╚══════════════════════════════════════════╝
   let RULES = [
@@ -2094,7 +2094,7 @@
         <div class="rule-card ${hasRules}">
           <div class="rule-venue">📍 ${venue} <span class="badge ${badgeClass}">${count} 筆</span></div>
           <div>${rulesHtml}</div>
-          <button class="rule-add-btn" onclick="openAddRuleModal('${venue}')">＋ 加入黑名單</button>
+          <button class="rule-add-btn" onclick="openAddRuleModal('${venue}')">＋ 新增限制</button>
         </div>`;
     });
     grid.innerHTML = html;
@@ -2102,7 +2102,7 @@
 
   function openAddRuleModal(presetVenue) {
     _editingRuleId = null;
-    document.getElementById('ruleModalTitle').textContent = '新增黑名單規則';
+    document.getElementById('ruleModalTitle').textContent = '新增限制規則';
     document.getElementById('ruleVenue').value = presetVenue || '';
     document.getElementById('ruleTruck').value = '';
     document.getElementById('ruleTag').value = '';
@@ -2116,7 +2116,7 @@
     const r = RULES.find(x => x.id === ruleId);
     if (!r) return;
     _editingRuleId = ruleId;
-    document.getElementById('ruleModalTitle').textContent = '編輯黑名單規則';
+    document.getElementById('ruleModalTitle').textContent = '編輯限制規則';
     document.getElementById('ruleVenue').value = r.venue;
     document.getElementById('ruleTruck').value = `${r.truckId}|${r.truckEmoji}|${r.truckName}`;
     document.getElementById('ruleTag').value = r.tag || '';
@@ -2174,7 +2174,7 @@
         venue, truckId, truckEmoji, truckName,
         tag, reason
       });
-      showToast(`✓ 已新增「${truckName} 不可上 ${venue}」規則`, 'success');
+      showToast(`✓ 已新增「${truckName} 未開放 ${venue}」規則`, 'success');
     }
     closeRuleModal();
     renderRules();
@@ -2184,7 +2184,7 @@
     if (!_editingRuleId) return;
     const r = RULES.find(x => x.id === _editingRuleId);
     if (!r) return;
-    if (!confirm(`確定刪除「${r.truckName} 不可上 ${r.venue}」這條規則？`)) return;
+    if (!confirm(`確定刪除「${r.truckName} 未開放 ${r.venue}」這條規則？`)) return;
     RULES = RULES.filter(x => x.id !== _editingRuleId);
     showToast(`已刪除「${r.truckName} × ${r.venue}」規則`, 'success');
     closeRuleModal();
@@ -2194,7 +2194,7 @@
   function doQuickDelete(ruleId) {
     const r = RULES.find(x => x.id === ruleId);
     if (!r) return;
-    if (!confirm(`快速刪除「${r.truckName} 不可上 ${r.venue}」？`)) return;
+    if (!confirm(`快速刪除「${r.truckName} 未開放 ${r.venue}」？`)) return;
     RULES = RULES.filter(x => x.id !== ruleId);
     showToast(`已刪除「${r.truckName} × ${r.venue}」規則`, 'success');
     renderRules();
