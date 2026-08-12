@@ -925,7 +925,7 @@
     <span>回首頁</span>
   </a>
 
-  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v1.8 · 08/12</div>
+  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v1.9 · 08/12</div>
   <div class="sidebar-user">
     <div class="sidebar-user-avatar">A</div>
     <div class="sidebar-user-info">
@@ -986,57 +986,11 @@
           <div class="card-header">
             <div>
               <span class="card-title">今日排班</span>
-              <span class="card-title-meta">6/20（六）· 共 4 場地有營業</span>
+              <span class="card-title-meta" id="todayMeta">—</span>
             </div>
             <button class="btn sm" onclick="gotoPage('calendar')">查看月曆 →</button>
           </div>
-          <div class="today-grid">
-            <div class="today-venue">
-              <div class="today-venue-header">
-                <span class="today-venue-name">中央公園市集 · 晚場</span>
-                <span class="badge success"><span class="dot"></span>5/5 滿</span>
-              </div>
-              <div class="today-venue-trucks">
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🍜</span>泰香打拋飯<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🌽</span>大熊烤玉米<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🥟</span>老王米粉湯<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🍢</span>關東煮 G<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🥤</span>飲料姊妹<span class="today-truck-status">已確認</span></div>
-              </div>
-            </div>
-            <div class="today-venue">
-              <div class="today-venue-header">
-                <span class="today-venue-name">老街商圈 · 晚場</span>
-                <span class="badge warn"><span class="dot"></span>3/4 接近滿</span>
-              </div>
-              <div class="today-venue-trucks">
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🧋</span>ZN 飲料<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🍤</span>阿根廷酥炸<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🥩</span>BC 職人烤玉米<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck waitlist"><span class="today-truck-emoji">🍕</span>好食披薩<span class="today-truck-status">候補 #1</span></div>
-              </div>
-            </div>
-            <div class="today-venue">
-              <div class="today-venue-header">
-                <span class="today-venue-name">陽光廣場 · 午場</span>
-                <span class="badge purple"><span class="dot"></span>已包場</span>
-              </div>
-              <div class="today-venue-trucks">
-                <div class="today-truck" style="background:var(--purple-bg); color:#5b21b6;">🎪 小熊夏季嘉年華</div>
-              </div>
-            </div>
-            <div class="today-venue">
-              <div class="today-venue-header">
-                <span class="today-venue-name">河濱夜市 · 晚場</span>
-                <span class="badge info"><span class="dot"></span>3/6 還早</span>
-              </div>
-              <div class="today-venue-trucks">
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🥞</span>胖揍餐車<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🥨</span>麵糰杜<span class="today-truck-status">已確認</span></div>
-                <div class="today-truck confirmed"><span class="today-truck-emoji">🍡</span>甜心點心坊<span class="today-truck-status">已確認</span></div>
-              </div>
-            </div>
-          </div>
+          <div class="today-grid" id="todayGrid"></div>
         </div>
 
         <div>
@@ -1264,7 +1218,7 @@
             <div class="watch-avatar" style="background:linear-gradient(135deg,#fb923c,#ea580c);">陳</div>
             <div class="watch-info">
               <div class="watch-name">陳老闆（大熊烤玉米）</div>
-              <div class="watch-meta">扣分原因：6/12 晚場無故缺席 (-15) · 6/8 取消過晚 (-5) · 5/30 取消過晚 (-8)</div>
+              <div class="watch-meta" id="watchMetaChen">—</div>
             </div>
             <div class="watch-score warn">72</div>
             <div style="display:flex; flex-direction:column; gap:5px;">
@@ -1276,7 +1230,7 @@
             <div class="watch-avatar" style="background:linear-gradient(135deg,#f87171,#dc2626);">林</div>
             <div class="watch-info">
               <div class="watch-name">林老闆（老王米粉湯）</div>
-              <div class="watch-meta">扣分原因：6/15 遲到超過 1 小時 (-10) · 6/2 遲到 30 分鐘 (-5) · 5/24 缺席 (-15) · 5/10 取消過晚 (-5)</div>
+              <div class="watch-meta" id="watchMetaLin">—</div>
             </div>
             <div class="watch-score danger">65</div>
             <div style="display:flex; flex-direction:column; gap:5px;">
@@ -1292,7 +1246,7 @@
     <div class="page" id="page-reports">
       <div class="card">
         <div class="card-header">
-          <span class="card-title">月度報表 · 2026 年 6 月</span>
+          <span class="card-title" id="reportMonthTitle">月度報表</span>
           <div style="display:flex; gap:8px;"><button class="btn" onclick="runExport('月度營運報表','pdf')">📥 匯出 PDF</button><button class="btn primary" onclick="runExport('月度營運報表','csv')">📊 匯出 CSV</button></div>
         </div>
         <div class="kpi-grid" style="margin:14px; gap:10px;">
@@ -1700,6 +1654,32 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // ============================================================
+  // 🆕 v1.8 日期基準：以「真實今天」為準，不再凍結在固定日期
+  // ============================================================
+  const DEMO_NOW   = new Date();
+  const DEMO_Y     = DEMO_NOW.getFullYear();
+  const DEMO_M     = DEMO_NOW.getMonth() + 1;   // 1-12
+  const DEMO_D     = DEMO_NOW.getDate();
+  const WD_TW      = ['日','一','二','三','四','五','六'];
+
+  function twDateLabel(d) {
+    return `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日（${WD_TW[d.getDay()]}）`;
+  }
+
+  // 相對日期工具：以今天為基準往前/往後推 n 天
+  function dOff(n) {
+    const d = new Date(DEMO_Y, DEMO_M - 1, DEMO_D);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+  const md    = n => { const d = dOff(n); return `${d.getMonth()+1}/${d.getDate()}`; };
+  const mdw   = n => { const d = dOff(n); return `${d.getMonth()+1}/${d.getDate()}（${WD_TW[d.getDay()]}）`; };
+  const mdPad = n => { const d = dOff(n); return `${d.getMonth()+1}/${String(d.getDate()).padStart(2,'0')}`; };
+  const iso   = n => { const d = dOff(n);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+
+
   // 🆕 ============ 登入驗證 ============
   // demo 階段：預設密碼 88888888，使用者改過後存在 localStorage
   // 簽約後可改成 LINE Login 或後端驗證
@@ -2133,18 +2113,18 @@
   // ---- 信用紀錄 ----
   const CREDIT_LOG = {
     chen: { name:'陳老闆（大熊烤玉米）', score:72, rows:[
-      ['6/12','晚場無故缺席','−15','中央公園市集'],
-      ['6/08','取消過晚（開場前 2 小時）','−5','河濱夜市'],
-      ['5/30','取消過晚（開場前 4 小時）','−8','老街商圈'],
-      ['5/18','準時出席','＋2','中央公園市集'],
-      ['5/04','準時出席','＋2','陽光廣場'],
+      [mdPad(-8),  '晚場無故缺席',              '−15', '中央公園市集'],
+      [mdPad(-12), '取消過晚（開場前 2 小時）', '−5',  '河濱夜市'],
+      [mdPad(-21), '取消過晚（開場前 4 小時）', '−8',  '老街商圈'],
+      [mdPad(-33), '準時出席',                  '＋2', '中央公園市集'],
+      [mdPad(-47), '準時出席',                  '＋2', '陽光廣場'],
     ]},
     lin: { name:'林老闆（老王米粉湯）', score:65, rows:[
-      ['6/15','遲到超過 1 小時','−10','河濱夜市'],
-      ['6/02','遲到 30 分鐘','−5','中央公園市集'],
-      ['5/24','無故缺席','−15','老街商圈'],
-      ['5/10','取消過晚','−5','河濱夜市'],
-      ['4/28','準時出席','＋2','中央公園市集'],
+      [mdPad(-5),  '遲到超過 1 小時', '−10', '河濱夜市'],
+      [mdPad(-18), '遲到 30 分鐘',    '−5',  '中央公園市集'],
+      [mdPad(-27), '無故缺席',        '−15', '老街商圈'],
+      [mdPad(-41), '取消過晚',        '−5',  '河濱夜市'],
+      [mdPad(-53), '準時出席',        '＋2', '中央公園市集'],
     ]},
   };
 
@@ -2242,7 +2222,7 @@
         </div>
         <div style="display:flex; gap:10px;">
           <span style="font-size:19px;">📅</span>
-          <div><div style="font-weight:700; font-size:14px;">6/27（六）河濱夜市 尚缺 4 攤</div>
+          <div><div style="font-weight:700; font-size:14px;">${mdw(7)} 河濱夜市 尚缺 4 攤</div>
           <div style="font-size:12px; color:var(--text-3);">建議提前推播招募</div></div>
         </div>
       </div>
@@ -2297,8 +2277,8 @@
       ['今天 11:05','胡桃哥','新增餐車','胡桃辣椒醬（落地攤）'],
       ['昨天 19:31','Amy','Email','新增 a***@gmail.com'],
       ['昨天 16:08','陳老闆','社群暱稱','大熊 → 大熊烤玉米'],
-      ['6/18 10:44','管理員','場地設定','河濱夜市 晚場上限 5 → 6'],
-      ['6/17 09:20','管理員','特殊規則','新增「室內限落地攤」'],
+      [md(-2) + ' 10:44','管理員','場地設定','河濱夜市 晚場上限 5 → 6'],
+      [md(-3) + ' 09:20','管理員','特殊規則','新增「室內限落地攤」'],
     ].map(r => `<tr>
         <td style="white-space:nowrap; color:var(--text-3); font-size:12px;">${r[0]}</td>
         <td style="white-space:nowrap;">${r[1]}</td>
@@ -2425,7 +2405,7 @@
       amount: 500,
       method: '銀行匯款',
       last5: '67890',
-      paidDate: '2026-06-02',
+      paidDate: iso(-10),
       screenshot: 'mock_kbank_500.jpg',
       sessions: ['老街商圈|2026-05-03|PM', '中央公園市集|2026-05-15|AM'],
       status: 'pending',
@@ -2443,7 +2423,7 @@
       amount: 1200,
       method: '銀行匯款',
       last5: '23456',
-      paidDate: '2026-06-02',
+      paidDate: iso(-10),
       screenshot: 'mock_ctbc_1200.jpg',
       sessions: ['中央公園市集|2026-05-01|AM', '中央公園市集|2026-05-08|AM', '中央公園市集|2026-05-15|AM', '中央公園市集|2026-05-22|AM'],
       status: 'pending',
@@ -2461,7 +2441,7 @@
       amount: 700,
       method: '銀行匯款',
       last5: '11223',
-      paidDate: '2026-06-01',
+      paidDate: iso(-11),
       screenshot: 'mock_esun_700.jpg',
       sessions: ['河濱夜市|2026-05-04|PM', '河濱夜市|2026-05-18|PM'],
       status: 'approved',
@@ -2497,7 +2477,7 @@
       amount: 350,
       method: '銀行匯款',
       last5: '55667',
-      paidDate: '2026-06-03',
+      paidDate: iso(-9),
       screenshot: 'mock_fubon_350.jpg',
       sessions: ['廟口廣場|2026-05-20|ALL'],
       status: 'pending',
@@ -2925,7 +2905,7 @@
       avatarText: '陳',
       ownerName: '陳老闆',
       handle: '@chenfood',
-      time: '14 小時前 · 6/19 22:18',
+      time: '14 小時前 · ' + md(-1) + ' 22:18',
       oldVal: '陳老闆 / 大熊燒烤',
       newVal: '陳大 / 大熊烤玉米',
       creditScore: null
@@ -2936,19 +2916,34 @@
       avatarGradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
       ownerName: '林老闆',
       handle: '@lin_noodle',
-      time: '3 小時前 · 6/20 06:50',
+      time: '3 小時前 · ' + md(0) + ' 06:50',
       oldVal: '林老闆 / 米粉湯',
       newVal: '林婆婆 / 老王米粉湯',
       creditScore: 65
     }
   ];
 
-  // 包場紀錄
-  let EVENTS = [
-    { id:'E_001', date:'2026-06-23', dateLabel:'6/23（二）', venue:'陽光廣場', slot:'PM', slotLabel:'晚場', name:'小熊夏季嘉年華', contact:'王先生 · 09xx-***-123', note:'整晚包場 / 含落地攤' },
-    { id:'E_002', date:'2026-06-29', dateLabel:'6/29（一）', venue:'中央公園市集', slot:'PM', slotLabel:'晚場', name:'社區居民日', contact:'王里長 · 09xx-***-456', note:'晚場包場' },
-    { id:'E_003', date:'2026-07-05', dateLabel:'7/5（日）', venue:'老街商圈', slot:'ALL', slotLabel:'全日', name:'老街建鎮慶典', contact:'區公所', note:'整日包場' }
-  ];
+  // 包場紀錄 —— 日期直接取自月曆的 eventDaysOf()，兩邊保證一致
+  function buildEvents() {
+    const evThis = eventDaysOf(DEMO_Y, DEMO_M);
+    const nm     = DEMO_M === 12 ? 1 : DEMO_M + 1;
+    const ny     = DEMO_M === 12 ? DEMO_Y + 1 : DEMO_Y;
+    const evNext = eventDaysOf(ny, nm);
+    const lbl = (y, m, d) => `${m}/${d}（${WD_TW[new Date(y, m-1, d).getDay()]}）`;
+    const pad = (y, m, d) => `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    return [
+      { id:'E_001', date:pad(DEMO_Y, DEMO_M, evThis.b), dateLabel:lbl(DEMO_Y, DEMO_M, evThis.b),
+        venue:'陽光廣場', slot:'PM', slotLabel:'晚場', name:'夏季嘉年華',
+        contact:'王先生 · 09xx-***-123', note:'整晚包場 / 含落地攤' },
+      { id:'E_002', date:pad(DEMO_Y, DEMO_M, evThis.a), dateLabel:lbl(DEMO_Y, DEMO_M, evThis.a),
+        venue:'中央公園市集', slot:'PM', slotLabel:'晚場', name:'社區居民日',
+        contact:'王里長 · 09xx-***-456', note:'晚場包場' },
+      { id:'E_003', date:pad(ny, nm, evNext.a), dateLabel:lbl(ny, nm, evNext.a),
+        venue:'老街商圈', slot:'ALL', slotLabel:'全日', name:'老街建鎮慶典',
+        contact:'區公所', note:'整日包場' },
+    ];
+  }
+  let EVENTS = buildEvents();
 
   // 自動生效紀錄
   let AUTO_APPLY = [
@@ -3176,19 +3171,6 @@
   }
 
   // 渲染月曆 grid（對齊 VENUE_CONFIG）
-  // ============================================================
-  // 🆕 v1.8 日期基準：以「真實今天」為準，不再凍結在固定日期
-  // ============================================================
-  const DEMO_NOW   = new Date();
-  const DEMO_Y     = DEMO_NOW.getFullYear();
-  const DEMO_M     = DEMO_NOW.getMonth() + 1;   // 1-12
-  const DEMO_D     = DEMO_NOW.getDate();
-  const WD_TW      = ['日','一','二','三','四','五','六'];
-
-  function twDateLabel(d) {
-    return `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日（${WD_TW[d.getDay()]}）`;
-  }
-
   // 讓每格資料固定不變（同一天同一場地永遠算出同樣結果）
   // FNV-1a + murmur3 fmix32 收尾，確保相鄰字串也能充分打散
   function seedRand(str) {
@@ -3206,13 +3188,46 @@
   // ============================================================
   // 排班月曆：整月渲染（1 號到月底）
   // ============================================================
+  // slotKey 需與餐車主端 VENUE_CONFIG 的時段代號一致，
+  // 兩邊才會用同一組 seed 算出相同的滿位狀況
   const CAL_VENUES = [
-    { name:'中央公園市集', slot:'晚場',   cap:5, days:[0,1,2,3,4,5,6] },
-    { name:'陽光廣場',     slot:'午場',   cap:4, days:[1,2,3,4,5]     },
-    { name:'老街商圈',     slot:'晚市',   cap:4, days:[6,0]           },
-    { name:'河濱夜市',     slot:'夜市',   cap:6, days:[1,3,5]         },
-    { name:'廟口廣場',     slot:'整天場', cap:5, days:[],  paused:true },
+    { name:'中央公園市集', slot:'晚場',   slotKey:'PM',  cap:5, days:[0,1,2,3,4,5,6] },
+    { name:'陽光廣場',     slot:'午場',   slotKey:'AM',  cap:4, days:[1,2,3,4,5]     },
+    { name:'老街商圈',     slot:'晚市',   slotKey:'PM',  cap:4, days:[6,0]           },
+    { name:'河濱夜市',     slot:'夜市',   slotKey:'PM',  cap:6, days:[1,3,5]         },
+    { name:'廟口廣場',     slot:'整天場', slotKey:'ALL', cap:8, days:[],  paused:true },
   ];
+
+  // 每月固定挑兩天當包場（deterministic）
+  function eventDaysOf(y, m) {
+    const dim = new Date(y, m, 0).getDate();
+    return {
+      a: Math.floor(seedRand(`ev-a-${y}-${m}`) * dim) + 1,   // 中央公園市集
+      b: Math.floor(seedRand(`ev-b-${y}-${m}`) * dim) + 1,   // 陽光廣場
+    };
+  }
+
+  // 單一場地在某一天的狀態 —— 月曆與今日排班共用，確保兩邊數字一致
+  function venueDayState(vi, y, m, d) {
+    const v  = CAL_VENUES[vi];
+    const wd = new Date(y, m - 1, d).getDay();
+    if (v.paused)              return { open:false, reason:'paused', cap:v.cap };
+    if (!v.days.includes(wd))  return { open:false, reason:'closed', cap:v.cap };
+
+    const ev = eventDaysOf(y, m);
+    if ((vi === 0 && d === ev.a) || (vi === 1 && d === ev.b))
+      return { open:true, event:true, cap:v.cap };
+
+    const dStr    = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const r       = seedRand(`${v.name}|${dStr}|${v.slotKey}`);
+    const weekend = (wd === 0 || wd === 6);
+    const ratio   = weekend ? 0.55 + r * 0.50 : 0.25 + r * 0.65;
+    const booked  = Math.max(0, Math.min(v.cap, Math.round(v.cap * ratio)));
+    return {
+      open:true, booked, cap:v.cap,
+      state: booked >= v.cap ? 'full' : (booked >= v.cap - 1 ? 'warning' : 'available')
+    };
+  }
 
   let _calYear  = DEMO_Y;
   let _calMonth = DEMO_M;
@@ -3248,10 +3263,6 @@
       head.innerHTML = th;
     }
 
-    // ---- 包場（每月固定挑兩天，deterministic）----
-    const evDayA = Math.floor(seedRand(`ev-a-${_calYear}-${_calMonth}`) * daysInMonth) + 1;
-    const evDayB = Math.floor(seedRand(`ev-b-${_calYear}-${_calMonth}`) * daysInMonth) + 1;
-
     // ---- 內容 ----
     const body = document.getElementById('calGridBody');
     if (!body) return;
@@ -3260,26 +3271,14 @@
       let tds = '';
       for (let d = 1; d <= daysInMonth; d++) {
         const wd     = new Date(_calYear, _calMonth - 1, d).getDay();
-        const key    = `${v.name}-${_calYear}-${_calMonth}-${d}`;
         const today  = isThisMonth && d === DEMO_D;
         const past   = isThisMonth ? d < DEMO_D : (_calYear < DEMO_Y || (_calYear === DEMO_Y && _calMonth < DEMO_M));
 
+        const st = venueDayState(vi, _calYear, _calMonth, d);
         let cls, text;
-        if (v.paused) {
-          cls = 'closed'; text = '─';
-        } else if (!v.days.includes(wd)) {
-          cls = 'closed'; text = '─';
-        } else if ((vi === 0 && d === evDayA) || (vi === 1 && d === evDayB)) {
-          cls = 'event';  text = '包場';
-        } else {
-          const r = seedRand(key);
-          const weekend = (wd === 0 || wd === 6);
-          // 平日 25%~90%、週末 55%~105%（會被 cap 夾住），讓「哪天缺人」看得出來
-          const ratio  = weekend ? 0.55 + r * 0.50 : 0.25 + r * 0.65;
-          const booked = Math.max(0, Math.min(v.cap, Math.round(v.cap * ratio)));
-          text = `${booked}/${v.cap}`;
-          cls  = booked >= v.cap ? 'full' : (booked >= v.cap - 1 ? 'warning' : 'available');
-        }
+        if (!st.open)       { cls = 'closed'; text = '─'; }
+        else if (st.event)  { cls = 'event';  text = '包場'; }
+        else                { cls = st.state; text = `${st.booked}/${st.cap}`; }
 
         tds += `<td class="${today ? 'cal-today' : ''}">
                   <div class="cal-cell ${cls}" style="${past ? 'opacity:.45;' : ''}">
@@ -3464,6 +3463,89 @@
     renderTruckTable();
   }
 
+  // ============================================================
+  // 今日排班（與月曆共用 venueDayState，數字保證一致）
+  // ============================================================
+  const TRUCK_POOL = [
+    ['🍜','泰香打拋飯'], ['🌽','大熊烤玉米'], ['🥟','老王米粉湯'], ['🍢','關東煮 G'],
+    ['🥤','飲料姊妹'],   ['🧋','ZN 飲料'],    ['🍤','海邊酥炸'],   ['🥩','炭道烤物'],
+    ['🍕','好食披薩'],   ['🥞','胖揍餐車'],   ['🥨','麵糰杜'],     ['🍡','甜心點心坊'],
+    ['🌮','墨西哥捲'],   ['🍔','速食堡'],     ['🍧','雪花冰舖'],   ['🍗','阿明鹽酥雞'],
+  ];
+  const EVENT_NAMES = ['社區居民日', '夏季嘉年華', '園遊會', '市集週年慶'];
+
+  function renderTodaySchedule() {
+    const grid = document.getElementById('todayGrid');
+    const meta = document.getElementById('todayMeta');
+    if (!grid) return;
+
+    const openList = [];
+    CAL_VENUES.forEach((v, vi) => {
+      const st = venueDayState(vi, DEMO_Y, DEMO_M, DEMO_D);
+      if (st.open) openList.push({ v, vi, st });
+    });
+
+    if (meta) {
+      meta.textContent = `${DEMO_M}/${DEMO_D}（${WD_TW[DEMO_NOW.getDay()]}）· 共 ${openList.length} 場地有營業`;
+    }
+
+    if (!openList.length) {
+      grid.innerHTML = `<div style="padding:26px; text-align:center; color:var(--text-3);">
+        今天沒有場地營業</div>`;
+      return;
+    }
+
+    grid.innerHTML = openList.map(({ v, vi, st }) => {
+      // 包場
+      if (st.event) {
+        const en = EVENT_NAMES[Math.floor(seedRand(`en-${v.name}-${DEMO_M}`) * EVENT_NAMES.length)];
+        return `<div class="today-venue">
+          <div class="today-venue-header">
+            <span class="today-venue-name">${v.name} · ${v.slot}</span>
+            <span class="badge purple"><span class="dot"></span>已包場</span>
+          </div>
+          <div class="today-venue-trucks">
+            <div class="today-truck" style="background:var(--purple-bg); color:#5b21b6;">🎪 ${en}</div>
+          </div>
+        </div>`;
+      }
+
+      // 依 booked 數從名單池挑車（deterministic，不會每次重整就換）
+      const offset = Math.floor(seedRand(`off-${v.name}-${DEMO_M}-${DEMO_D}`) * TRUCK_POOL.length);
+      const rows = [];
+      for (let i = 0; i < st.booked; i++) {
+        const [emoji, name] = TRUCK_POOL[(offset + i) % TRUCK_POOL.length];
+        rows.push(`<div class="today-truck confirmed">
+          <span class="today-truck-emoji">${emoji}</span>${name}
+          <span class="today-truck-status">已確認</span></div>`);
+      }
+      // 額滿的場地補一筆候補，示範候補機制
+      if (st.state === 'full') {
+        const [e2, n2] = TRUCK_POOL[(offset + st.booked) % TRUCK_POOL.length];
+        rows.push(`<div class="today-truck waitlist">
+          <span class="today-truck-emoji">${e2}</span>${n2}
+          <span class="today-truck-status">候補 #1</span></div>`);
+      }
+      if (!rows.length) {
+        rows.push(`<div class="today-truck" style="color:var(--text-3);">尚無人登記</div>`);
+      }
+
+      const badge = st.state === 'full'
+        ? `<span class="badge success"><span class="dot"></span>${st.booked}/${st.cap} 滿</span>`
+        : st.state === 'warning'
+          ? `<span class="badge warn"><span class="dot"></span>${st.booked}/${st.cap} 接近滿</span>`
+          : `<span class="badge info"><span class="dot"></span>${st.booked}/${st.cap} 還早</span>`;
+
+      return `<div class="today-venue">
+        <div class="today-venue-header">
+          <span class="today-venue-name">${v.name} · ${v.slot}</span>
+          ${badge}
+        </div>
+        <div class="today-venue-trucks">${rows.join('')}</div>
+      </div>`;
+    }).join('');
+  }
+
   // 月曆捲到今天（換頁後元素才有寬度，需延後執行）
   function scrollCalToToday() {
     const run = () => {
@@ -3490,15 +3572,24 @@
       el.textContent = `${DEMO_M}/${DEMO_D}`;
     });
     // 報表頁月份標題
+    const rt = document.getElementById('reportMonthTitle');
+    if (rt) rt.textContent = `月度報表 · ${DEMO_Y} 年 ${DEMO_M} 月`;
     document.querySelectorAll('.card-title, .card-title-meta').forEach(el => {
       if (el.textContent.trim() === '2026 年 6 月') {
         el.textContent = `${DEMO_Y} 年 ${DEMO_M} 月`;
       }
     });
+
+    // 信用觀察的扣分摘要
+    const wc = document.getElementById('watchMetaChen');
+    if (wc) wc.textContent = `扣分原因：${md(-8)} 晚場無故缺席 (-15) · ${md(-12)} 取消過晚 (-5) · ${md(-21)} 取消過晚 (-8)`;
+    const wl = document.getElementById('watchMetaLin');
+    if (wl) wl.textContent = `扣分原因：${md(-5)} 遲到超過 1 小時 (-10) · ${md(-18)} 遲到 30 分鐘 (-5) · ${md(-27)} 缺席 (-15) · ${md(-41)} 取消過晚 (-5)`;
   }
 
   // 🆕 初始化
   applyTodayLabels();
+  renderTodaySchedule();
   renderCalGrid();
   renderTruckTable();
   renderNewTruckReviews();
@@ -3509,6 +3600,6 @@
   renderSettings();  // 🆕 載入業主設定
 </script>
 
-<!-- BUILD: v1.8 · 08/12 02:38 -->
+<!-- BUILD: v1.9 · 08/12 02:58 -->
 </body>
 </html>

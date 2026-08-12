@@ -990,7 +990,7 @@
 
     <div class="month-switcher">
       <button class="month-btn" onclick="changeMonth(-1)">‹</button>
-      <div class="month-title" id="monthTitle">2026 年 6 月</div>
+      <div class="month-title" id="monthTitle">—</div>
       <button class="month-btn" onclick="changeMonth(1)">›</button>
       <!-- 🆕 列表 / 網格 切換 -->
       <div class="view-toggle" id="viewToggle">
@@ -1488,8 +1488,9 @@
       slots: ['ALL'],
       labels: { ALL:'整天場' },
       hours:  { ALL:'10:00–21:00' },
-      openWeekdays: { ALL:[1,2,3,4,5,6,7] },                         // 每天都開
-      capacity: { ALL:8 }
+      openWeekdays: { ALL:[1,2,3,4,5,6,7] },
+      capacity: { ALL:8 },
+      paused: true                                                   // 業主暫停開放，與後台場地管理一致
     }
   };
 
@@ -1514,7 +1515,32 @@
     return (VENUE_CONFIG[venue] && VENUE_CONFIG[venue].slots.length) || 2;
   }
 
-  const TODAY = '2026-06-20';
+  // 🆕 v1.8 以真實今天為基準（原本寫死 2026-06-20，八月展示時整個 demo 停在六月）
+  const _now = new Date();
+  const _pad = n => String(n).padStart(2, '0');
+  const TODAY = `${_now.getFullYear()}-${_pad(_now.getMonth()+1)}-${_pad(_now.getDate())}`;
+  const THIS_MONTH = TODAY.slice(0, 7);
+  const WD_TW = ['日','一','二','三','四','五','六'];
+
+  // 與後台共用的亂數（FNV-1a + murmur3 fmix32），確保兩邊算出同樣的滿位狀況
+  function seedRand(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    h ^= h >>> 16; h = Math.imul(h, 2246822507);
+    h ^= h >>> 13; h = Math.imul(h, 3266489909);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  }
+
+  // 每月固定挑兩天當包場（與後台 eventDaysOf 同演算法）
+  function eventDaysOf(y, m) {
+    const dim = new Date(y, m, 0).getDate();
+    return {
+      a: Math.floor(seedRand(`ev-a-${y}-${m}`) * dim) + 1,   // 中央公園市集 PM
+      b: Math.floor(seedRand(`ev-b-${y}-${m}`) * dim) + 1,   // 陽光廣場 PM
+    };
+  }
+  const EVENT_NAMES = ['社區居民日', '夏季嘉年華', '園遊會', '市集週年慶'];
 
   // 🆕 SESSIONS：按照 VENUE_CONFIG 的場地時段規律重新設計，讓 demo 能看到「每個場地的差異」
   // - 中央公園：每天 AM+PM（5+5）
@@ -1522,84 +1548,87 @@
   // - 老街：假日早市+晚市（3+4），平日休
   // - 河濱：週一三五只夜市（6），其他天休
   // - 廟口：每天整天場（10:00–21:00，容量 8）
-  const SESSIONS = {
-    '2026-05': [
-      { d:'2026-05-03', wd:'六', slot:'PM', venue:'老街商圈', status:'history-completed', truckOk:'all' },
-      { d:'2026-05-15', wd:'四', slot:'AM', venue:'中央公園市集', status:'history-completed', truckOk:['t1','t3'] }
-    ],
-    '2026-06': [
-      // === 6/22（一）平日 ===
-      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'中央公園市集', status:'full',        cap:[5,5], wl:[2,5], truckOk:['t1','t3'] },
-      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'河濱夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
-      { d:'2026-06-22', wd:'一', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' },
-
-      // === 6/23（二）平日 ===
-      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'陽光廣場', status:'event', event:'小熊夏季嘉年華', truckOk:'all' },
-      { d:'2026-06-23', wd:'二', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[6,8], wl:[0,8], truckOk:'all' },
-
-      // === 6/24（三）平日 ===
-      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'陽光廣場', status:'full',        cap:[4,4], wl:[1,4], truckOk:'all' },
-      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'河濱夜市',     status:'full',        cap:[6,6], wl:[2,6], truckOk:['t2','t3'] },
-      { d:'2026-06-24', wd:'三', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
-
-      // === 6/25（四）平日 ===
-      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[1,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-25', wd:'四', slot:'ALL', venue:'廟口廣場',     status:'full',        cap:[8,8], wl:[1,8], truckOk:'all' },
-
-      // === 6/26（五）平日 ===
-      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[3,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'陽光廣場', status:'full',        cap:[3,3], wl:[1,3], truckOk:'all' },
-      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'河濱夜市',     status:'available',   cap:[4,6], wl:[0,6], truckOk:['t2','t3'] },
-      { d:'2026-06-26', wd:'五', slot:'ALL', venue:'廟口廣場',     status:'waitlist-full', cap:[8,8], wl:[8,8], truckOk:'all' },
-
-      // === 6/27（六）週末 ===
-      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'老街商圈',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'老街商圈',     status:'registered',  cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-27', wd:'六', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[3,8], wl:[0,8], truckOk:'all' },
-
-      // === 6/28（日）週末 ===
-      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'老街商圈',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'老街商圈',     status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-28', wd:'日', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
-
-      // === 6/29（一）平日，中央公園 PM 包場 ===
-      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'中央公園市集', status:'event', event:'社區居民日', truckOk:['t1','t3'] },
-      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'河濱夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
-      { d:'2026-06-29', wd:'一', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[2,8], wl:[0,8], truckOk:'all' },
-
-      // === 6/30（二）平日 ===
-      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-30', wd:'二', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' }
-    ],
-    '2026-07': []
+  // ============================================================
+  // 🆕 v1.8 場次資料改為程式產生
+  // 原本是手寫的 2026 年 5–7 月清單，換月只有三個月有資料，
+  // 且與後台的滿位數字對不起來。改為依 VENUE_CONFIG 的開放星期、
+  // 容量與共用亂數即時算出，任何月份都有資料，也與後台一致。
+  // ============================================================
+  const VENUE_TRUCK_OK = {
+    '中央公園市集': ['t1', 't3'],   // 僅開放熟食類
+    '河濱夜市':     ['t2', 't3'],   // 車型上限為輕食類
+    '陽光廣場':     'all',
+    '老街商圈':     'all',
+    '廟口廣場':     'all',
   };
 
-  // 🆕 備份初始 SESSIONS（resetDemo 用深拷貝還原）
-  const INITIAL_SESSIONS_JSON = JSON.stringify(SESSIONS);
+  // 產生某個月所有場次
+  function buildMonthSessions(monthKey) {
+    const [y, m] = monthKey.split('-').map(Number);
+    const dim    = new Date(y, m, 0).getDate();
+    const ev     = eventDaysOf(y, m);
+    const out    = [];
+
+    for (let day = 1; day <= dim; day++) {
+      const dt   = new Date(y, m - 1, day);
+      const wd0  = dt.getDay();              // 0=日
+      const wdIso = wd0 === 0 ? 7 : wd0;     // VENUE_CONFIG 用 1=一…7=日
+      const dStr = `${y}-${_pad(m)}-${_pad(day)}`;
+      const past = dStr < TODAY;
+
+      for (const [venue, cfg] of Object.entries(VENUE_CONFIG)) {
+        if (cfg.paused) continue;            // 業主暫停的場地不出現在登記畫面
+
+        for (const slot of cfg.slots) {
+          if (!(cfg.openWeekdays[slot] || []).includes(wdIso)) continue;
+
+          const cap  = cfg.capacity[slot];
+          const base = { d: dStr, wd: WD_TW[wd0], slot, venue, truckOk: VENUE_TRUCK_OK[venue] || 'all' };
+
+          // 包場
+          const isEvent = (venue === '中央公園市集' && slot === 'PM' && day === ev.a)
+                       || (venue === '陽光廣場'     && slot === 'PM' && day === ev.b);
+          if (isEvent) {
+            const en = EVENT_NAMES[Math.floor(seedRand(`en-${venue}-${m}`) * EVENT_NAMES.length)];
+            out.push({ ...base, status: 'event', event: en });
+            continue;
+          }
+
+          // 已過去的日期一律標成歷史，不能再登記
+          if (past) { out.push({ ...base, status: 'history-completed' }); continue; }
+
+          // 與後台 venueDayState 相同的計算方式
+          const r       = seedRand(`${venue}|${dStr}|${slot}`);
+          const weekend = (wd0 === 0 || wd0 === 6);
+          const ratio   = weekend ? 0.55 + r * 0.50 : 0.25 + r * 0.65;
+          const booked  = Math.max(0, Math.min(cap, Math.round(cap * ratio)));
+          const full    = booked >= cap;
+          const wlN     = full ? Math.floor(seedRand(`wl|${venue}|${dStr}|${slot}`) * 3) : 0;
+
+          out.push({ ...base, status: full ? 'full' : 'available',
+                     cap: [booked, cap], wl: [wlN, cap] });
+        }
+      }
+    }
+    return out;
+  }
+
+  // 依需求產生並快取；任何月份都拿得到資料
+  const SESSIONS = {};
+  function getSessions(monthKey) {
+    if (!SESSIONS[monthKey]) SESSIONS[monthKey] = buildMonthSessions(monthKey);
+    return SESSIONS[monthKey];
+  }
+  // 預先備好上個月、本月、下個月
+  (function preload() {
+    const [y, m] = THIS_MONTH.split('-').map(Number);
+    [-1, 0, 1].forEach(off => {
+      const d = new Date(y, m - 1 + off, 1);
+      getSessions(`${d.getFullYear()}-${_pad(d.getMonth() + 1)}`);
+    });
+  })();
+
+  // resetDemo 時直接清空快取重算即可，不需要保存初始快照
 
   // 🆕 我的登記紀錄（單一資料源 · 取代原本 hard-coded HTML）
   // 每筆：{ id, sessionKey, status, registeredAt, waitlistOrder, promotedAt }
@@ -1611,9 +1640,15 @@
   const sessionKeyOf = (s) => `${s.venue}|${s.d}|${s.slot}`;
 
   function findSession(key) {
-    for (const month of Object.keys(SESSIONS)) {
-      const found = (SESSIONS[month] || []).find(x => sessionKeyOf(x) === key);
-      if (found) return found;
+    // key 格式：場地|YYYY-MM-DD|時段 —— 直接由日期推出月份，不必掃全部
+    const month = (key.split('|')[1] || '').slice(0, 7);
+    if (month) {
+      const hit = getSessions(month).find(x => sessionKeyOf(x) === key);
+      if (hit) return hit;
+    }
+    for (const m of Object.keys(SESSIONS)) {
+      const hit = SESSIONS[m].find(x => sessionKeyOf(x) === key);
+      if (hit) return hit;
     }
     return null;
   }
@@ -1623,16 +1658,51 @@
     return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }
 
+  // 從實際產生的場次裡找一筆符合條件的，避免示範資料指向不存在的日期
+  // dir = +1 往未來找、-1 往過去找
+  function findRealSessionKey(venue, slot, startOffset, dir) {
+    for (let i = 0; i < 60; i++) {
+      const off = startOffset + i * dir;
+      const d = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate() + off);
+      const ds = `${d.getFullYear()}-${_pad(d.getMonth()+1)}-${_pad(d.getDate())}`;
+      const hit = getSessions(ds.slice(0, 7))
+        .find(x => x.venue === venue && x.slot === slot && x.d === ds);
+      if (hit) return { key: sessionKeyOf(hit), d: ds, mdText: `${d.getMonth()+1}/${d.getDate()}` };
+    }
+    return null;
+  }
+  const _monthOffset = n => { const d = new Date(_now.getFullYear(), _now.getMonth() + n, 1);
+                              return `${d.getFullYear()}-${_pad(d.getMonth()+1)}`; };
+  const _relMd = n => { const d = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate() + n);
+                        return `${d.getMonth()+1}/${d.getDate()}`; };
+
+  let _DEMO_PAST = { a:null, b:null };
+
   function initMyRegistrations() {
     _regCounter = 0;
-    MY_REGISTRATIONS = [
-      { id: makeRegId(), sessionKey:'老街商圈|2026-06-27|PM', truckId:'t1', status:'confirmed', registeredAt:'6/19 14:32' },
-      { id: makeRegId(), sessionKey:'中央公園市集|2026-06-22|PM', truckId:'t3', status:'waiting', registeredAt:'6/19 14:35', waitlistOrder:2 },
-      // 已遞補上（30 分鐘倒數中，3 分鐘前剛遞補上）
-      { id: makeRegId(), sessionKey:'陽光廣場|2026-06-24|AM', truckId:'t1', status:'promoted', registeredAt:'6/18 10:15', promotedAt: Date.now() - 3 * 60 * 1000 },
-      { id: makeRegId(), sessionKey:'老街商圈|2026-05-03|PM', truckId:'t1', status:'completed', registeredAt:'4/28 09:10' },
-      { id: makeRegId(), sessionKey:'中央公園市集|2026-05-15|AM', truckId:'t1', status:'completed', registeredAt:'4/30 16:42' }
-    ];
+    MY_REGISTRATIONS = [];
+
+    // 未來：已確認 / 候補中 / 剛遞補上（30 分鐘倒數）
+    const upComing  = findRealSessionKey('老街商圈',     'PM',  3, 1);
+    const upWaiting = findRealSessionKey('中央公園市集', 'PM',  2, 1);
+    const upPromo   = findRealSessionKey('陽光廣場',     'AM',  1, 1);
+    // 過去：已完成，可展示報到紀錄與對帳
+    const pastA = findRealSessionKey('老街商圈',     'PM', -12, -1);
+    const pastB = findRealSessionKey('中央公園市集', 'AM', -20, -1);
+
+    if (upComing)  MY_REGISTRATIONS.push({ id:makeRegId(), sessionKey:upComing.key,  truckId:'t1',
+                     status:'confirmed', registeredAt:_relMd(-1) + ' 14:32' });
+    if (upWaiting) MY_REGISTRATIONS.push({ id:makeRegId(), sessionKey:upWaiting.key, truckId:'t3',
+                     status:'waiting',   registeredAt:_relMd(-1) + ' 14:35', waitlistOrder:2 });
+    if (upPromo)   MY_REGISTRATIONS.push({ id:makeRegId(), sessionKey:upPromo.key,   truckId:'t1',
+                     status:'promoted',  registeredAt:_relMd(-2) + ' 10:15',
+                     promotedAt: Date.now() - 3 * 60 * 1000 });
+    if (pastA)     MY_REGISTRATIONS.push({ id:makeRegId(), sessionKey:pastA.key, truckId:'t1',
+                     status:'completed', registeredAt:_relMd(-26) + ' 09:10' });
+    if (pastB)     MY_REGISTRATIONS.push({ id:makeRegId(), sessionKey:pastB.key, truckId:'t1',
+                     status:'completed', registeredAt:_relMd(-31) + ' 16:42' });
+
+    _DEMO_PAST = { a: pastA, b: pastB };
   }
 
   // 🆕 報到紀錄（key: sessionKey, value: { checkedAt, photo }）
@@ -1640,10 +1710,11 @@
   let CHECKINS = {};
 
   function initCheckins() {
-    // demo：5/15 那場已完成報到
-    CHECKINS = {
-      '中央公園市集|2026-05-15|AM': { checkedAt: '5/15 10:08', photo: null }
-    };
+    // 過去那場已完成報到，可示範「看照片」
+    CHECKINS = {};
+    if (_DEMO_PAST.b) {
+      CHECKINS[_DEMO_PAST.b.key] = { checkedAt: `${_DEMO_PAST.b.mdText} 10:08`, photo: null };
+    }
   }
 
   // 🆕 Plan B — 繳費紀錄
@@ -1658,26 +1729,26 @@
     PAYMENTS = [
       {
         id: makePayId(),
-        month: '2026-04',
+        month: _monthOffset(-2),
         amount: 1200,
         status: 'paid',
-        paidAt: '5/3 14:23',
+        paidAt: _relMd(-40) + ' 14:23',
         approvedAt: '5/3 19:42',
         method: '銀行匯款',
         last5: '12345',
-        sessions: ['老街商圈|2026-04-05|PM', '老街商圈|2026-04-12|PM', '中央公園市集|2026-04-19|AM', '中央公園市集|2026-04-26|AM'],
-        note: '4 月場地費 4 場'
+        sessions: [],
+        note: '上上個月場地費 4 場'
       },
       {
         id: makePayId(),
-        month: '2026-05',
+        month: _monthOffset(-1),
         amount: 500,
         status: 'pending',
-        paidAt: '6/2 16:48',
+        paidAt: _relMd(-10) + ' 16:48',
         method: '銀行匯款',
         last5: '67890',
-        sessions: ['老街商圈|2026-05-03|PM', '中央公園市集|2026-05-15|AM'],
-        note: '5 月場地費 2 場（等業主確認）'
+        sessions: [_DEMO_PAST.a, _DEMO_PAST.b].filter(Boolean).map(x => x.key),
+        note: '上個月場地費 2 場（等業主確認）'
       }
     ];
   }
@@ -1769,7 +1840,7 @@
 
   let STATE = {
     currentScreen: 'calendar',
-    currentMonth: '2026-06',
+    currentMonth: THIS_MONTH,
     currentTruckIdx: 0,
     currentMyTab: 'confirmed',
     calendarView: 'list',  // 'list' 或 'grid'，桌面版預設 grid（init 時設定）
@@ -1829,7 +1900,7 @@
   // 渲染對帳頁
   function renderPayment() {
     // 本月應繳卡
-    const currentMonth = '2026-06';
+    const currentMonth = THIS_MONTH;
     document.getElementById('payCurrentMonth').textContent = '2026/' + currentMonth.split('-')[1];
     const unpaidSessions = calcUnpaidSessions(currentMonth);
     const total = unpaidSessions.reduce((sum, r) => sum + getSessionFee(r.sessionKey), 0);
@@ -1863,7 +1934,7 @@
     let items = [];
 
     // 「本月應繳」當作虛擬卡放在最上面（如果有未繳場次）
-    const currentMonth = '2026-06';
+    const currentMonth = THIS_MONTH;
     const unpaidSessions = calcUnpaidSessions(currentMonth);
     if (unpaidSessions.length > 0 && (_payTab === 'unpaid' || _payTab === 'all')) {
       const total = unpaidSessions.reduce((sum, r) => sum + getSessionFee(r.sessionKey), 0);
@@ -2000,7 +2071,7 @@
 
   // ──── 繳費 Modal ────
   function openPayModal() {
-    const currentMonth = '2026-06';
+    const currentMonth = THIS_MONTH;
     const unpaidSessions = calcUnpaidSessions(currentMonth);
     if (unpaidSessions.length === 0) {
       showToast('本月暫無待繳場次', 'success');
@@ -2023,7 +2094,7 @@
   }
 
   function renderPayModalBody() {
-    const currentMonth = '2026-06';
+    const currentMonth = THIS_MONTH;
     const unpaidSessions = calcUnpaidSessions(currentMonth);
     const total = unpaidSessions.filter(r => _payModalState.selectedSessions.includes(r.sessionKey))
       .reduce((s, r) => s + getSessionFee(r.sessionKey), 0);
@@ -2185,7 +2256,7 @@
   function submitPayment() {
     const newPay = {
       id: makePayId(),
-      month: '2026-06',
+      month: THIS_MONTH,
       amount: _payModalState.amount,
       status: 'pending',
       paidAt: formatNow(),
@@ -2830,7 +2901,7 @@
 
   // helper: 給日期 + 場地，取回該日該場地所有 slots
   function findVenueSlots(dateStr, venue) {
-    return (SESSIONS[STATE.currentMonth] || []).filter(s => s.d === dateStr && s.venue === venue);
+    return getSessions(STATE.currentMonth).filter(s => s.d === dateStr && s.venue === venue);
   }
 
   function changeMonth(delta) {
@@ -2859,14 +2930,13 @@
       const daysLeft = Math.ceil((openDate - today) / 86400000);
       phaseHtml = `⏳ <span><b>${m} 月排班尚未開放登記</b> · ${daysLeft > 0 ? `${daysLeft} 天後開放` : '即將開放'}</span>`;
     } else {
-      const day = today.getDate();
-      if (day >= 15 && day <= 28) {
-        phase = 'main';
-        phaseHtml = `🟢 <span><b>主登記期</b>（每月 15–28 日）· 自由登記中</span>`;
-      } else {
-        phase = 'waitlist';
-        phaseHtml = `🟡 <span><b>候補期</b> · 僅可加入候補佇列</span>`;
-      }
+      // 本月：剩餘場次開放登記；下個月的開放時間另外提示
+      phase = 'main';
+      const day  = today.getDate();
+      const hint = (day >= 15 && day <= 28)
+        ? `　·　下個月排班登記中`
+        : `　·　下個月 15 日開放登記`;
+      phaseHtml = `🟢 <span><b>${m} 月開放登記中</b>${hint}</span>`;
     }
     const banner = document.getElementById('phaseBanner');
     banner.className = `phase-banner ${phase}`;
@@ -2902,9 +2972,14 @@
       return;
     }
 
-    const sessions = SESSIONS[STATE.currentMonth] || [];
+    // 本月只列今天以後的場次；過去的場次在「我的登記 → 歷史」查看，
+    // 否則月初到今天的十幾天會把畫面塞滿，要滑很久才看到能登記的
+    let sessions = getSessions(STATE.currentMonth);
+    if (phase !== 'history') sessions = sessions.filter(s => s.d >= TODAY);
+
     if (sessions.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#9ca3af; padding:40px 0; font-size:13px;">此月份無場次</div>`;
+      list.innerHTML = `<div style="text-align:center; color:#9ca3af; padding:40px 0; font-size:13px;">
+        本月剩餘場次都結束了，可以看看下個月</div>`;
       return;
     }
 
@@ -2956,7 +3031,8 @@
           if (s.status === 'registered') return { key:'registered', label:'✅ 已登記' };
           if (s.status === 'available') return { key:'available', label:`剩 ${s.cap[1]-s.cap[0]}/${s.cap[1]}` };
           if (s.status === 'full') return { key:'full', label:`候補 ${s.wl[0]}/${s.wl[1]}` };
-          return { key:'', label:s.status };
+          if (s.status === 'history-completed') return { key:'history', label:'已結束' };
+          return { key:'history', label:'已結束' };
         });
 
         // 卡片 border 顏色根據優先級：registered > available > full > event > all-disabled
@@ -3654,9 +3730,8 @@
   }
 
   function resetDemo() {
-    // 用初始 JSON 深拷貝完整還原 SESSIONS
-    const initial = JSON.parse(INITIAL_SESSIONS_JSON);
-    Object.keys(initial).forEach(month => { SESSIONS[month] = initial[month]; });
+    // 清掉快取讓場次重新產生，登記痕跡一併消失
+    Object.keys(SESSIONS).forEach(k => { delete SESSIONS[k]; });
     // 🆕 還原 TRUCKS（清掉新增的 pending 車）
     const initialTrucks = JSON.parse(INITIAL_TRUCKS_JSON);
     TRUCKS.splice(0, TRUCKS.length, ...initialTrucks);
@@ -3669,7 +3744,7 @@
     refreshBellBadges();
     // 還原 STATE
     STATE.currentTruckIdx = 0;
-    STATE.currentMonth = '2026-06';
+    STATE.currentMonth = THIS_MONTH;
     STATE.currentMyTab = 'confirmed';
     // 還原 tab UI
     document.querySelectorAll('.my-tab').forEach((tab, i) => {
@@ -3852,6 +3927,6 @@
   })();
 </script>
 
-<!-- BUILD: v1.8 · 08/12 02:38 -->
+<!-- BUILD: v1.9 · 08/12 02:58 -->
 </body>
 </html>
