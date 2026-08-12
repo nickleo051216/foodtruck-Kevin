@@ -163,7 +163,7 @@
   .cal-legend-item { display:flex; align-items:center; gap:5px; }
   .cal-legend-dot { width:10px; height:10px; border-radius:3px; }
   .cal-grid { overflow-x:auto; }
-  .cal-grid-inner { min-width:1100px; }
+  
   .cal-grid-table { border-collapse:separate; border-spacing:0; width:100%; }
   .cal-grid-table th { position:sticky; top:0; background:#fafafa; padding:8px 6px; font-size:10px; font-weight:600; color:var(--text-3); border-bottom:1px solid var(--border); white-space:nowrap; }
   .cal-grid-table th:first-child { text-align:left; padding-left:14px; min-width:130px; }
@@ -178,6 +178,14 @@
   .cal-cell.closed { background:#f4f4f5; color:#a1a1aa; }
   .cal-cell-count { font-weight:700; font-size:12px; font-family:'Inter',sans-serif; }
   .cal-cell-meta { font-size:9px; opacity:.85; }
+
+  /* 🆕 v1.8 整月月曆 */
+  .cal-grid-inner { min-width:max-content; }
+  .cal-grid-table th { min-width:40px; }
+  .cal-grid-table td { min-width:40px; }
+  .cal-grid-table th.cal-today,
+  .cal-grid-table td.cal-today { background:#fff7ed; box-shadow:inset 0 0 0 1px var(--brand); }
+  .cal-grid-table th.cal-today { color:var(--brand); font-weight:700; }
 
   /* ===== Review Page ===== */
   .review-item { border-bottom:1px solid var(--border); padding:16px 18px; display:flex; gap:14px; align-items:flex-start; }
@@ -261,141 +269,7 @@
   .sidebar-toggle:hover { background:#eef0f3; color:var(--text); }
 
   /* 響應式：手機自動折疊（也含 tooltip） */
-  /* 平板：側欄縮成圖示列 */
-  @media (min-width:769px) and (max-width:1024px) {
-    .sidebar { width:68px; }
-    .sidebar .sidebar-logo-text,
-    .sidebar .nav-label,
-    .sidebar .nav-badge,
-    .sidebar .sidebar-section,
-    .sidebar .sidebar-user-info { display:none; }
-    .sidebar .sidebar-logo { padding:0 0 14px; justify-content:center; gap:0; }
-    .sidebar .nav-item { padding-left:0; padding-right:0; justify-content:center; position:relative; }
-    .sidebar .nav-item .nav-icon { width:auto; }
-    .sidebar .sidebar-user { justify-content:center; padding:12px 0 0; }
-    .sidebar .nav-item:hover::after {
-      content:attr(data-tooltip); position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%);
-      background:#1a1a1a; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; white-space:nowrap;
-      z-index:100; box-shadow:0 4px 14px rgba(0,0,0,.35); pointer-events:none;
-    }
-    .sidebar-toggle { display:none; }
-    .content { padding:20px; }
-    .topbar { padding:14px 20px; }
-  }
 
-  /* ===== 手機：側欄改為滑出抽屜 ===== */
-  .drawer-scrim {
-    position:fixed; inset:0; background:rgba(15,18,22,.5);
-    opacity:0; pointer-events:none; transition:opacity .22s ease; z-index:89;
-  }
-  .drawer-scrim.show { opacity:1; pointer-events:auto; }
-
-  @media (max-width:768px) {
-    /* 抽屜化 */
-    .sidebar {
-      position:fixed; top:0; left:0; bottom:0; width:252px; z-index:90;
-      transform:translateX(-100%); transition:transform .24s ease;
-      min-height:100vh; overflow-y:auto; box-shadow:0 0 40px rgba(0,0,0,.4);
-    }
-    .sidebar.open { transform:translateX(0); }
-    .sidebar.collapsed { width:252px; }          /* 手機忽略桌機的收合狀態 */
-    .sidebar.collapsed .sidebar-logo-text,
-    .sidebar.collapsed .nav-label,
-    .sidebar.collapsed .nav-badge,
-    .sidebar.collapsed .sidebar-section,
-    .sidebar.collapsed .sidebar-user-info { display:block; }
-    .sidebar.collapsed .sidebar-logo { padding:0 20px 18px; justify-content:flex-start; gap:10px; }
-    .sidebar.collapsed .nav-item { padding-left:22px; padding-right:22px; justify-content:flex-start; }
-    .sidebar.collapsed .sidebar-user { justify-content:flex-start; padding:12px 18px 0; }
-    .sidebar .nav-item { padding-top:13px; padding-bottom:13px; }   /* 觸控目標加大 */
-
-    /* 主區塊佔滿 */
-    .main { width:100%; }
-
-    /* Topbar 兩行、按鈕可捲 */
-    .topbar { padding:9px 12px; flex-direction:column; align-items:stretch; gap:7px; }
-    .topbar > div:first-child { min-width:0; }
-    .topbar-title {
-      font-size:15px; min-width:0;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .topbar-title small { display:none; }      /* 日期副標在手機省略，改由頁面內顯示 */
-    .topbar-actions {
-      gap:6px; overflow-x:auto; padding-bottom:1px;
-      scrollbar-width:none; -ms-overflow-style:none;
-    }
-    .topbar-actions::-webkit-scrollbar { display:none; }
-    .topbar-btn { white-space:nowrap; flex-shrink:0; padding:7px 11px; font-size:12px; }
-    .sidebar-toggle {
-      display:inline-flex !important; align-items:center; justify-content:center;
-      width:34px; height:34px; flex-shrink:0;
-      background:var(--bg); border:1px solid var(--border); border-radius:8px;
-      font-size:16px; cursor:pointer;
-    }
-
-    /* 內容區留白縮小 */
-    .content { padding:14px 12px 40px; }
-
-    /* 防止任何元素撐破畫面 */
-    html, body { overflow-x:hidden; }
-    .main, .content, .page, .card { max-width:100%; }
-    .card { overflow:hidden; }
-
-    /* 設定頁：標籤與按鈕改上下排，避免按鈕被擠出畫面 */
-    .settings-grid { grid-template-columns:1fr; gap:12px; }
-    .settings-row { flex-direction:column; align-items:stretch; gap:9px; }
-    .settings-row > button,
-    .settings-row .btn,
-    .settings-row .toggle { align-self:flex-start; }
-
-    /* KPI 兩欄 */
-    .kpi-grid { grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-    .kpi-card { padding:13px; }
-    .kpi-value { font-size:22px; }
-    .kpi-label { font-size:10px; }
-
-    /* 卡片標題列換行 */
-    .card-header { flex-wrap:wrap; gap:9px; }
-    .card-header > div { min-width:0; }
-
-    /* 月曆：橫向捲動 + 提示 */
-    .cal-grid-inner { min-width:760px; }
-    .cal-grid-table th:first-child,
-    .cal-grid-table td:first-child { min-width:88px; padding-left:10px; }
-    .cal-grid-table td { min-width:58px; }
-    .cal-controls { flex-direction:column; align-items:stretch; gap:10px; padding:12px 14px; }
-    .cal-legend { flex-wrap:wrap; gap:10px; }
-    .cal-grid::after {
-      content:"← 左右滑動看整個月 →";
-      display:block; text-align:center; font-size:11px; color:var(--text-3);
-      padding:8px 0 2px;
-    }
-
-    /* 對帳卡片 */
-    .pay-stats { grid-template-columns:1fr 1fr !important; }
-
-    /* 所有 inline 兩欄佈局改單欄（總覽頁 2fr 1fr 等） */
-    .content [style*="grid-template-columns:2fr 1fr"],
-    .content [style*="grid-template-columns: 2fr 1fr"] {
-      grid-template-columns:1fr !important;
-    }
-
-    /* 搜尋框 + 按鈕不擠壓 */
-    .card-header [style*="display:flex"] { flex-wrap:wrap; width:100%; }
-    .card-header input[type="text"] { min-width:0 !important; flex:1 1 100%; }
-
-    /* 表格一律可橫向捲 */
-    .card table { display:block; overflow-x:auto; white-space:nowrap; }
-
-    /* Modal 貼齊底部，好按 */
-    .modal-overlay { padding:0; align-items:flex-end; }
-    .modal { max-width:100%; border-radius:16px 16px 0 0; max-height:88vh; }
-  }
-
-  @media (max-width:359px) {
-    .kpi-grid { grid-template-columns:1fr; }
-    .pay-stats { grid-template-columns:1fr !important; }
-  }
 
   /* 🆕 ===== 登入畫面 ===== */
   #login-screen {
@@ -830,6 +704,145 @@
   .toast.error::before { content: '⚠'; }
   .toast.info::before { content: 'ⓘ'; }
 
+
+  /* ================= 響應式（置於最後，確保覆蓋前面的基礎規則） ================= */
+  /* 平板：側欄縮成圖示列 */
+  @media (min-width:769px) and (max-width:1024px) {
+    .sidebar { width:68px; }
+    .sidebar .sidebar-logo-text,
+    .sidebar .nav-label,
+    .sidebar .nav-badge,
+    .sidebar .sidebar-section,
+    .sidebar .sidebar-user-info { display:none; }
+    .sidebar .sidebar-logo { padding:0 0 14px; justify-content:center; gap:0; }
+    .sidebar .nav-item { padding-left:0; padding-right:0; justify-content:center; position:relative; }
+    .sidebar .nav-item .nav-icon { width:auto; }
+    .sidebar .sidebar-user { justify-content:center; padding:12px 0 0; }
+    .sidebar .nav-item:hover::after {
+      content:attr(data-tooltip); position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%);
+      background:#1a1a1a; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; white-space:nowrap;
+      z-index:100; box-shadow:0 4px 14px rgba(0,0,0,.35); pointer-events:none;
+    }
+    .sidebar-toggle { display:none; }
+    .content { padding:20px; }
+    .topbar { padding:14px 20px; }
+  }
+
+  /* ===== 手機：側欄改為滑出抽屜 ===== */
+  .drawer-scrim {
+    position:fixed; inset:0; background:rgba(15,18,22,.5);
+    opacity:0; pointer-events:none; transition:opacity .22s ease; z-index:89;
+  }
+  .drawer-scrim.show { opacity:1; pointer-events:auto; }
+
+  @media (max-width:768px) {
+    /* 抽屜化 */
+    .sidebar {
+      position:fixed; top:0; left:0; bottom:0; width:252px; z-index:90;
+      transform:translateX(-100%); transition:transform .24s ease;
+      min-height:100vh; overflow-y:auto; box-shadow:0 0 40px rgba(0,0,0,.4);
+    }
+    .sidebar.open { transform:translateX(0); }
+    .sidebar.collapsed { width:252px; }          /* 手機忽略桌機的收合狀態 */
+    .sidebar.collapsed .sidebar-logo-text,
+    .sidebar.collapsed .nav-label,
+    .sidebar.collapsed .nav-badge,
+    .sidebar.collapsed .sidebar-section,
+    .sidebar.collapsed .sidebar-user-info { display:block; }
+    .sidebar.collapsed .sidebar-logo { padding:0 20px 18px; justify-content:flex-start; gap:10px; }
+    .sidebar.collapsed .nav-item { padding-left:22px; padding-right:22px; justify-content:flex-start; }
+    .sidebar.collapsed .sidebar-user { justify-content:flex-start; padding:12px 18px 0; }
+    .sidebar .nav-item { padding-top:13px; padding-bottom:13px; }   /* 觸控目標加大 */
+
+    /* 主區塊佔滿 */
+    .main { width:100%; }
+
+    /* Topbar 兩行、按鈕可捲 */
+    .topbar { padding:9px 12px; flex-direction:column; align-items:stretch; gap:7px; }
+    .topbar > div:first-child { min-width:0; }
+    .topbar-title {
+      font-size:15px; min-width:0;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .topbar-title small { display:none; }      /* 日期副標在手機省略，改由頁面內顯示 */
+    .topbar-actions {
+      gap:6px; overflow-x:auto; padding-bottom:1px;
+      scrollbar-width:none; -ms-overflow-style:none;
+    }
+    .topbar-actions::-webkit-scrollbar { display:none; }
+    .topbar-btn { white-space:nowrap; flex-shrink:0; padding:7px 11px; font-size:12px; }
+    .sidebar-toggle {
+      display:inline-flex !important; align-items:center; justify-content:center;
+      width:34px; height:34px; flex-shrink:0;
+      background:var(--bg); border:1px solid var(--border); border-radius:8px;
+      font-size:16px; cursor:pointer;
+    }
+
+    /* 內容區留白縮小 */
+    .content { padding:14px 12px 40px; }
+
+    /* 防止任何元素撐破畫面 */
+    html, body { overflow-x:hidden; }
+    .main, .content, .page, .card { max-width:100%; }
+    .card { overflow:hidden; }
+
+    /* 設定頁：標籤與按鈕改上下排，避免按鈕被擠出畫面 */
+    .settings-grid { grid-template-columns:1fr; gap:12px; }
+    .settings-row { flex-direction:column; align-items:stretch; gap:9px; }
+    .settings-row > button,
+    .settings-row > span,
+    .settings-row .btn,
+    .settings-row .badge,
+    .settings-row .toggle { align-self:flex-start; }
+
+    /* KPI 兩欄 */
+    .kpi-grid { grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+    .kpi-card { padding:13px; }
+    .kpi-value { font-size:22px; }
+    .kpi-label { font-size:10px; }
+
+    /* 卡片標題列換行 */
+    .card-header { flex-wrap:wrap; gap:9px; }
+    .card-header > div { min-width:0; }
+
+    /* 月曆：橫向捲動 + 提示 */
+    .cal-grid-table th, .cal-grid-table td { min-width:34px; }
+    .cal-grid-table th:first-child,
+    .cal-grid-table td:first-child { min-width:88px; padding-left:10px; }
+    .cal-grid-table td { min-width:58px; }
+    .cal-controls { flex-direction:column; align-items:stretch; gap:10px; padding:12px 14px; }
+    .cal-legend { flex-wrap:wrap; gap:10px; }
+    .cal-grid::after {
+      content:"← 左右滑動看整個月 →";
+      display:block; text-align:center; font-size:11px; color:var(--text-3);
+      padding:8px 0 2px;
+    }
+
+    /* 對帳卡片 */
+    .pay-stats { grid-template-columns:1fr 1fr !important; }
+
+    /* 所有 inline 兩欄佈局改單欄（總覽頁 2fr 1fr 等） */
+    .content [style*="grid-template-columns:2fr 1fr"],
+    .content [style*="grid-template-columns: 2fr 1fr"] {
+      grid-template-columns:1fr !important;
+    }
+
+    /* 搜尋框 + 按鈕不擠壓 */
+    .card-header [style*="display:flex"] { flex-wrap:wrap; width:100%; }
+    .card-header input[type="text"] { min-width:0 !important; flex:1 1 100%; }
+
+    /* 表格一律可橫向捲 */
+    .card table { display:block; overflow-x:auto; white-space:nowrap; }
+
+    /* Modal 貼齊底部，好按 */
+    .modal-overlay { padding:0; align-items:flex-end; }
+    .modal { max-width:100%; border-radius:16px 16px 0 0; max-height:88vh; }
+  }
+
+  @media (max-width:359px) {
+    .kpi-grid { grid-template-columns:1fr; }
+    .pay-stats { grid-template-columns:1fr !important; }
+  }
 </style>
 </head>
 <body>
@@ -1094,11 +1107,7 @@
           <div class="cal-grid-inner">
             <table class="cal-grid-table">
               <thead>
-                <tr>
-                  <th>場地</th>
-                  <th>20<br>六</th><th>21<br>日</th><th>22<br>一</th><th>23<br>二</th><th>24<br>三</th>
-                  <th>25<br>四</th><th>26<br>五</th><th>27<br>六</th><th>28<br>日</th><th>29<br>一</th><th>30<br>二</th>
-                </tr>
+                <tr id="calGridHead"><th>場地</th></tr>
               </thead>
               <tbody id="calGridBody"></tbody>
             </table>
@@ -1178,24 +1187,21 @@
         <div class="card-header">
           <div>
             <span class="card-title">餐車總覽</span>
-            <span class="card-title-meta">共 168 台 · 啟用中 154 台</span>
+            <span class="card-title-meta" id="truckCountMeta">共 168 台 · 啟用中 154 台</span>
           </div>
           <div style="display:flex; gap:8px;">
-            <input type="text" placeholder="🔍 搜尋餐車名 / 車主 / 車牌" style="padding:7px 12px; border:1px solid var(--border); border-radius:7px; font-size:12px; font-family:inherit; min-width:240px;">
+            <input type="text" id="truckSearch" placeholder="🔍 搜尋餐車名 / 車主 / 車牌"
+                   oninput="renderTruckTable()"
+                   style="padding:7px 12px; border:1px solid var(--border); border-radius:7px; font-size:12px; font-family:inherit; min-width:240px;">
             <button class="btn" onclick="runImport()">📥 匯入 CSV</button>
+            <button class="btn primary" onclick="openTruckEditor()">＋ 新增餐車</button>
           </div>
         </div>
         <table>
           <thead>
-            <tr><th>餐車</th><th>車主</th><th>類型</th><th>車牌</th><th>本月場次</th><th>信用</th><th>狀態</th></tr>
+            <tr><th>餐車</th><th>車主</th><th>類型</th><th>車牌</th><th>本月場次</th><th>信用</th><th>狀態</th><th></th></tr>
           </thead>
-          <tbody>
-            <tr><td><b>🍜 泰香打拋飯</b><br><span style="font-size:11px; color:var(--text-3);">泰式料理</span></td><td>Nick Chang</td><td>餐車</td><td>ABC-1234</td><td>6</td><td><span class="badge success">100</span></td><td><span class="badge success"><span class="dot"></span>啟用</span></td></tr>
-            <tr><td><b>🧋 ZN 飲料</b><br><span style="font-size:11px; color:var(--text-3);">飲料茶飲</span></td><td>Nick Chang</td><td>餐車</td><td>XYZ-5678</td><td>4</td><td><span class="badge success">100</span></td><td><span class="badge success"><span class="dot"></span>啟用</span></td></tr>
-            <tr><td><b>🌽 大熊烤玉米</b><br><span style="font-size:11px; color:var(--text-3);">燒烤</span></td><td>陳老闆</td><td>落地攤</td><td>─</td><td>8</td><td><span class="badge warn">72</span></td><td><span class="badge warn"><span class="dot"></span>觀察</span></td></tr>
-            <tr><td><b>🥟 老王米粉湯</b><br><span style="font-size:11px; color:var(--text-3);">小吃</span></td><td>林老闆</td><td>餐車</td><td>DEF-9012</td><td>5</td><td><span class="badge danger">65</span></td><td><span class="badge danger"><span class="dot"></span>觀察</span></td></tr>
-            <tr><td><b>🍡 甜心點心坊</b><br><span style="font-size:11px; color:var(--text-3);">甜點</span></td><td>Amy</td><td>餐車</td><td>GHI-3456</td><td>3</td><td><span class="badge success">100</span></td><td><span class="badge success"><span class="dot"></span>啟用</span></td></tr>
-          </tbody>
+          <tbody id="truckTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -2030,18 +2036,6 @@
     if (nav) { switchPage(id, nav); }
   }
 
-  // ---- 排班月曆：月份切換 ----
-  let _calMonth = 6, _calYear = 2026;
-  function shiftCalMonth(delta) {
-    _calMonth += delta;
-    if (_calMonth > 12) { _calMonth = 1; _calYear++; }
-    if (_calMonth < 1)  { _calMonth = 12; _calYear--; }
-    const t = document.getElementById('calMonthTitle');
-    if (t) t.textContent = `${_calYear} 年 ${_calMonth} 月`;
-    if (typeof renderCalGrid === 'function') renderCalGrid();
-    showToast(`已切換至 ${_calYear} 年 ${_calMonth} 月`);
-  }
-
   // ---- 通用小 modal ----
   function openInfoModal(title, bodyHtml, footHtml) {
     let el = document.getElementById('infoModal');
@@ -2378,6 +2372,7 @@
     const [t, s] = PAGE_TITLES[id];
     document.getElementById('pageTitle').firstChild.textContent = t + ' ';
     document.getElementById('pageTitleSub').textContent = s;
+    if (id === 'calendar') scrollCalToToday();
     if (id === 'payment') renderPaymentReview();
     if (id === 'rules') renderRules();  // 🆕 v1.4
     if (isMobileView()) closeDrawer();  // 手機：選完自動收起抽屜
@@ -3170,53 +3165,331 @@
   }
 
   // 渲染月曆 grid（對齊 VENUE_CONFIG）
-  function renderCalGrid() {
-    const venues = [
-      { name:'中央公園市集', slot:'晚場', slotKey:'PM' },
-      { name:'陽光廣場', slot:'午場', slotKey:'AM' },
-      { name:'老街商圈', slot:'晚市', slotKey:'PM' },
-      { name:'河濱夜市', slot:'夜市', slotKey:'PM' },
-      { name:'廟口廣場', slot:'整天場', slotKey:'ALL' }
-    ];
-    // 6/20 ~ 6/30，週幾 1-7（一-日）
-    // 中央公園: 每天開
-    // 陽光: 平日才開（1-5），週末 C
-    // 老街: 週末才開（6-7），平日 C
-    // 河濱夜市: 週一三五才開
-    // 廟口: 每天開
-    // F=已滿 W=接近滿 A=可登記 E=包場 C=不開放
-    const data = [
-      // 6/20(六) 21(日) 22(一) 23(二) 24(三) 25(四) 26(五) 27(六) 28(日) 29(一) 30(二)
-      ['F','F','A','A','A','A','A','A','A','A','A'],  // 中央公園（6/29 PM 包場）
-      ['C','C','A','E','F','A','A','C','C','A','A'],  // 陽光（週末 C，6/23 PM 包場）
-      ['F','F','C','C','C','C','C','A','A','C','C'],  // 老街（平日 C）
-      ['C','C','A','C','F','C','A','C','C','A','C'],  // 河濱（只週一三五 PM）
-      ['A','A','A','A','A','F','F','A','A','A','A']   // 廟口（6/25-26 已滿）
-    ];
-    // 修正 6/29 一 中央公園 PM 包場
-    data[0][9] = 'E';
-    // 修正 6/23 二 陽光 PM 包場
-    data[1][3] = 'E';
+  // ============================================================
+  // 🆕 v1.8 日期基準：以「真實今天」為準，不再凍結在固定日期
+  // ============================================================
+  const DEMO_NOW   = new Date();
+  const DEMO_Y     = DEMO_NOW.getFullYear();
+  const DEMO_M     = DEMO_NOW.getMonth() + 1;   // 1-12
+  const DEMO_D     = DEMO_NOW.getDate();
+  const WD_TW      = ['日','一','二','三','四','五','六'];
 
-    const counts = {
-      'F': () => `${5}/5`,
-      'W': () => `${4}/5`,
-      'A': () => `${Math.floor(Math.random()*3)+1}/5`,
-      'E': () => '包場',
-      'C': () => '─'
-    };
-    const cls = { 'F':'full', 'W':'warning', 'A':'available', 'E':'event', 'C':'closed' };
+  function twDateLabel(d) {
+    return `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日（${WD_TW[d.getDay()]}）`;
+  }
+
+  // 讓每格資料固定不變（同一天同一場地永遠算出同樣結果）
+  // FNV-1a + murmur3 fmix32 收尾，確保相鄰字串也能充分打散
+  function seedRand(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    h ^= h >>> 16; h = Math.imul(h, 2246822507);
+    h ^= h >>> 13; h = Math.imul(h, 3266489909);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  }
+
+  // ============================================================
+  // 排班月曆：整月渲染（1 號到月底）
+  // ============================================================
+  const CAL_VENUES = [
+    { name:'中央公園市集', slot:'晚場',   cap:5, days:[0,1,2,3,4,5,6] },
+    { name:'陽光廣場',     slot:'午場',   cap:4, days:[1,2,3,4,5]     },
+    { name:'老街商圈',     slot:'晚市',   cap:4, days:[6,0]           },
+    { name:'河濱夜市',     slot:'夜市',   cap:6, days:[1,3,5]         },
+    { name:'廟口廣場',     slot:'整天場', cap:5, days:[],  paused:true },
+  ];
+
+  let _calYear  = DEMO_Y;
+  let _calMonth = DEMO_M;
+
+  function shiftCalMonth(delta) {
+    _calMonth += delta;
+    if (_calMonth > 12) { _calMonth = 1;  _calYear++; }
+    if (_calMonth < 1)  { _calMonth = 12; _calYear--; }
+    renderCalGrid();
+    showToast(`已切換至 ${_calYear} 年 ${_calMonth} 月`);
+  }
+
+  function renderCalGrid() {
+    const title = document.getElementById('calMonthTitle');
+    if (title) title.textContent = `${_calYear} 年 ${_calMonth} 月`;
+
+    const daysInMonth = new Date(_calYear, _calMonth, 0).getDate();
+    const isThisMonth = (_calYear === DEMO_Y && _calMonth === DEMO_M);
+
+    // ---- 表頭 ----
+    const head = document.getElementById('calGridHead');
+    if (head) {
+      let th = '<th>場地</th>';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const wd = new Date(_calYear, _calMonth - 1, d).getDay();
+        const weekend = (wd === 0 || wd === 6);
+        const today   = isThisMonth && d === DEMO_D;
+        th += `<th class="${today ? 'cal-today' : ''}"
+                   style="${weekend ? 'background:#fef6f2;' : ''}">
+                 ${d}<br><span style="opacity:.7">${WD_TW[wd]}</span>
+               </th>`;
+      }
+      head.innerHTML = th;
+    }
+
+    // ---- 包場（每月固定挑兩天，deterministic）----
+    const evDayA = Math.floor(seedRand(`ev-a-${_calYear}-${_calMonth}`) * daysInMonth) + 1;
+    const evDayB = Math.floor(seedRand(`ev-b-${_calYear}-${_calMonth}`) * daysInMonth) + 1;
+
+    // ---- 內容 ----
     const body = document.getElementById('calGridBody');
-    body.innerHTML = venues.map((v, i) => `
-      <tr>
-        <td><b>${v.name}</b><br><span style="font-size:10px; color:var(--text-3);">${v.slot}</span></td>
-        ${data[i].map(s => `<td><div class="cal-cell ${cls[s]}"><div class="cal-cell-count">${counts[s]()}</div></div></td>`).join('')}
-      </tr>
-    `).join('');
+    if (!body) return;
+
+    body.innerHTML = CAL_VENUES.map((v, vi) => {
+      let tds = '';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const wd     = new Date(_calYear, _calMonth - 1, d).getDay();
+        const key    = `${v.name}-${_calYear}-${_calMonth}-${d}`;
+        const today  = isThisMonth && d === DEMO_D;
+        const past   = isThisMonth ? d < DEMO_D : (_calYear < DEMO_Y || (_calYear === DEMO_Y && _calMonth < DEMO_M));
+
+        let cls, text;
+        if (v.paused) {
+          cls = 'closed'; text = '─';
+        } else if (!v.days.includes(wd)) {
+          cls = 'closed'; text = '─';
+        } else if ((vi === 0 && d === evDayA) || (vi === 1 && d === evDayB)) {
+          cls = 'event';  text = '包場';
+        } else {
+          const r = seedRand(key);
+          const weekend = (wd === 0 || wd === 6);
+          // 平日 25%~90%、週末 55%~105%（會被 cap 夾住），讓「哪天缺人」看得出來
+          const ratio  = weekend ? 0.55 + r * 0.50 : 0.25 + r * 0.65;
+          const booked = Math.max(0, Math.min(v.cap, Math.round(v.cap * ratio)));
+          text = `${booked}/${v.cap}`;
+          cls  = booked >= v.cap ? 'full' : (booked >= v.cap - 1 ? 'warning' : 'available');
+        }
+
+        tds += `<td class="${today ? 'cal-today' : ''}">
+                  <div class="cal-cell ${cls}" style="${past ? 'opacity:.45;' : ''}">
+                    <div class="cal-cell-count">${text}</div>
+                  </div>
+                </td>`;
+      }
+      const pausedTag = v.paused
+        ? ' <span class="badge neutral" style="font-size:9px; padding:1px 5px;">暫停</span>' : '';
+      return `<tr>
+        <td><b>${v.name}</b>${pausedTag}<br>
+            <span style="font-size:10px; color:var(--text-3);">${v.slot}</span></td>
+        ${tds}
+      </tr>`;
+    }).join('');
+
+    // 本月的話自動捲到今天那一欄，省得使用者自己滑
+    if (isThisMonth) scrollCalToToday();
+  }
+
+  // ============================================================
+  // 🆕 v1.8 餐車總覽：新增 / 編輯 / 停用 / 刪除 / 搜尋
+  // ============================================================
+  const TRUCK_TOTAL_BASE = 163;   // 未列出的其餘車數（讓總計看起來合理）
+
+  let ADMIN_TRUCKS = [
+    { id:'t1', emoji:'🍜', name:'泰香打拋飯',   cat:'泰式料理', owner:'Nick Chang', type:'餐車',   plate:'ABC-1234', sessions:6, credit:100, status:'active' },
+    { id:'t2', emoji:'🧋', name:'ZN 飲料',      cat:'飲料茶飲', owner:'Nick Chang', type:'餐車',   plate:'XYZ-5678', sessions:4, credit:100, status:'active' },
+    { id:'t3', emoji:'🌽', name:'大熊烤玉米',   cat:'燒烤',     owner:'陳老闆',     type:'落地攤', plate:'',         sessions:8, credit:72,  status:'watch'  },
+    { id:'t4', emoji:'🥟', name:'老王米粉湯',   cat:'小吃',     owner:'林老闆',     type:'餐車',   plate:'DEF-9012', sessions:5, credit:65,  status:'watch'  },
+    { id:'t5', emoji:'🍡', name:'甜心點心坊',   cat:'甜點',     owner:'Amy',        type:'餐車',   plate:'GHI-3456', sessions:3, credit:100, status:'active' },
+  ];
+
+  const TRUCK_STATUS = {
+    active: { label:'啟用', cls:'success' },
+    watch:  { label:'觀察', cls:'warn'    },
+    paused: { label:'停用', cls:'neutral' },
+  };
+
+  function creditBadgeCls(n) {
+    return n >= 90 ? 'success' : (n >= 70 ? 'warn' : 'danger');
+  }
+
+  function renderTruckTable() {
+    const q = (document.getElementById('truckSearch')?.value || '').trim().toLowerCase();
+    const list = ADMIN_TRUCKS.filter(t =>
+      !q || [t.name, t.owner, t.plate, t.cat].join(' ').toLowerCase().includes(q));
+
+    const body = document.getElementById('truckTableBody');
+    if (!body) return;
+
+    if (!list.length) {
+      body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:28px; color:var(--text-3);">
+        找不到符合「${q}」的餐車</td></tr>`;
+    } else {
+      body.innerHTML = list.map(t => {
+        const st = TRUCK_STATUS[t.status] || TRUCK_STATUS.active;
+        return `<tr>
+          <td><b>${t.emoji} ${t.name}</b><br>
+              <span style="font-size:11px; color:var(--text-3);">${t.cat}</span></td>
+          <td>${t.owner}</td>
+          <td>${t.type}</td>
+          <td>${t.plate || '─'}</td>
+          <td>${t.sessions}</td>
+          <td><span class="badge ${creditBadgeCls(t.credit)}">${t.credit}</span></td>
+          <td><span class="badge ${st.cls}"><span class="dot"></span>${st.label}</span></td>
+          <td style="white-space:nowrap;">
+            <button class="btn sm" onclick="openTruckEditor('${t.id}')">編輯</button>
+            <button class="btn sm" onclick="toggleTruckStatus('${t.id}')">${t.status === 'paused' ? '啟用' : '停用'}</button>
+            <button class="btn sm danger" onclick="deleteTruck('${t.id}')">刪除</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // 數量統計
+    const shown  = ADMIN_TRUCKS.length;
+    const active = ADMIN_TRUCKS.filter(t => t.status !== 'paused').length;
+    const meta = document.getElementById('truckCountMeta');
+    if (meta) {
+      meta.textContent = q
+        ? `符合條件 ${list.length} 台（全部 ${TRUCK_TOTAL_BASE + shown} 台）`
+        : `共 ${TRUCK_TOTAL_BASE + shown} 台 · 啟用中 ${TRUCK_TOTAL_BASE - 9 + active} 台`;
+    }
+  }
+
+  function openTruckEditor(id) {
+    const t = ADMIN_TRUCKS.find(x => x.id === id);
+    const isNew = !t;
+    const v = t || { emoji:'🚚', name:'', cat:'', owner:'', type:'餐車', plate:'', status:'active' };
+    const opt = (val, cur) => `<option${val === cur ? ' selected' : ''}>${val}</option>`;
+
+    openInfoModal(isNew ? '新增餐車' : `編輯餐車 · ${v.name}`, `
+      <div class="settings-form-row">
+        <label>圖示<span class="meta">會顯示在名單與車主端</span></label>
+        <input type="text" id="tkEmoji" value="${v.emoji}" maxlength="4" style="width:80px;">
+      </div>
+      <div class="settings-form-row">
+        <label>餐車名稱</label>
+        <input type="text" id="tkName" value="${v.name}" placeholder="例：阿明鹽酥雞">
+      </div>
+      <div class="settings-form-row">
+        <label>餐點類別</label>
+        <input type="text" id="tkCat" value="${v.cat}" placeholder="例：炸物、飲料茶飲、甜點">
+      </div>
+      <div class="settings-form-row">
+        <label>車主</label>
+        <input type="text" id="tkOwner" value="${v.owner}" placeholder="車主姓名或 LINE 暱稱">
+      </div>
+      <div class="settings-form-row">
+        <label>類型</label>
+        <select id="tkType">${opt('餐車', v.type)}${opt('落地攤', v.type)}</select>
+      </div>
+      <div class="settings-form-row">
+        <label>車牌<span class="meta">落地攤免填</span></label>
+        <input type="text" id="tkPlate" value="${v.plate}" placeholder="例：ABC-1234">
+      </div>
+      <div class="settings-form-row">
+        <label>狀態</label>
+        <select id="tkStatus">
+          <option value="active"${v.status === 'active' ? ' selected' : ''}>啟用</option>
+          <option value="watch"${v.status === 'watch'  ? ' selected' : ''}>觀察中</option>
+          <option value="paused"${v.status === 'paused' ? ' selected' : ''}>停用</option>
+        </select>
+      </div>
+    `, `
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn" onclick="closeInfoModal()">取消</button>
+        <button class="btn primary" onclick="saveTruck('${id || ''}')">${isNew ? '建立餐車' : '儲存變更'}</button>
+      </div>
+    `);
+  }
+
+  function saveTruck(id) {
+    const g = k => (document.getElementById(k)?.value || '').trim();
+    const name = g('tkName');
+    if (!name)      { showToast('請填寫餐車名稱', 'error'); return; }
+    if (!g('tkOwner')) { showToast('請填寫車主', 'error'); return; }
+
+    const data = {
+      emoji:  g('tkEmoji') || '🚚',
+      name,
+      cat:    g('tkCat') || '未分類',
+      owner:  g('tkOwner'),
+      type:   g('tkType'),
+      plate:  g('tkType') === '落地攤' ? '' : g('tkPlate'),
+      status: g('tkStatus'),
+    };
+
+    const t = ADMIN_TRUCKS.find(x => x.id === id);
+    if (t) {
+      Object.assign(t, data);
+      showToast(`已儲存「${name}」`);
+    } else {
+      ADMIN_TRUCKS.push({ id:'t' + Date.now(), sessions:0, credit:100, ...data });
+      showToast(`已新增「${name}」，車主可開始登記場次`);
+    }
+    closeInfoModal();
+    renderTruckTable();
+  }
+
+  function toggleTruckStatus(id) {
+    const t = ADMIN_TRUCKS.find(x => x.id === id);
+    if (!t) return;
+    if (t.status === 'paused') {
+      t.status = t.credit < 80 ? 'watch' : 'active';
+      showToast(`已重新啟用「${t.name}」`);
+    } else {
+      if (!confirm(`停用「${t.name}」？\n停用後這台車不會出現在排班登記畫面。`)) return;
+      t.status = 'paused';
+      showToast(`已停用「${t.name}」`);
+    }
+    renderTruckTable();
+  }
+
+  function deleteTruck(id) {
+    const t = ADMIN_TRUCKS.find(x => x.id === id);
+    if (!t) return;
+    if (!confirm(`刪除「${t.name}」？\n這會一併移除該車的排班與登記紀錄，無法復原。\n若只是暫時不出攤，建議改用「停用」。`)) return;
+    ADMIN_TRUCKS = ADMIN_TRUCKS.filter(x => x.id !== id);
+    showToast(`已刪除「${t.name}」`);
+    renderTruckTable();
+  }
+
+  // 月曆捲到今天（換頁後元素才有寬度，需延後執行）
+  function scrollCalToToday() {
+    const run = () => {
+      const scroller = document.querySelector('.cal-grid');
+      const todayTh  = document.querySelector('#calGridHead th.cal-today');
+      if (!scroller || !todayTh || !scroller.clientWidth) return false;
+      const labelW = document.querySelector('#calGridBody td:first-child')?.offsetWidth || 110;
+      const target = todayTh.offsetLeft - labelW - 40;
+      scroller.scrollLeft = Math.max(0, Math.min(target, scroller.scrollWidth - scroller.clientWidth));
+      return true;
+    };
+    if (!run()) setTimeout(run, 120);
+  }
+
+  // ---- 把寫死的日期換成今天 ----
+  function applyTodayLabels() {
+    const sub = document.getElementById('pageTitleSub');
+    if (sub && sub.textContent.includes('2026 年 6 月 20 日')) {
+      sub.textContent = twDateLabel(DEMO_NOW);
+    }
+    PAGE_TITLES.overview[1] = twDateLabel(DEMO_NOW);
+    PAGE_TITLES.reports[1]  = `月度數據 · ${DEMO_Y}/${DEMO_M}`;
+    document.querySelectorAll('[data-today-date]').forEach(el => {
+      el.textContent = `${DEMO_M}/${DEMO_D}`;
+    });
+    // 報表頁月份標題
+    document.querySelectorAll('.card-title, .card-title-meta').forEach(el => {
+      if (el.textContent.trim() === '2026 年 6 月') {
+        el.textContent = `${DEMO_Y} 年 ${DEMO_M} 月`;
+      }
+    });
   }
 
   // 🆕 初始化
+  applyTodayLabels();
   renderCalGrid();
+  renderTruckTable();
   renderNewTruckReviews();
   renderNicknameReviews();
   renderAutoApply();
