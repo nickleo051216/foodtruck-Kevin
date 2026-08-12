@@ -410,7 +410,25 @@
      加了 class 卻永遠 display:none。兩種都支援。 */
   .modal-overlay.show,
   .modal-overlay.active { display:flex; }
-  .modal { background:#fff; border-radius:20px 20px 0 0; width:100%; padding:24px; max-height:80%; overflow-y:auto; }
+  /* 內容長的彈窗（例如費率表）原本整塊一起捲動，標題會捲走、按鈕要捲到底才看得到。
+     改為標題與按鈕固定，只有內容區捲動。 */
+  .modal {
+    background:#fff; border-radius:20px 20px 0 0; width:100%; padding:24px;
+    max-height:86%; overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .modal > .modal-handle,
+  .modal > .modal-title,
+  .modal > .modal-actions { flex:0 0 auto; }
+  /* 標題與按鈕以外的區塊 = 內容區，超出時自己捲 */
+  .modal > *:not(.modal-handle):not(.modal-title):not(.modal-actions) {
+    flex:1 1 auto; min-height:0; overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .modal > .modal-actions {
+    padding-top:14px; margin-top:4px;
+    border-top:1px solid #f1f3f5; background:#fff;
+  }
   .modal-handle { width:36px; height:4px; background:#d4d4d8; border-radius:2px; margin:0 auto 16px; }
   .modal-title { font-size:18px; font-weight:700; margin-bottom:14px; }
   .modal-info { background:#f4f6f8; border-radius:12px; padding:14px; margin-bottom:16px; }
@@ -4154,6 +4172,6 @@
   })();
 </script>
 
-<!-- BUILD: v2.3 · 08/12 04:55 -->
+<!-- BUILD: v2.4 · 08/12 05:14 -->
 </body>
 </html>
