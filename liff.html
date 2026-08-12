@@ -1443,7 +1443,7 @@
     const title = document.getElementById('modalTitle');
     const body = document.getElementById('modalBody');
     const confirmBtn = document.getElementById('modalConfirmBtn');
-    const cancelBtn = document.querySelector('.modal-actions .modal-btn.cancel');
+    const cancelBtn = document.querySelector('#modal .modal-actions .modal-btn.cancel');
 
     title.textContent = '此場地未開放';
     body.innerHTML = `
@@ -1784,6 +1784,18 @@
         last5: '67890',
         sessions: [_DEMO_PAST.a, _DEMO_PAST.b].filter(Boolean).map(x => x.key),
         note: '上個月場地費 2 場（等業主確認）'
+      },
+      {
+        id: makePayId(),
+        month: _monthOffset(-3),
+        amount: 600,
+        status: 'rejected',
+        paidAt: _relMd(-72) + ' 11:20',
+        method: '銀行匯款',
+        last5: '24680',
+        sessions: [],
+        note: '金額與系統不符',
+        rejectReason: '匯款金額 600 元與應繳 900 元不符，請確認後補匯差額並重新上傳'
       }
     ];
   }
@@ -2010,7 +2022,7 @@
               </div>
               <div class="pay-card-amount unpaid">NT$ ${it.amount.toLocaleString()}</div>
             </div>
-            <span class="pay-status-badge pay-status-pending">⏳ 尚未上傳匯款</span>
+            <span class="pay-status-badge pay-status-pending">⏳ 尚未上傳匯款</span>${isOverdue(it.month) ? '<span class="pay-status-badge pay-status-rejected" style="margin-left:5px;">⚠️ 已逾期</span>' : ''}
             <div class="pay-card-actions">
               <button class="pay-card-btn primary" onclick="openPayModal()">📤 上傳匯款</button>
               <button class="pay-card-btn outline" onclick="showPayDetail('virtual','${it.month}')">查看明細</button>
@@ -2038,13 +2050,39 @@
               繳款日：<b>${it.paidAt || '-'}</b> · 後五碼：<b>${it.last5 || '-'}</b>
             </div>
             ${statusBadge}
+            ${it.status === 'rejected' && it.rejectReason
+              ? `<div style="margin-top:7px; padding:8px 10px; background:#fee2e2; border-radius:7px;
+                     font-size:11.5px; color:#991b1b; line-height:1.6;">退回原因：${it.rejectReason}</div>` : ''}
             <div class="pay-card-actions">
+              ${it.status === 'rejected'
+                ? `<button class="pay-card-btn primary" onclick="openPayModal()">📤 重新上傳</button>` : ''}
               <button class="pay-card-btn outline" onclick="showPayDetail('${it.id}')">查看明細</button>
             </div>
           </div>`;
       }
     });
     wrap.innerHTML = html;
+  }
+
+  // 資訊型彈窗（只需要關閉，不需要確認/取消兩顆）
+  function showInfoModal(title, bodyHtml, closeText) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    const cancelBtn  = document.querySelector('#modal .modal-actions .modal-btn.cancel');
+    confirmBtn.style.display = 'none';          // 隱藏確認鍵，避免兩顆都是「關閉」
+    cancelBtn.style.display  = '';
+    cancelBtn.textContent    = closeText || '關閉';
+    document.getElementById('modal').classList.add('active');
+  }
+
+  // 開啟需要確認的彈窗前，把按鈕狀態還原
+  function resetModalButtons() {
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    const cancelBtn  = document.querySelector('#modal .modal-actions .modal-btn.cancel');
+    confirmBtn.style.display = '';
+    cancelBtn.style.display  = '';
+    cancelBtn.textContent    = '取消';
   }
 
   function showFeeRules() {
@@ -2056,26 +2094,22 @@
         <span style="font-size:11px; color:#666;">${lines}</span>
       </div>`;
     }).join('');
-    document.getElementById('modalTitle').textContent = '💰 場地費率表';
-    document.getElementById('modalBody').innerHTML = `
+    showInfoModal('場地費率表', `
       <div style="font-size:12px; color:#666; margin-bottom:10px;">每場次費用如下，月底結算</div>
       ${rows}
       <div style="margin-top:12px; padding:10px; background:#fef3c7; border-radius:8px; font-size:11px; color:#92400e;">
-        💡 提醒：每月 5 日前繳清上月場地費，逾期將影響下月排班優先順位
-      </div>`;
-    document.getElementById('modalConfirmBtn').textContent = '我知道了';
-    document.getElementById('modalConfirmBtn').onclick = closeModal;
-    document.getElementById('modal').classList.add('active');
+        每月 5 日前繳清上月場地費，逾期將影響下月排班優先順位
+      </div>`, '我知道了');
   }
 
   function showPayDetail(id, month) {
-    let pay;
-    let sessions = [];
+    let pay = null, sessions = [], mth = month;
     if (id === 'virtual') {
       sessions = calcUnpaidSessions(month);
     } else {
       pay = PAYMENTS.find(p => p.id === id);
       if (!pay) return;
+      mth = pay.month;
       sessions = (pay.sessions || []).map(k => ({ sessionKey: k }));
     }
 
@@ -2083,25 +2117,65 @@
       const [venue, date, slot] = r.sessionKey.split('|');
       const fee = getSessionFee(r.sessionKey);
       const [, mm, dd] = date.split('-');
-      return `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f3f4f6; font-size:12px;">
+      return `<div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #f3f4f6; font-size:12.5px;">
         <span>${parseInt(mm)}/${parseInt(dd)} ${venue} ${getSlotLabel(venue, slot)}</span>
         <b style="font-family:'Inter',sans-serif; color:#10b981;">NT$ ${fee}</b>
       </div>`;
     }).join('');
-    const total = sessions.reduce((s, r) => s + getSessionFee(r.sessionKey), 0);
 
-    document.getElementById('modalTitle').textContent = `📋 對帳明細`;
-    document.getElementById('modalBody').innerHTML = `
+    const total = pay ? pay.amount
+                      : sessions.reduce((s2, r) => s2 + getSessionFee(r.sessionKey), 0);
+
+    // 繳費進度：上傳 → 審核 → 核銷／退回
+    let progress = '';
+    if (pay) {
+      const step = (done, label, sub) => `
+        <div style="display:flex; gap:9px; align-items:flex-start; padding:5px 0;">
+          <span style="width:16px; text-align:center; color:${done ? '#059669' : '#cbd5e1'};">${done ? '●' : '○'}</span>
+          <div style="flex:1;">
+            <div style="font-size:12.5px; font-weight:${done ? '700' : '400'}; color:${done ? 'var(--text)' : '#9ca3af'};">${label}</div>
+            ${sub ? `<div style="font-size:11px; color:#888; margin-top:1px;">${sub}</div>` : ''}
+          </div>
+        </div>`;
+      const isPaid = pay.status === 'paid';
+      const isRej  = pay.status === 'rejected';
+      progress = `
+        <div style="margin-top:14px; padding:11px 12px; background:#f8fafc; border-radius:9px;">
+          <div style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:4px;">繳費進度</div>
+          ${step(true, '已上傳匯款資料', `${pay.paidAt} · ${pay.method} · 後五碼 ${pay.last5}`)}
+          ${step(true, '業主審核', isPaid || isRej ? '已完成' : '審核中，通常 1–2 個工作天')}
+          ${isRej
+            ? step(true, '已退回', pay.rejectReason || '資料有誤，請重新上傳')
+            : step(isPaid, '完成核銷', isPaid ? (pay.approvedAt || '已核銷') : '待業主確認')}
+        </div>`;
+    }
+
+    const overdueTip = (!pay && isOverdue(mth))
+      ? `<div style="margin-top:12px; padding:10px 12px; background:#fee2e2; border-radius:8px; font-size:11.5px; color:#991b1b; line-height:1.6;">
+           這筆已超過繳費期限（每月 5 日前繳清上月費用），逾期會影響下月排班優先順位。
+         </div>` : '';
+
+    const rejectTip = (pay && pay.status === 'rejected')
+      ? `<div style="margin-top:12px; padding:10px 12px; background:#fee2e2; border-radius:8px; font-size:11.5px; color:#991b1b; line-height:1.6;">
+           <b>退回原因：</b>${pay.rejectReason || '資料有誤'}<br>請確認後重新上傳匯款資料。
+         </div>` : '';
+
+    showInfoModal(`${mth.replace('-', '/')} 對帳明細`, `
       <div style="font-size:12px; color:#666; margin-bottom:8px;">包含以下 ${sessions.length} 場次</div>
-      ${rows}
-      <div style="display:flex; justify-content:space-between; padding:10px 0 2px; font-size:14px; font-weight:700;">
+      ${rows || '<div style="padding:14px 0; font-size:12.5px; color:#9ca3af;">此筆無場次明細</div>'}
+      <div style="display:flex; justify-content:space-between; padding:11px 0 2px; font-size:15px; font-weight:700;">
         <span>應繳總計</span>
         <span style="font-family:'Inter',sans-serif; color:#059669;">NT$ ${total.toLocaleString()}</span>
       </div>
-      ${pay && pay.status === 'paid' ? `<div style="margin-top:8px; padding:8px; background:#d1fae5; border-radius:6px; font-size:11px; color:#065f46;">✓ 業主已於 ${pay.approvedAt} 核銷此筆</div>` : ''}`;
-    document.getElementById('modalConfirmBtn').textContent = '關閉';
-    document.getElementById('modalConfirmBtn').onclick = closeModal;
-    document.getElementById('modal').classList.add('active');
+      ${progress}${overdueTip}${rejectTip}`);
+  }
+
+  // 上月費用應於本月 5 日前繳清
+  function isOverdue(monthKey) {
+    if (!monthKey) return false;
+    const [y, m] = monthKey.split('-').map(Number);
+    const due = new Date(y, m, 5);        // 該月的下個月 5 號
+    return _now > due;
   }
 
   // ──── 繳費 Modal ────
@@ -2128,6 +2202,47 @@
     updatePaySubmitBtn();
   }
 
+  // 收款帳戶（業主端「設定 → 匯款資訊」維護）
+  const PAYEE = {
+    bank: '台新國際商業銀行', code: '812',
+    branch: '永和分行', name: '市集管理處', account: '2049-10-0006010-1',
+  };
+
+  function copyAccount() {
+    const txt = PAYEE.account.replace(/-/g, '');
+    const done = () => showToast('帳號已複製：' + txt, 'success');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done).catch(done);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta); done();
+    }
+  }
+
+  function payeeBoxHtml() {
+    return `
+      <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:12px; margin-bottom:12px;">
+        <div style="font-size:11px; font-weight:700; color:#065f46; margin-bottom:7px;">請匯款至以下帳戶</div>
+        <div style="display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0;">
+          <span style="color:#059669;">銀行</span><b>${PAYEE.bank}（${PAYEE.code}）</b></div>
+        <div style="display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0;">
+          <span style="color:#059669;">分行</span><b>${PAYEE.branch}</b></div>
+        <div style="display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0;">
+          <span style="color:#059669;">戶名</span><b>${PAYEE.name}</b></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:3px 0;">
+          <span style="color:#059669;">帳號</span>
+          <b style="font-family:'Inter',sans-serif; letter-spacing:.3px;">${PAYEE.account}</b></div>
+        <button onclick="copyAccount()" style="width:100%; margin-top:9px; padding:8px; border:none;
+          border-radius:7px; background:#059669; color:#fff; font-size:12.5px; font-weight:700;
+          font-family:inherit; cursor:pointer;">複製帳號</button>
+        <div style="font-size:11px; color:#047857; margin-top:8px; line-height:1.6;">
+          匯款後回到這裡上傳截圖，業主確認後就會核銷。
+        </div>
+      </div>`;
+  }
+
   function renderPayModalBody() {
     const currentMonth = THIS_MONTH;
     const unpaidSessions = calcUnpaidSessions(currentMonth);
@@ -2150,6 +2265,7 @@
     const aiBadge = _payModalState.ocrDone ? '<span class="ocr-result-badge">✨ AI 自動填寫</span>' : '';
 
     document.getElementById('payModalBody').innerHTML = `
+      ${payeeBoxHtml()}
       <div class="session-checklist">
         <div class="session-checklist-title">勾選要一起繳費的場次</div>
         ${sessionList}
@@ -2660,6 +2776,7 @@
 
   // 🆕 開「新增餐車」modal
   function openAddTruckModal() {
+    resetModalButtons();
     STATE.pendingAction = 'add_truck';
     document.getElementById('modalTitle').textContent = '新增餐車';
     document.getElementById('modalBody').innerHTML = `
@@ -2975,7 +3092,7 @@
 
     document.getElementById('modalBody').innerHTML = body;
     document.getElementById('modalConfirmBtn').style.display = 'none';
-    document.querySelector('.modal-actions .modal-btn.cancel').textContent = '關閉';
+    document.querySelector('#modal .modal-actions .modal-btn.cancel').textContent = '關閉';
     document.getElementById('modal').classList.add('show');
   }
 
@@ -3161,6 +3278,7 @@
   // 🆕 時段選擇 modal：點 venue 卡片後跳出，內含 AM/PM 兩個大按鈕
   // 對「單時段場」（廟口整天場、河濱夜市）直接跳過此 modal，走對應 action
   function openSlotPicker(date, venue, slots) {
+    resetModalButtons();
     // 🆕 單時段場 fast path：不開選時段 modal
     if (slots.length === 1) {
       const s = slots[0];
@@ -3239,7 +3357,7 @@
     document.getElementById('modalBody').innerHTML = body;
     // 此 modal 無底部確認按鈕
     document.getElementById('modalConfirmBtn').style.display = 'none';
-    document.querySelector('.modal-actions .modal-btn.cancel').textContent = '關閉';
+    document.querySelector('#modal .modal-actions .modal-btn.cancel').textContent = '關閉';
     document.getElementById('modal').classList.add('show');
   }
 
@@ -3661,6 +3779,7 @@
   }
 
   function openConfirm(s, action) {
+    resetModalButtons();
     STATE.pendingSession = s;
     STATE.pendingAction = action;
     const t = TRUCKS[STATE.currentTruckIdx];
@@ -3686,6 +3805,7 @@
   }
 
   function openEditModal(field, currentVal) {
+    resetModalButtons();
     document.getElementById('modalTitle').textContent = '修改 ' + field;
     document.getElementById('modalBody').innerHTML = `
       <input type="text" class="modal-input" value="${currentVal}" placeholder="輸入新的 ${field}" id="editInput">
@@ -3704,7 +3824,7 @@
     // 🆕 reset 按鈕狀態（避免不同 modal 間殘留）
     const btn = document.getElementById('modalConfirmBtn');
     if (btn) { btn.style.display = ''; btn.style.background = ''; btn.style.color = ''; }
-    const cancel = document.querySelector('.modal-actions .modal-btn.cancel');
+    const cancel = document.querySelector('#modal .modal-actions .modal-btn.cancel');
     if (cancel) cancel.textContent = '取消';
   }
 
@@ -4034,6 +4154,6 @@
   })();
 </script>
 
-<!-- BUILD: v2.2 · 08/12 04:42 -->
+<!-- BUILD: v2.3 · 08/12 04:55 -->
 </body>
 </html>
