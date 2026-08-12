@@ -925,7 +925,7 @@
     <span>回首頁</span>
   </a>
 
-  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v1.9 · 08/12</div>
+  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v2.0 · 08/12</div>
   <div class="sidebar-user">
     <div class="sidebar-user-avatar">A</div>
     <div class="sidebar-user-info">
@@ -1136,11 +1136,11 @@
             <tr><th>場地</th><th>午場上限</th><th>晚場上限</th><th>開放星期</th><th>候補上限</th><th>狀態</th><th></th></tr>
           </thead>
           <tbody>
-            <tr><td><b>中央公園市集</b><br><span style="font-size:11px; color:var(--text-3);">📌 禁止放音樂</span></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueEditor('中央公園市集')">編輯</button></td></tr>
-            <tr><td><b>陽光廣場</b><br><span style="font-size:11px; color:var(--text-3);">📌 室內限落地</span></td><td>4</td><td>3</td><td>週一~五</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueEditor('陽光廣場')">編輯</button></td></tr>
-            <tr><td><b>老街商圈</b></td><td>3</td><td>4</td><td>週六、日</td><td>1.5:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueEditor('老街商圈')">編輯</button></td></tr>
-            <tr><td><b>河濱夜市</b></td><td>0</td><td>6</td><td>週一、三、五</td><td>0.8:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueEditor('河濱夜市')">編輯</button></td></tr>
-            <tr><td><b>廟口廣場</b></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge neutral"><span class="dot"></span>暫停</span></td><td><button class="btn sm" onclick="openVenueEditor('廟口廣場')">編輯</button></td></tr>
+            <tr><td><b>中央公園市集</b><br><span style="font-size:11px; color:var(--text-3);">📌 禁止放音樂</span></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('中央公園市集')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('中央公園市集')">編輯</button></td></tr>
+            <tr><td><b>陽光廣場</b><br><span style="font-size:11px; color:var(--text-3);">📌 室內限落地</span></td><td>4</td><td>3</td><td>週一~五</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('陽光廣場')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('陽光廣場')">編輯</button></td></tr>
+            <tr><td><b>老街商圈</b></td><td>3</td><td>4</td><td>週六、日</td><td>1.5:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('老街商圈')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('老街商圈')">編輯</button></td></tr>
+            <tr><td><b>河濱夜市</b></td><td>0</td><td>6</td><td>週一、三、五</td><td>0.8:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('河濱夜市')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('河濱夜市')">編輯</button></td></tr>
+            <tr><td><b>廟口廣場</b></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge neutral"><span class="dot"></span>暫停</span></td><td><button class="btn sm" onclick="openVenueRoster('廟口廣場')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('廟口廣場')">編輯</button></td></tr>
           </tbody>
         </table>
       </div>
@@ -1247,23 +1247,39 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title" id="reportMonthTitle">月度報表</span>
-          <div style="display:flex; gap:8px;"><button class="btn" onclick="runExport('月度營運報表','pdf')">📥 匯出 PDF</button><button class="btn primary" onclick="runExport('月度營運報表','csv')">📊 匯出 CSV</button></div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" onclick="runExport('月度營運報表','pdf')">📥 匯出 PDF</button>
+            <button class="btn primary" onclick="runExport('月度營運報表','csv')">📊 匯出 CSV</button>
+          </div>
         </div>
-        <div class="kpi-grid" style="margin:14px; gap:10px;">
-          <div class="kpi-card"><div class="kpi-label">總場次數</div><div class="kpi-value">456</div><div class="kpi-delta up">↑ +8% vs 上月</div></div>
-          <div class="kpi-card"><div class="kpi-label">確認登記</div><div class="kpi-value">387</div><div class="kpi-delta up">↑ +12%</div></div>
-          <div class="kpi-card"><div class="kpi-label">候補後遞補</div><div class="kpi-value">42</div><div class="kpi-delta neutral">候補→正取率 89%</div></div>
-          <div class="kpi-card"><div class="kpi-label">缺席率</div><div class="kpi-value">1.8%</div><div class="kpi-delta down">↓ 比上月低 0.4%</div></div>
+        <div class="kpi-grid" id="reportKpis" style="margin:14px; gap:10px;"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <div>
+            <span class="card-title">各場地收支效益</span>
+            <span class="card-title-meta">場地費收入扣掉固定成本後的實際貢獻</span>
+          </div>
+          <button class="btn sm" onclick="openCostSettings()">⚙️ 設定成本</button>
         </div>
-        <table>
-          <thead><tr><th>場地</th><th>本月登記</th><th>候補</th><th>包場</th><th>滿載率</th></tr></thead>
-          <tbody>
-            <tr><td><b>中央公園市集</b></td><td>148</td><td>22</td><td>1</td><td><span style="color:var(--danger); font-weight:700;">95%</span></td></tr>
-            <tr><td><b>老街商圈</b></td><td>87</td><td>10</td><td>1</td><td><span style="color:var(--warn); font-weight:700;">78%</span></td></tr>
-            <tr><td><b>陽光廣場</b></td><td>76</td><td>5</td><td>1</td><td><span style="color:var(--success); font-weight:700;">62%</span></td></tr>
-            <tr><td><b>河濱夜市</b></td><td>76</td><td>5</td><td>0</td><td><span style="color:var(--info); font-weight:700;">45%</span></td></tr>
-          </tbody>
+        <table id="venuePnlTable">
+          <thead>
+            <tr>
+              <th>場地</th><th>開放場次</th><th>使用攤位</th><th>滿載率</th>
+              <th style="text-align:right;">場地費收入</th>
+              <th style="text-align:right;">場地成本</th>
+              <th style="text-align:right;">淨貢獻</th>
+              <th style="text-align:right;">每攤位淨賺</th>
+            </tr>
+          </thead>
+          <tbody id="venuePnlBody"></tbody>
+          <tfoot id="venuePnlFoot"></tfoot>
         </table>
+        <div style="padding:12px 16px; font-size:12px; color:var(--text-3); line-height:1.7; border-top:1px solid var(--border);">
+          場地成本＝場地租金／清潔／電費等固定支出，可按「設定成本」調整。<br>
+          淨貢獻為負代表這個場地目前在賠錢，可考慮調整費率、縮減開放天數，或改談租金。
+        </div>
       </div>
     </div>
 
@@ -2364,6 +2380,7 @@
     document.getElementById('pageTitle').firstChild.textContent = t + ' ';
     document.getElementById('pageTitleSub').textContent = s;
     if (id === 'calendar') scrollCalToToday();
+    if (id === 'reports')  renderReports();
     if (id === 'payment') renderPaymentReview();
     if (id === 'rules') renderRules();  // 🆕 v1.4
     if (isMobileView()) closeDrawer();  // 手機：選完自動收起抽屜
@@ -3560,6 +3577,281 @@
     if (!run()) setTimeout(run, 120);
   }
 
+  // ============================================================
+  // 🆕 v2.0 月報表：各場地收支效益
+  // ============================================================
+  // 每個場地每月的固定成本（租金／清潔／電費）—— 業主可自行調整
+  let VENUE_COSTS = {
+    '中央公園市集': 18000,
+    '陽光廣場':      8000,
+    '老街商圈':      4000,
+    '河濱夜市':     22000,   // 租金偏高，展示「這個場地在賠錢」的情境
+    '廟口廣場':     12000,
+  };
+
+  const nt = n => 'NT$ ' + Math.round(n).toLocaleString('en-US');
+
+  // 掃過整個月，累計每個場地的開放場次、使用攤位數、收入
+  function calcVenuePnl(y, m) {
+    const dim = new Date(y, m, 0).getDate();
+    return CAL_VENUES.map((v, vi) => {
+      let openDays = 0, used = 0, capacity = 0, events = 0, revenue = 0;
+      const fee = (VENUE_FEES_ADMIN[v.name] || {})[v.slotKey] || 0;
+
+      for (let d = 1; d <= dim; d++) {
+        const st = venueDayState(vi, y, m, d);
+        if (!st.open) continue;
+        openDays++;
+        if (st.event) {
+          events++;
+          revenue += fee * v.cap;          // 包場以整場計價
+          used    += v.cap;
+          capacity += v.cap;
+          continue;
+        }
+        used     += st.booked;
+        capacity += st.cap;
+        revenue  += st.booked * fee;
+      }
+
+      const cost   = v.paused ? 0 : (VENUE_COSTS[v.name] || 0);
+      const net    = revenue - cost;
+      const rate   = capacity ? Math.round(used / capacity * 100) : 0;
+      const perSlot = used ? net / used : 0;
+      return { name:v.name, slot:v.slot, paused:!!v.paused, fee,
+               openDays, used, capacity, events, revenue, cost, net, rate, perSlot };
+    });
+  }
+
+  function renderReports() {
+    const rows = calcVenuePnl(DEMO_Y, DEMO_M);
+    const sum = k => rows.reduce((a, r) => a + r[k], 0);
+    const totalRev = sum('revenue'), totalCost = sum('cost');
+    const totalNet = totalRev - totalCost;
+    const totalUsed = sum('used'), totalCap = sum('capacity');
+
+    // 上方 KPI
+    const kpi = document.getElementById('reportKpis');
+    if (kpi) {
+      const margin = totalRev ? Math.round(totalNet / totalRev * 100) : 0;
+      kpi.innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">場地費收入</div>
+          <div class="kpi-value" style="font-size:24px;">${nt(totalRev)}</div>
+          <div class="kpi-delta neutral">本月已登記攤位 ${totalUsed} 個</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">場地固定成本</div>
+          <div class="kpi-value" style="font-size:24px;">${nt(totalCost)}</div>
+          <div class="kpi-delta neutral">租金 · 清潔 · 電費</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">淨貢獻</div>
+          <div class="kpi-value" style="font-size:24px; color:${totalNet >= 0 ? 'var(--success)' : 'var(--danger)'};">${nt(totalNet)}</div>
+          <div class="kpi-delta ${totalNet >= 0 ? 'up' : 'down'}">毛利率 ${margin}%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">整體滿載率</div>
+          <div class="kpi-value" style="font-size:24px;">${totalCap ? Math.round(totalUsed/totalCap*100) : 0}%</div>
+          <div class="kpi-delta neutral">${totalUsed} / ${totalCap} 攤位</div>
+        </div>`;
+    }
+
+    // 明細表
+    const body = document.getElementById('venuePnlBody');
+    if (body) {
+      body.innerHTML = rows.map(r => {
+        if (r.paused) {
+          return `<tr style="opacity:.5;">
+            <td><b>${r.name}</b> <span class="badge neutral" style="font-size:9px; padding:1px 5px;">暫停</span></td>
+            <td colspan="7" style="color:var(--text-3);">本月未開放，不計收支</td></tr>`;
+        }
+        const rateColor = r.rate >= 85 ? 'var(--danger)' : r.rate >= 65 ? 'var(--warn)' : 'var(--success)';
+        const netColor  = r.net >= 0 ? 'var(--success)' : 'var(--danger)';
+        return `<tr>
+          <td><b>${r.name}</b><br><span style="font-size:11px; color:var(--text-3);">${r.slot} · 每攤 ${nt(r.fee)}</span></td>
+          <td>${r.openDays} 天${r.events ? `<br><span style="font-size:11px; color:#7c3aed;">含包場 ${r.events}</span>` : ''}</td>
+          <td>${r.used} / ${r.capacity}</td>
+          <td><span style="color:${rateColor}; font-weight:700;">${r.rate}%</span></td>
+          <td style="text-align:right;">${nt(r.revenue)}</td>
+          <td style="text-align:right; color:var(--text-3);">−${nt(r.cost)}</td>
+          <td style="text-align:right; font-weight:700; color:${netColor};">${r.net >= 0 ? '' : '−'}${nt(Math.abs(r.net))}</td>
+          <td style="text-align:right; color:${netColor};">${r.used ? (r.perSlot >= 0 ? '' : '−') + nt(Math.abs(r.perSlot)) : '—'}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    const foot = document.getElementById('venuePnlFoot');
+    if (foot) {
+      foot.innerHTML = `<tr style="background:#fafafa; font-weight:700;">
+        <td>合計</td>
+        <td>${sum('openDays')} 天</td>
+        <td>${totalUsed} / ${totalCap}</td>
+        <td>${totalCap ? Math.round(totalUsed/totalCap*100) : 0}%</td>
+        <td style="text-align:right;">${nt(totalRev)}</td>
+        <td style="text-align:right; color:var(--text-3);">−${nt(totalCost)}</td>
+        <td style="text-align:right; color:${totalNet >= 0 ? 'var(--success)' : 'var(--danger)'};">
+          ${totalNet >= 0 ? '' : '−'}${nt(Math.abs(totalNet))}</td>
+        <td></td>
+      </tr>`;
+    }
+  }
+
+  function openCostSettings() {
+    const fields = CAL_VENUES.map(v => `
+      <div class="settings-form-row">
+        <label>${v.name}<span class="meta">每月租金／清潔／電費</span></label>
+        <div class="input-with-suffix">
+          <input type="number" id="cost-${v.name}" value="${VENUE_COSTS[v.name] || 0}" step="1000">
+          <span class="suffix">元／月</span>
+        </div>
+      </div>`).join('');
+    openInfoModal('設定場地固定成本', fields + `
+      <p style="font-size:12px; color:var(--text-3); margin-top:10px; line-height:1.7;">
+        填入每個場地每月要付出去的固定支出，報表就會算出真實的淨貢獻。<br>
+        如果某個場地是免費借用，填 0 即可。
+      </p>`, `
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn" onclick="closeInfoModal()">取消</button>
+        <button class="btn primary" onclick="saveCostSettings()">儲存並重算</button>
+      </div>`);
+  }
+
+  function saveCostSettings() {
+    CAL_VENUES.forEach(v => {
+      const el = document.getElementById('cost-' + v.name);
+      if (el) VENUE_COSTS[v.name] = Number(el.value) || 0;
+    });
+    closeInfoModal();
+    renderReports();
+    showToast('成本已更新，報表已重新計算');
+  }
+
+  // ============================================================
+  // 🆕 v2.0 場地名單：某場地未來各場次的登記與候補
+  // ============================================================
+  function truckAt(i) { return TRUCK_POOL[i % TRUCK_POOL.length]; }
+
+  // 依 seed 產生某場次的登記名單與候補名單（與月曆數字一致）
+  function rosterOf(vi, y, m, d) {
+    const v  = CAL_VENUES[vi];
+    const st = venueDayState(vi, y, m, d);
+    if (!st.open) return null;
+    const dStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if (st.event) return { date:dStr, event:true, cap:v.cap };
+
+    const off = Math.floor(seedRand(`off-${v.name}-${m}-${d}`) * TRUCK_POOL.length);
+    const confirmed = [];
+    for (let i = 0; i < st.booked; i++) confirmed.push(truckAt(off + i));
+
+    // 只有額滿的場次才會有人排候補
+    const waiting = [];
+    if (st.state === 'full') {
+      const n = 1 + Math.floor(seedRand(`wl-${v.name}-${m}-${d}`) * 3);
+      for (let i = 0; i < n; i++) waiting.push(truckAt(off + st.booked + i));
+    }
+    return { date:dStr, booked:st.booked, cap:st.cap, state:st.state, confirmed, waiting };
+  }
+
+  function openVenueRoster(name) {
+    const vi = CAL_VENUES.findIndex(v => v.name === name);
+    if (vi < 0) return;
+    const v = CAL_VENUES[vi];
+
+    if (v.paused) {
+      openInfoModal(`${name} · 登記名單`, `
+        <div style="padding:26px; text-align:center; color:var(--text-3);">
+          這個場地目前暫停開放，沒有可登記的場次。<br>
+          要重新開放請到「編輯」把狀態改回啟用。
+        </div>`);
+      return;
+    }
+
+    // 今天起往後 21 天內有開的場次
+    const days = [];
+    for (let i = 0; i < 21 && days.length < 8; i++) {
+      const dt = dOff(i);
+      const r  = rosterOf(vi, dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+      if (r) days.push({ dt, r });
+    }
+
+    if (!days.length) {
+      openInfoModal(`${name} · 登記名單`, `
+        <div style="padding:26px; text-align:center; color:var(--text-3);">未來三週沒有開放場次</div>`);
+      return;
+    }
+
+    const totalC = days.reduce((a, x) => a + (x.r.confirmed ? x.r.confirmed.length : 0), 0);
+    const totalW = days.reduce((a, x) => a + (x.r.waiting ? x.r.waiting.length : 0), 0);
+
+    const blocks = days.map(({ dt, r }) => {
+      const label = `${dt.getMonth()+1}/${dt.getDate()}（${WD_TW[dt.getDay()]}）`;
+      const isToday = dt.toDateString() === DEMO_NOW.toDateString();
+
+      if (r.event) {
+        return `<div style="border:1px solid var(--border); border-radius:10px; margin-bottom:10px; overflow:hidden;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 12px; background:var(--purple-bg);">
+            <b style="font-size:13px; color:#5b21b6;">${label}${isToday ? '　今天' : ''}</b>
+            <span class="badge purple">🎪 已包場</span>
+          </div>
+          <div style="padding:11px 12px; font-size:12.5px; color:var(--text-3);">整場包出，不開放個別登記</div>
+        </div>`;
+      }
+
+      const rows = r.confirmed.map(([e, n], i) => `
+        <div style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px;
+                    border-bottom:1px solid #f5f5f5;">
+          <span style="width:20px; color:var(--text-3); font-size:11px;">${i+1}</span>
+          <span>${e}</span><span style="flex:1;">${n}</span>
+          <span class="badge success" style="font-size:10px;">已確認</span>
+        </div>`).join('');
+
+      const wrows = r.waiting.map(([e, n], i) => `
+        <div style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px;
+                    border-bottom:1px solid #f5f5f5; opacity:.85;">
+          <span style="width:20px; color:var(--warn); font-size:11px; font-weight:700;">#${i+1}</span>
+          <span>${e}</span><span style="flex:1;">${n}</span>
+          <span class="badge warn" style="font-size:10px;">候補</span>
+        </div>`).join('');
+
+      const badge = r.state === 'full'
+        ? `<span class="badge danger">${r.booked}/${r.cap} 已滿</span>`
+        : r.state === 'warning'
+          ? `<span class="badge warn">${r.booked}/${r.cap} 接近滿</span>`
+          : `<span class="badge success">${r.booked}/${r.cap}</span>`;
+
+      const shortfall = r.cap - r.booked;
+
+      return `<div style="border:1px solid var(--border); border-radius:10px; margin-bottom:10px; overflow:hidden;
+                          ${isToday ? 'box-shadow:0 0 0 2px var(--brand);' : ''}">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 12px; background:#fafafa;">
+          <b style="font-size:13px;">${label}${isToday ? '　<span style="color:var(--brand);">今天</span>' : ''}</b>
+          ${badge}
+        </div>
+        <div style="padding:4px 12px 10px;">
+          ${rows || '<div style="padding:10px 0; font-size:12.5px; color:var(--text-3);">尚無人登記</div>'}
+          ${r.waiting.length ? `<div style="margin-top:8px; font-size:11px; color:var(--warn); font-weight:700;">候補名單</div>${wrows}` : ''}
+          ${shortfall > 0 ? `<div style="margin-top:8px; font-size:12px; color:var(--text-3);">
+            還缺 ${shortfall} 攤　<button class="btn sm" onclick="closeInfoModal(); openBroadcast();">發推播找人</button>
+          </div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    openInfoModal(`${name} · ${v.slot}`, `
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <div style="flex:1; background:#f0fdf4; border-radius:9px; padding:10px 12px;">
+          <div style="font-size:11px; color:var(--text-3);">未來 ${days.length} 場已登記</div>
+          <div style="font-size:21px; font-weight:700; color:var(--success);">${totalC}</div>
+        </div>
+        <div style="flex:1; background:#fffbeb; border-radius:9px; padding:10px 12px;">
+          <div style="font-size:11px; color:var(--text-3);">候補中</div>
+          <div style="font-size:21px; font-weight:700; color:var(--warn);">${totalW}</div>
+        </div>
+      </div>
+      ${blocks}`);
+  }
+
   // ---- 把寫死的日期換成今天 ----
   function applyTodayLabels() {
     const sub = document.getElementById('pageTitleSub');
@@ -3590,6 +3882,7 @@
   // 🆕 初始化
   applyTodayLabels();
   renderTodaySchedule();
+  renderReports();
   renderCalGrid();
   renderTruckTable();
   renderNewTruckReviews();
@@ -3600,6 +3893,6 @@
   renderSettings();  // 🆕 載入業主設定
 </script>
 
-<!-- BUILD: v1.9 · 08/12 02:58 -->
+<!-- BUILD: v2.0 · 08/12 04:02 -->
 </body>
 </html>
