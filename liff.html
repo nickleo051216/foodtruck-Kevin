@@ -351,6 +351,7 @@
   .slot-picker-btn.event, .slot-picker-btn.disabled { opacity:.5; cursor:not-allowed; }
   .slot-picker-time { display:flex; flex-direction:column; gap:2px; }
   .slot-picker-name { font-size:16px; font-weight:700; }
+  .slot-picker-fee { font-size:11px; color:var(--brand-orange); font-weight:600; margin-top:2px; }
   .slot-picker-hours { font-size:11px; color:#666; }
   .slot-picker-status { font-size:13px; font-weight:600; }
   .slot-picker-status.green { color:var(--line-green-dark); }
@@ -1503,6 +1504,20 @@
     '廟口廣場':      { ALL: 350 }
   };
 
+
+  // 取得單一時段的場地費
+  function getFee(venue, slot) {
+    const f = VENUE_FEES[venue];
+    return f ? (f[slot] || 0) : 0;
+  }
+  // 多時段時顯示金額區間，例如「NT$ 300 / 場」或「NT$ 250–400 / 場」
+  function feeRangeText(venue, slots) {
+    const vals = [...new Set(slots.map(s => getFee(s.venue, s.slot)).filter(Boolean))].sort((a,b)=>a-b);
+    if (!vals.length) return '免費';
+    return vals.length === 1
+      ? `NT$ ${vals[0]} / 場`
+      : `NT$ ${vals[0]}–${vals[vals.length-1]} / 場`;
+  }
 
   // helper：取得場地時段顯示名稱
   function getSlotLabel(venue, slot) {
@@ -3108,6 +3123,7 @@
         <div class="modal-row"><span class="label">場地</span><span class="value">${venue}</span></div>
         <div class="modal-row"><span class="label">日期</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${wd}）</span></div>
         <div class="modal-row"><span class="label">餐車</span><span class="value">${truck.emoji} ${truck.name}${truck.plate ? ' · ' + truck.plate : ''}</span></div>
+        <div class="modal-row"><span class="label">場地費</span><span class="value" style="color:var(--brand-orange);">${feeRangeText(venue, slots)}</span></div>
       </div>
       <div class="slot-picker-grid">`;
 
@@ -3142,11 +3158,13 @@
         onclickAttr = `onclick="closeModal(); openConfirm(findSession('${sk}'), 'waitlist')"`;
       }
 
+      const fee = getFee(s.venue, s.slot);
       body += `
         <button class="${cls}" ${onclickAttr} ${disabled?'disabled':''}>
           <div class="slot-picker-time">
             <div class="slot-picker-name">${slotName}</div>
             <div class="slot-picker-hours">${hours}</div>
+            ${fee ? `<div class="slot-picker-fee">場地費 NT$ ${fee}</div>` : ''}
           </div>
           <div class="slot-picker-status ${statusCls}">${statusText}</div>
         </button>`;
@@ -3568,7 +3586,9 @@
         <div class="modal-row"><span class="label">日期</span><span class="value">${parseInt(mm)}/${parseInt(dd)}（${s.wd}）</span></div>
         <div class="modal-row"><span class="label">時段</span><span class="value">${slot}</span></div>
         <div class="modal-row"><span class="label">餐車</span><span class="value">${t.emoji} ${t.name}${t.plate ? ' · ' + t.plate : ''}</span></div>
+        <div class="modal-row"><span class="label">場地費</span><span class="value" style="color:var(--brand-orange); font-weight:700;">NT$ ${getFee(s.venue, s.slot)}</span></div>
         ${action === 'waitlist' ? `<div class="modal-row" style="color:var(--warn);"><span class="label">⚠️ 候補</span><span class="value">將是第 ${s.wl[0]+1} 位 / 上限 ${s.wl[1]}</span></div>` : ''}
+        ${action === 'waitlist' ? `<div class="modal-row" style="color:#888; font-size:11px;"><span class="label"></span><span class="value">遞補成功才需繳費</span></div>` : ''}
       </div>`;
     const btn = document.getElementById('modalConfirmBtn');
     btn.style.background = '';
@@ -3927,6 +3947,6 @@
   })();
 </script>
 
-<!-- BUILD: v2.0 · 08/12 04:02 -->
+<!-- BUILD: v2.1 · 08/12 04:22 -->
 </body>
 </html>

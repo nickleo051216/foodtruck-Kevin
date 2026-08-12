@@ -925,7 +925,7 @@
     <span>回首頁</span>
   </a>
 
-  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v2.0 · 08/12</div>
+  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v2.1 · 08/12</div>
   <div class="sidebar-user">
     <div class="sidebar-user-avatar">A</div>
     <div class="sidebar-user-info">
@@ -1133,14 +1133,14 @@
         </div>
         <table>
           <thead>
-            <tr><th>場地</th><th>午場上限</th><th>晚場上限</th><th>開放星期</th><th>候補上限</th><th>狀態</th><th></th></tr>
+            <tr><th>場地</th><th>午場上限</th><th>晚場上限</th><th>場地費 / 攤</th><th>開放星期</th><th>候補上限</th><th>狀態</th><th></th></tr>
           </thead>
           <tbody>
-            <tr><td><b>中央公園市集</b><br><span style="font-size:11px; color:var(--text-3);">📌 禁止放音樂</span></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('中央公園市集')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('中央公園市集')">編輯</button></td></tr>
-            <tr><td><b>陽光廣場</b><br><span style="font-size:11px; color:var(--text-3);">📌 室內限落地</span></td><td>4</td><td>3</td><td>週一~五</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('陽光廣場')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('陽光廣場')">編輯</button></td></tr>
-            <tr><td><b>老街商圈</b></td><td>3</td><td>4</td><td>週六、日</td><td>1.5:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('老街商圈')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('老街商圈')">編輯</button></td></tr>
-            <tr><td><b>河濱夜市</b></td><td>0</td><td>6</td><td>週一、三、五</td><td>0.8:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('河濱夜市')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('河濱夜市')">編輯</button></td></tr>
-            <tr><td><b>廟口廣場</b></td><td>5</td><td>5</td><td>每日</td><td>1:1</td><td><span class="badge neutral"><span class="dot"></span>暫停</span></td><td><button class="btn sm" onclick="openVenueRoster('廟口廣場')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('廟口廣場')">編輯</button></td></tr>
+            <tr><td><b>中央公園市集</b><br><span style="font-size:11px; color:var(--text-3);">📌 禁止放音樂</span></td><td>5</td><td>5</td><td><span id="feeCell-中央公園市集" style="font-size:12px;">午 300 / 晚 300</span></td><td>每日</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('中央公園市集')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('中央公園市集')">編輯</button></td></tr>
+            <tr><td><b>陽光廣場</b><br><span style="font-size:11px; color:var(--text-3);">📌 室內限落地</span></td><td>4</td><td>3</td><td><span id="feeCell-陽光廣場" style="font-size:12px;">午 250 / 晚 250</span></td><td>週一~五</td><td>1:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('陽光廣場')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('陽光廣場')">編輯</button></td></tr>
+            <tr><td><b>老街商圈</b></td><td>3</td><td>4</td><td><span id="feeCell-老街商圈" style="font-size:12px;">早 200 / 晚 200</span></td><td>週六、日</td><td>1.5:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('老街商圈')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('老街商圈')">編輯</button></td></tr>
+            <tr><td><b>河濱夜市</b></td><td>0</td><td>6</td><td><span id="feeCell-河濱夜市" style="font-size:12px;">夜 400</span></td><td>週一、三、五</td><td>0.8:1</td><td><span class="badge success"><span class="dot"></span>啟用</span></td><td><button class="btn sm" onclick="openVenueRoster('河濱夜市')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('河濱夜市')">編輯</button></td></tr>
+            <tr><td><b>廟口廣場</b></td><td>5</td><td>5</td><td><span id="feeCell-廟口廣場" style="font-size:12px;">整天 350</span></td><td>每日</td><td>1:1</td><td><span class="badge neutral"><span class="dot"></span>暫停</span></td><td><button class="btn sm" onclick="openVenueRoster('廟口廣場')">👥 名單</button> <button class="btn sm" onclick="openVenueEditor('廟口廣場')">編輯</button></td></tr>
           </tbody>
         </table>
       </div>
@@ -1277,6 +1277,7 @@
           <tfoot id="venuePnlFoot"></tfoot>
         </table>
         <div style="padding:12px 16px; font-size:12px; color:var(--text-3); line-height:1.7; border-top:1px solid var(--border);">
+          場地費收入＝每場實際登記攤位數 × 該場地費率，費率可在「場地管理 → 編輯」調整。<br>
           場地成本＝場地租金／清潔／電費等固定支出，可按「設定成本」調整。<br>
           淨貢獻為負代表這個場地目前在賠錢，可考慮調整費率、縮減開放天數，或改談租金。
         </div>
@@ -2085,6 +2086,7 @@
 
   function openVenueEditor(name) {
     const v = VENUE_PRESET[name] || { am:'', pm:'', days:'每日', wait:'1:1', note:'' };
+    const fee = Object.assign({ AM:0, PM:0 }, VENUE_FEES_ADMIN[name] || {});
     const isNew = !name;
     openInfoModal(isNew ? '新增場地' : `編輯場地 · ${name}`, `
       <div class="settings-form-row">
@@ -2099,6 +2101,37 @@
         <label>晚場上限<span class="meta">攤位數</span></label>
         <input type="number" id="vePm" value="${v.pm}">
       </div>
+
+      <div style="margin:14px 0 4px; padding-top:12px; border-top:1px solid var(--border);
+                  font-size:12px; font-weight:700; color:var(--text-2);">
+        場地費（每攤每場）
+      </div>
+      <div class="settings-form-row">
+        <label>午場 / 早市<span class="meta">車主登記時會看到這個金額</span></label>
+        <div class="input-with-suffix">
+          <input type="number" id="veFeeAm" value="${fee.AM || 0}" step="50">
+          <span class="suffix">元</span>
+        </div>
+      </div>
+      <div class="settings-form-row">
+        <label>晚場 / 夜市<span class="meta">同一場地不同時段可設不同價</span></label>
+        <div class="input-with-suffix">
+          <input type="number" id="veFeePm" value="${fee.PM || 0}" step="50">
+          <span class="suffix">元</span>
+        </div>
+      </div>
+      ${fee.ALL !== undefined ? `
+      <div class="settings-form-row">
+        <label>整天場</label>
+        <div class="input-with-suffix">
+          <input type="number" id="veFeeAll" value="${fee.ALL || 0}" step="50">
+          <span class="suffix">元</span>
+        </div>
+      </div>` : ''}
+      <p style="font-size:11.5px; color:var(--text-3); line-height:1.65; margin-top:-2px;">
+        月報表的場地費收入＝每場實際登記攤位數 × 這裡設定的金額。<br>
+        改了之後報表會立刻重算。
+      </p>
       <div class="settings-form-row">
         <label>開放星期</label>
         <input type="text" id="veDays" value="${v.days}">
@@ -2122,8 +2155,40 @@
   function saveVenue(isNew) {
     const n = (document.getElementById('veName').value || '').trim();
     if (!n) { showToast('請填寫場地名稱', 'error'); return; }
+
+    // 寫回費率，報表與車主端顯示的金額都以這裡為準
+    const num = id => { const el = document.getElementById(id); return el ? (Number(el.value) || 0) : null; };
+    const cur = VENUE_FEES_ADMIN[n] || {};
+    const next = {};
+    if (num('veFeeAll') !== null)                 next.ALL = num('veFeeAll');
+    if (cur.AM !== undefined || num('veFeeAm'))   next.AM  = num('veFeeAm');
+    if (cur.PM !== undefined || num('veFeePm'))   next.PM  = num('veFeePm');
+    VENUE_FEES_ADMIN[n] = Object.keys(next).length ? next : cur;
+
+    refreshFeeCells();
+    renderReports();
     closeInfoModal();
-    showToast(isNew ? `已新增場地「${n}」` : `已儲存「${n}」的設定`);
+    showToast(isNew ? `已新增場地「${n}」` : `已儲存「${n}」，報表已重算`);
+  }
+
+  // 場地清單的費率欄位文字
+  const SLOT_WORD = {
+    '中央公園市集': { AM:'午場', PM:'晚場' },
+    '陽光廣場':     { AM:'午場', PM:'晚場' },
+    '老街商圈':     { AM:'早市', PM:'晚市' },
+    '河濱夜市':     { PM:'夜市' },
+    '廟口廣場':     { ALL:'整天場' },
+  };
+
+  function refreshFeeCells() {
+    CAL_VENUES.forEach(v => {
+      const el = document.getElementById('feeCell-' + v.name);
+      if (!el) return;
+      const f = VENUE_FEES_ADMIN[v.name] || {};
+      const w = SLOT_WORD[v.name] || {};
+      const parts = Object.keys(f).map(k => `${w[k] || k} ${f[k]}`);
+      el.textContent = parts.length ? parts.join(' / ') : '未設定';
+    });
   }
 
   // ---- 信用紀錄 ----
@@ -3673,7 +3738,9 @@
           <td>${r.openDays} 天${r.events ? `<br><span style="font-size:11px; color:#7c3aed;">含包場 ${r.events}</span>` : ''}</td>
           <td>${r.used} / ${r.capacity}</td>
           <td><span style="color:${rateColor}; font-weight:700;">${r.rate}%</span></td>
-          <td style="text-align:right;">${nt(r.revenue)}</td>
+          <td style="text-align:right;">${nt(r.revenue)}<br>
+              <span style="font-size:10.5px; color:var(--text-3); font-weight:400;">
+                ${r.used} 攤 × ${nt(r.fee)}</span></td>
           <td style="text-align:right; color:var(--text-3);">−${nt(r.cost)}</td>
           <td style="text-align:right; font-weight:700; color:${netColor};">${r.net >= 0 ? '' : '−'}${nt(Math.abs(r.net))}</td>
           <td style="text-align:right; color:${netColor};">${r.used ? (r.perSlot >= 0 ? '' : '−') + nt(Math.abs(r.perSlot)) : '—'}</td>
@@ -3881,6 +3948,7 @@
 
   // 🆕 初始化
   applyTodayLabels();
+  refreshFeeCells();
   renderTodaySchedule();
   renderReports();
   renderCalGrid();
@@ -3893,6 +3961,6 @@
   renderSettings();  // 🆕 載入業主設定
 </script>
 
-<!-- BUILD: v2.0 · 08/12 04:02 -->
+<!-- BUILD: v2.1 · 08/12 04:22 -->
 </body>
 </html>
