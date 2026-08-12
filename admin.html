@@ -2340,7 +2340,7 @@
 
   function renderPaymentReview() {
     // 統計
-    const total = 912 * 350;  // 預估
+    const total = 168 * 350;  // 預估
     const paid = PAYMENT_REVIEWS.filter(p => p.status === 'approved').reduce((s, p) => s + p.amount, 0);
     const pending = PAYMENT_REVIEWS.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0);
     const overdue = 28500;  // demo 數字
