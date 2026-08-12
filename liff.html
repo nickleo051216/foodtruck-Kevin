@@ -559,25 +559,51 @@
   .session-check-item label { flex:1; cursor:pointer; }
   .session-check-fee { font-family:'Inter',sans-serif; font-weight:600; color:#10b981; font-size:12px; }
 
-  /* ==== 📍 報到打卡 Modal ==== */
-  .checkin-status { padding:14px; border-radius:12px; margin-bottom:14px; text-align:center; }
-  .checkin-status.checking { background:#eff6ff; color:#1e40af; }
-  .checkin-status.ok { background:#d1fae5; color:#065f46; }
-  .checkin-status.far { background:#fee2e2; color:#991b1b; }
-  .checkin-status-icon { font-size:32px; margin-bottom:6px; }
-  .checkin-status-text { font-size:13px; font-weight:600; margin-bottom:3px; }
-  .checkin-status-meta { font-size:11px; opacity:.85; font-family:'Inter',sans-serif; }
-
+  /* ==== 📷 拍照報到 Modal ==== */
   .checkin-info-row { display:flex; justify-content:space-between; padding:7px 0; font-size:12px; border-bottom:1px solid #f3f4f6; }
   .checkin-info-row:last-child { border-bottom:none; }
   .checkin-info-row span:first-child { color:#666; }
   .checkin-info-row b { color:var(--text); font-weight:600; }
 
-  /* 卡片上的「報到打卡」按鈕 */
+  /* 拍照上傳區 */
+  .shot-drop {
+    margin-top:14px; padding:26px 14px; text-align:center; cursor:pointer;
+    border:2px dashed #cbd5e1; border-radius:12px; background:#f8fafc;
+    transition:all .15s;
+  }
+  .shot-drop:hover { border-color:#94a3b8; background:#f1f5f9; }
+  .shot-drop-icon { font-size:34px; margin-bottom:8px; }
+  .shot-drop-text { font-size:14px; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .shot-drop-hint { font-size:11px; color:#94a3b8; }
+
+  /* 預覽 */
+  .shot-preview { margin-top:14px; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb; }
+  .shot-preview img { display:block; width:100%; max-height:220px; object-fit:cover; }
+  .shot-meta {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 12px; background:#d1fae5; color:#065f46;
+    font-size:12px; font-weight:600;
+  }
+  .shot-meta .stamp { font-family:'Inter',sans-serif; font-weight:500; opacity:.9; }
+  .shot-retake {
+    width:100%; margin-top:8px; padding:8px; border:none; border-radius:8px;
+    background:#f3f4f6; color:#4b5563; font-size:12px; font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .shot-retake:hover { background:#e5e7eb; }
+  .shot-sample {
+    width:100%; margin-top:8px; padding:9px; border:none; border-radius:8px;
+    background:#fef3c7; color:#92400e; font-size:12px; font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .shot-sample:hover { background:#fde68a; }
+
+  /* 卡片上的「拍照報到」按鈕 */
   .checkin-btn-row { display:flex; gap:6px; margin-top:8px; }
   .checkin-btn { flex:1; padding:8px; background:#dbeafe; color:#1e40af; border:none; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
   .checkin-btn:hover { background:#bfdbfe; }
-  .checkin-btn.done { background:#d1fae5; color:#065f46; cursor:default; }
+  .checkin-btn.done { background:#d1fae5; color:#065f46; cursor:pointer; }
+  .checkin-btn.done:hover { background:#a7f3d0; }
   .checkin-btn.miss { background:#fee2e2; color:#991b1b; cursor:default; }
   .checkin-btn.future { background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
 
@@ -757,7 +783,7 @@
     font-family: inherit;
   }
 
-  /* ─── ③ 黑名單原因 Tooltip ─── */
+  /* ─── ③ 未開放名單原因 Tooltip ─── */
   .slot-mini.blocked {
     cursor: help;
     position: relative;
@@ -953,7 +979,7 @@
         <div class="car-trigger" onclick="toggleCarDropdown()">
           <div class="car-avatar" id="carAvatar">🍜</div>
           <div class="car-info">
-            <div class="car-name" id="carName">泰沙了打抛飯</div>
+            <div class="car-name" id="carName">泰香打拋飯</div>
             <div class="car-meta" id="carMeta">餐車 · 泰式料理 · 車牌 ABC-1234</div>
           </div>
           <span class="car-arrow">▾</span>
@@ -1065,7 +1091,7 @@
             <div class="account-row-label">電話</div>
             <div class="account-row-value">0932-684-***</div>
           </div>
-          <div class="account-row-edit" onclick="openEditModal('電話','0932-684-051')">修改</div>
+          <div class="account-row-edit" onclick="openEditModal('電話','0912-345-678')">修改</div>
         </div>
         <div class="account-row">
           <div>
@@ -1092,7 +1118,7 @@
         <div class="account-row">
           <div>
             <div class="account-row-label">2026/06/12</div>
-            <div class="account-row-value" style="font-size:13px;">新增餐車：黑熊烤玉米</div>
+            <div class="account-row-value" style="font-size:13px;">新增餐車：大熊烤玉米</div>
           </div>
           <span class="truck-card-status">已通過</span>
         </div>
@@ -1167,17 +1193,31 @@
     </div>
   </div>
 
-  <!-- 📍 報到打卡 Modal -->
+  <!-- 📷 拍照報到 Modal -->
   <div class="modal-overlay" id="checkinModal" onclick="if(event.target === this) closeCheckinModal()">
     <div class="modal">
       <div class="modal-handle"></div>
-      <div class="modal-title">📍 場地報到打卡</div>
+      <div class="modal-title">📷 拍照報到</div>
       <div id="checkinBody">
         <!-- 動態渲染 -->
       </div>
+      <input type="file" id="checkinPhotoInput" accept="image/*" capture="environment"
+             style="display:none" onchange="handlePhotoPick(event)">
       <div class="modal-actions">
         <button class="modal-btn cancel" onclick="closeCheckinModal()">取消</button>
-        <button class="modal-btn confirm" id="checkinConfirmBtn" onclick="doCheckin()" disabled style="opacity:.5;cursor:not-allowed;">確認打卡</button>
+        <button class="modal-btn confirm" id="checkinConfirmBtn" onclick="doCheckin()" disabled style="opacity:.5;cursor:not-allowed;">送出報到</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🖼 檢視報到照片 Modal -->
+  <div class="modal-overlay" id="shotViewModal" onclick="if(event.target === this) closeShotView()">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">🖼 報到紀錄</div>
+      <div id="shotViewBody"><!-- 動態渲染 --></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeShotView()">關閉</button>
       </div>
     </div>
   </div>
@@ -1233,8 +1273,8 @@
   const DEMO_USERS = {
     nick: { lineUserId:'U_line_nick001', label:'Nick' },
     amy:  { lineUserId:'U_line_amy004',  label:'Amy' },
-    lin:  { lineUserId:'U_line_lin003',  label:'林姊' },
-    chen: { lineUserId:'U_line_chen002', label:'陳大哥' }
+    lin:  { lineUserId:'U_line_lin003',  label:'林老闆' },
+    chen: { lineUserId:'U_line_chen002', label:'陳老闆' }
   };
   let CURRENT_USER = DEMO_USERS[DEMO_USER_KEY] || DEMO_USERS.nick;
 
@@ -1242,19 +1282,19 @@
   const TRUCK_ID_MAP = { t1:'T_001', t2:'T_002', t3:'T_003' };
   // 場地名稱對應 venueId
   const VENUE_NAME_TO_ID = {
-    '南港餐車市集': 'V_001',
-    '央北中山小熊': 'V_002',
-    '三峽老街': 'V_003',
-    '新店夜市': 'V_004',
-    '蘆洲廟口': 'V_005'
+    '中央公園市集': 'V_001',
+    '陽光廣場': 'V_002',
+    '老街商圈': 'V_003',
+    '河濱夜市': 'V_004',
+    '廟口廣場': 'V_005'
   };
 
   let TRUCKS = [
-    { id:'t1', name:'泰沙了打抛飯', emoji:'🍜', type:'餐車', food:'泰式料理', plate:'ABC-1234', status:'active', blocked:['新店夜市'],
-      blockedReasons:{ '新店夜市':'此場地車型上限為輕食類，本車型暫不在開放名單' } },
-    { id:'t2', name:'ZN 飲料', emoji:'🧋', type:'餐車', food:'飲料茶飲', plate:'XYZ-5678', status:'active', blocked:['南港餐車市集'],
-      blockedReasons:{ '南港餐車市集':'此場地僅開放熟食類餐車，飲料車暫不適用' } },
-    { id:'t3', name:'黑熊烤玉米', emoji:'🌽', type:'落地攤', food:'燒烤', plate:null, status:'active', blocked:[],
+    { id:'t1', name:'泰香打拋飯', emoji:'🍜', type:'餐車', food:'泰式料理', plate:'ABC-1234', status:'active', blocked:['河濱夜市'],
+      blockedReasons:{ '河濱夜市':'此場地車型上限為輕食類，本車型暫不在開放名單' } },
+    { id:'t2', name:'ZN 飲料', emoji:'🧋', type:'餐車', food:'飲料茶飲', plate:'XYZ-5678', status:'active', blocked:['中央公園市集'],
+      blockedReasons:{ '中央公園市集':'此場地僅開放熟食類餐車，飲料車暫不適用' } },
+    { id:'t3', name:'大熊烤玉米', emoji:'🌽', type:'落地攤', food:'燒烤', plate:null, status:'active', blocked:[],
       blockedReasons:{} }
   ];
 
@@ -1375,7 +1415,7 @@
   const INITIAL_TRUCKS_JSON = JSON.stringify(TRUCKS);
 
   // ╔══════════════════════════════════════════╗
-  // ║  🆕 v1.4 黑名單原因系統                      ║
+  // ║  🆕 v1.4 未開放名單原因系統                      ║
   // ╚══════════════════════════════════════════╝
   function getRestrictionReason(truckId, venue) {
     const truck = TRUCKS.find(t => t.id === truckId);
@@ -1416,35 +1456,35 @@
 
   // 🆕 場地時段配置 — 對應後端 venues 表的 openDays / capacity
   const VENUE_CONFIG = {
-    '南港餐車市集': {
+    '中央公園市集': {
       slots: ['AM', 'PM'],
       labels: { AM:'午場', PM:'晚場' },
       hours:  { AM:'10:00–15:00', PM:'16:00–21:00' },
       openWeekdays: { AM:[1,2,3,4,5,6,7], PM:[1,2,3,4,5,6,7] },   // 每天都開
       capacity: { AM:5, PM:5 }
     },
-    '央北中山小熊': {
+    '陽光廣場': {
       slots: ['AM', 'PM'],
       labels: { AM:'午場', PM:'晚場' },
       hours:  { AM:'10:00–15:00', PM:'16:00–21:00' },
       openWeekdays: { AM:[1,2,3,4,5], PM:[1,2,3,4,5] },             // 平日才開
       capacity: { AM:4, PM:3 }
     },
-    '三峽老街': {
+    '老街商圈': {
       slots: ['AM', 'PM'],
       labels: { AM:'早市', PM:'晚市' },
       hours:  { AM:'09:00–14:00', PM:'17:00–22:00' },
       openWeekdays: { AM:[6,7], PM:[6,7] },                          // 週末才開
       capacity: { AM:3, PM:4 }
     },
-    '新店夜市': {
+    '河濱夜市': {
       slots: ['PM'],
       labels: { PM:'夜市' },
       hours:  { PM:'17:00–24:00' },
       openWeekdays: { PM:[1,3,5] },                                  // 週一三五才開
       capacity: { PM:6 }
     },
-    '蘆洲廟口': {
+    '廟口廣場': {
       slots: ['ALL'],
       labels: { ALL:'整天場' },
       hours:  { ALL:'10:00–21:00' },
@@ -1455,23 +1495,13 @@
 
   // 🆕 Plan B — 場地費率（每場 NT$）
   const VENUE_FEES = {
-    '南港餐車市集':  { AM: 300, PM: 300 },
-    '央北中山小熊':  { AM: 250, PM: 250 },
-    '三峽老街':      { AM: 200, PM: 200 },
-    '新店夜市':      { PM: 400 },
-    '蘆洲廟口':      { ALL: 350 }
+    '中央公園市集':  { AM: 300, PM: 300 },
+    '陽光廣場':  { AM: 250, PM: 250 },
+    '老街商圈':      { AM: 200, PM: 200 },
+    '河濱夜市':      { PM: 400 },
+    '廟口廣場':      { ALL: 350 }
   };
 
-  // 🆕 Plan B — 場地 GPS 座標（用於報到打卡距離驗證）
-  const VENUE_GPS = {
-    '南港餐車市集':  { lat: 25.054, lng: 121.601 },
-    '央北中山小熊':  { lat: 25.013, lng: 121.529 },
-    '三峽老街':      { lat: 24.934, lng: 121.371 },
-    '新店夜市':      { lat: 24.978, lng: 121.541 },
-    '蘆洲廟口':      { lat: 25.084, lng: 121.470 }
-  };
-
-  const CHECKIN_RADIUS_M = 500;  // 半徑 500 公尺內視為到場
 
   // helper：取得場地時段顯示名稱
   function getSlotLabel(venue, slot) {
@@ -1487,83 +1517,83 @@
   const TODAY = '2026-06-20';
 
   // 🆕 SESSIONS：按照 VENUE_CONFIG 的場地時段規律重新設計，讓 demo 能看到「每個場地的差異」
-  // - 南港：每天 AM+PM（5+5）
-  // - 央北：平日 AM+PM（4+3），週末休
-  // - 三峽：假日早市+晚市（3+4），平日休
-  // - 新店：週一三五只夜市（6），其他天休
-  // - 蘆洲：每天整天場（10:00–21:00，容量 8）
+  // - 中央公園：每天 AM+PM（5+5）
+  // - 陽光：平日 AM+PM（4+3），週末休
+  // - 老街：假日早市+晚市（3+4），平日休
+  // - 河濱：週一三五只夜市（6），其他天休
+  // - 廟口：每天整天場（10:00–21:00，容量 8）
   const SESSIONS = {
     '2026-05': [
-      { d:'2026-05-03', wd:'六', slot:'PM', venue:'三峽老街', status:'history-completed', truckOk:'all' },
-      { d:'2026-05-15', wd:'四', slot:'AM', venue:'南港餐車市集', status:'history-completed', truckOk:['t1','t3'] }
+      { d:'2026-05-03', wd:'六', slot:'PM', venue:'老街商圈', status:'history-completed', truckOk:'all' },
+      { d:'2026-05-15', wd:'四', slot:'AM', venue:'中央公園市集', status:'history-completed', truckOk:['t1','t3'] }
     ],
     '2026-06': [
       // === 6/22（一）平日 ===
-      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'南港餐車市集', status:'full',        cap:[5,5], wl:[2,5], truckOk:['t1','t3'] },
-      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'新店夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
-      { d:'2026-06-22', wd:'一', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' },
+      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'中央公園市集', status:'full',        cap:[5,5], wl:[2,5], truckOk:['t1','t3'] },
+      { d:'2026-06-22', wd:'一', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-22', wd:'一', slot:'PM',  venue:'河濱夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
+      { d:'2026-06-22', wd:'一', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' },
 
       // === 6/23（二）平日 ===
-      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'央北中山小熊', status:'event', event:'小熊夏季嘉年華', truckOk:'all' },
-      { d:'2026-06-23', wd:'二', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[6,8], wl:[0,8], truckOk:'all' },
+      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-23', wd:'二', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-23', wd:'二', slot:'PM',  venue:'陽光廣場', status:'event', event:'小熊夏季嘉年華', truckOk:'all' },
+      { d:'2026-06-23', wd:'二', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[6,8], wl:[0,8], truckOk:'all' },
 
       // === 6/24（三）平日 ===
-      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'央北中山小熊', status:'full',        cap:[4,4], wl:[1,4], truckOk:'all' },
-      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'新店夜市',     status:'full',        cap:[6,6], wl:[2,6], truckOk:['t2','t3'] },
-      { d:'2026-06-24', wd:'三', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
+      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-24', wd:'三', slot:'AM',  venue:'陽光廣場', status:'full',        cap:[4,4], wl:[1,4], truckOk:'all' },
+      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-24', wd:'三', slot:'PM',  venue:'河濱夜市',     status:'full',        cap:[6,6], wl:[2,6], truckOk:['t2','t3'] },
+      { d:'2026-06-24', wd:'三', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
 
       // === 6/25（四）平日 ===
-      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[1,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-25', wd:'四', slot:'ALL', venue:'蘆洲廟口',     status:'full',        cap:[8,8], wl:[1,8], truckOk:'all' },
+      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[1,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-25', wd:'四', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-25', wd:'四', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-25', wd:'四', slot:'ALL', venue:'廟口廣場',     status:'full',        cap:[8,8], wl:[1,8], truckOk:'all' },
 
       // === 6/26（五）平日 ===
-      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[3,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'央北中山小熊', status:'full',        cap:[3,3], wl:[1,3], truckOk:'all' },
-      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'新店夜市',     status:'available',   cap:[4,6], wl:[0,6], truckOk:['t2','t3'] },
-      { d:'2026-06-26', wd:'五', slot:'ALL', venue:'蘆洲廟口',     status:'waitlist-full', cap:[8,8], wl:[8,8], truckOk:'all' },
+      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-26', wd:'五', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[3,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'陽光廣場', status:'full',        cap:[3,3], wl:[1,3], truckOk:'all' },
+      { d:'2026-06-26', wd:'五', slot:'PM',  venue:'河濱夜市',     status:'available',   cap:[4,6], wl:[0,6], truckOk:['t2','t3'] },
+      { d:'2026-06-26', wd:'五', slot:'ALL', venue:'廟口廣場',     status:'waitlist-full', cap:[8,8], wl:[8,8], truckOk:'all' },
 
       // === 6/27（六）週末 ===
-      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'三峽老街',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'三峽老街',     status:'registered',  cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-27', wd:'六', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[3,8], wl:[0,8], truckOk:'all' },
+      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[4,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-27', wd:'六', slot:'AM',  venue:'老街商圈',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-27', wd:'六', slot:'PM',  venue:'老街商圈',     status:'registered',  cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-27', wd:'六', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[3,8], wl:[0,8], truckOk:'all' },
 
       // === 6/28（日）週末 ===
-      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'三峽老街',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'三峽老街',     status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-28', wd:'日', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
+      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-28', wd:'日', slot:'AM',  venue:'老街商圈',     status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-28', wd:'日', slot:'PM',  venue:'老街商圈',     status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-28', wd:'日', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[5,8], wl:[0,8], truckOk:'all' },
 
-      // === 6/29（一）平日，南港 PM 包場 ===
-      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'南港餐車市集', status:'event', event:'南港居民日', truckOk:['t1','t3'] },
-      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'新店夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
-      { d:'2026-06-29', wd:'一', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[2,8], wl:[0,8], truckOk:'all' },
+      // === 6/29（一）平日，中央公園 PM 包場 ===
+      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'中央公園市集', status:'event', event:'社區居民日', truckOk:['t1','t3'] },
+      { d:'2026-06-29', wd:'一', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[1,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[1,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-29', wd:'一', slot:'PM',  venue:'河濱夜市',     status:'available',   cap:[3,6], wl:[0,6], truckOk:['t2','t3'] },
+      { d:'2026-06-29', wd:'一', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[2,8], wl:[0,8], truckOk:'all' },
 
       // === 6/30（二）平日 ===
-      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'南港餐車市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'南港餐車市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
-      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'央北中山小熊', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
-      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'央北中山小熊', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
-      { d:'2026-06-30', wd:'二', slot:'ALL', venue:'蘆洲廟口',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' }
+      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'中央公園市集', status:'available',   cap:[3,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'中央公園市集', status:'available',   cap:[2,5], wl:[0,5], truckOk:['t1','t3'] },
+      { d:'2026-06-30', wd:'二', slot:'AM',  venue:'陽光廣場', status:'available',   cap:[2,4], wl:[0,4], truckOk:'all' },
+      { d:'2026-06-30', wd:'二', slot:'PM',  venue:'陽光廣場', status:'available',   cap:[2,3], wl:[0,3], truckOk:'all' },
+      { d:'2026-06-30', wd:'二', slot:'ALL', venue:'廟口廣場',     status:'available',   cap:[4,8], wl:[0,8], truckOk:'all' }
     ],
     '2026-07': []
   };
@@ -1596,22 +1626,23 @@
   function initMyRegistrations() {
     _regCounter = 0;
     MY_REGISTRATIONS = [
-      { id: makeRegId(), sessionKey:'三峽老街|2026-06-27|PM', truckId:'t1', status:'confirmed', registeredAt:'6/19 14:32' },
-      { id: makeRegId(), sessionKey:'南港餐車市集|2026-06-22|PM', truckId:'t3', status:'waiting', registeredAt:'6/19 14:35', waitlistOrder:2 },
+      { id: makeRegId(), sessionKey:'老街商圈|2026-06-27|PM', truckId:'t1', status:'confirmed', registeredAt:'6/19 14:32' },
+      { id: makeRegId(), sessionKey:'中央公園市集|2026-06-22|PM', truckId:'t3', status:'waiting', registeredAt:'6/19 14:35', waitlistOrder:2 },
       // 已遞補上（30 分鐘倒數中，3 分鐘前剛遞補上）
-      { id: makeRegId(), sessionKey:'央北中山小熊|2026-06-24|AM', truckId:'t1', status:'promoted', registeredAt:'6/18 10:15', promotedAt: Date.now() - 3 * 60 * 1000 },
-      { id: makeRegId(), sessionKey:'三峽老街|2026-05-03|PM', truckId:'t1', status:'completed', registeredAt:'4/28 09:10' },
-      { id: makeRegId(), sessionKey:'南港餐車市集|2026-05-15|AM', truckId:'t1', status:'completed', registeredAt:'4/30 16:42' }
+      { id: makeRegId(), sessionKey:'陽光廣場|2026-06-24|AM', truckId:'t1', status:'promoted', registeredAt:'6/18 10:15', promotedAt: Date.now() - 3 * 60 * 1000 },
+      { id: makeRegId(), sessionKey:'老街商圈|2026-05-03|PM', truckId:'t1', status:'completed', registeredAt:'4/28 09:10' },
+      { id: makeRegId(), sessionKey:'中央公園市集|2026-05-15|AM', truckId:'t1', status:'completed', registeredAt:'4/30 16:42' }
     ];
   }
 
-  // 🆕 Plan B — 報到打卡紀錄（key: sessionKey, value: { checkedAt, lat, lng })
+  // 🆕 報到紀錄（key: sessionKey, value: { checkedAt, photo }）
+  // photo 為圖片 dataURL；正式版改存雲端圖片網址
   let CHECKINS = {};
 
   function initCheckins() {
-    // demo：5/15 那場已經補打卡完成
+    // demo：5/15 那場已完成報到
     CHECKINS = {
-      '南港餐車市集|2026-05-15|AM': { checkedAt: '5/15 10:08', distance: 120 }
+      '中央公園市集|2026-05-15|AM': { checkedAt: '5/15 10:08', photo: null }
     };
   }
 
@@ -1634,7 +1665,7 @@
         approvedAt: '5/3 19:42',
         method: '銀行匯款',
         last5: '12345',
-        sessions: ['三峽老街|2026-04-05|PM', '三峽老街|2026-04-12|PM', '南港餐車市集|2026-04-19|AM', '南港餐車市集|2026-04-26|AM'],
+        sessions: ['老街商圈|2026-04-05|PM', '老街商圈|2026-04-12|PM', '中央公園市集|2026-04-19|AM', '中央公園市集|2026-04-26|AM'],
         note: '4 月場地費 4 場'
       },
       {
@@ -1645,7 +1676,7 @@
         paidAt: '6/2 16:48',
         method: '銀行匯款',
         last5: '67890',
-        sessions: ['三峽老街|2026-05-03|PM', '南港餐車市集|2026-05-15|AM'],
+        sessions: ['老街商圈|2026-05-03|PM', '中央公園市集|2026-05-15|AM'],
         note: '5 月場地費 2 場（等業主確認）'
       }
     ];
@@ -1665,7 +1696,7 @@
         type: 'promotion',
         icon: '🎉',
         title: '候補已遞補上！',
-        body: '您 6/24 央北中山小熊 午場的候補已遞補，請於 30 分鐘內到「我的登記」確認',
+        body: '您 6/24 陽光廣場 午場的候補已遞補，請於 30 分鐘內到「我的登記」確認',
         time: '3 分鐘前',
         timestamp: Date.now() - 3 * 60 * 1000,
         read: false,
@@ -1687,7 +1718,7 @@
         type: 'announcement',
         icon: '📢',
         title: '7 月排班登記開放',
-        body: 'Kevin 哥：7 月排班 6/28 開放登記，請各位老闆把握時間。新增「線上對帳」功能，匯款後可上傳截圖。',
+        body: '場地方公告：7 月排班 6/28 開放登記，請各位老闆把握時間。新增「線上對帳」功能，匯款後可上傳截圖。',
         time: '今天 09:15',
         timestamp: Date.now() - 5 * 60 * 60 * 1000,
         read: false,
@@ -1698,7 +1729,7 @@
         type: 'review_approved',
         icon: '✅',
         title: '修改申請已通過',
-        body: '您申請修改「黑熊烤玉米」的食物類型為「日式」已通過審核',
+        body: '您申請修改「大熊烤玉米」的食物類型為「日式」已通過審核',
         time: '昨天 18:32',
         timestamp: Date.now() - 24 * 60 * 60 * 1000,
         read: true,
@@ -1708,8 +1739,8 @@
         id: makeNotifId(),
         type: 'checkin_reminder',
         icon: '📍',
-        title: '別忘了報到打卡',
-        body: '您今天 6/20 在南港餐車市集 晚場有場次，到場後記得在 LIFF 點「📍 報到打卡」，避免缺席扣分',
+        title: '別忘了拍照報到',
+        body: '您今天 6/20 在中央公園市集 晚場有場次，到場後記得在「我的登記」點「📷 拍照報到」，避免缺席扣分',
         time: '今天 08:00',
         timestamp: Date.now() - 8 * 60 * 60 * 1000,
         read: true,
@@ -2186,26 +2217,15 @@
   }
 
   // ============================================================
-  // 🆕 Plan B 功能 ② GPS 報到打卡
+  // 🆕 功能 ② 拍照報到（LIFF 相機 / 相簿上傳）
   // ============================================================
-  let _checkinContext = null;  // { regId, sessionKey, currentDistance, currentLat, currentLng, allowed }
+  // 只做「存證 + 時間戳」：記錄誰、在哪個場次、幾點上傳了什麼照片。
+  // 不做照片內容判讀（OCR / 影像辨識屬 AI 加值包，不含在本功能）。
+  let _checkinContext = null;  // { regId, sessionKey, photo }
 
-  // Haversine 公式 — 計算兩點距離（公尺）
-  function haversineDistance(lat1, lng1, lat2, lng2) {
-    const R = 6371000;
-    const toRad = d => d * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLng = toRad(lng2 - lng1);
-    const a = Math.sin(dLat/2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLng/2) ** 2;
-    return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-  }
-
-  // 從 sessionKey 取得日期 yyyy-mm-dd
   function isCheckinAvailable(sessionKey) {
     const [, date] = sessionKey.split('|');
-    return date === TODAY;  // demo 簡化：當天才能打卡
+    return date === TODAY;  // demo 簡化：當天才能報到
   }
 
   function isCheckinExpired(sessionKey) {
@@ -2216,107 +2236,104 @@
   function openCheckinModal(regId) {
     const r = MY_REGISTRATIONS.find(x => x.id === regId);
     if (!r) return;
-    _checkinContext = {
-      regId,
-      sessionKey: r.sessionKey,
-      currentDistance: null,
-      currentLat: null,
-      currentLng: null,
-      allowed: false
-    };
+    _checkinContext = { regId, sessionKey: r.sessionKey, photo: null };
+
     const [venue, date, slot] = r.sessionKey.split('|');
     const [, mm, dd] = date.split('-');
     document.getElementById('checkinBody').innerHTML = `
       <div class="checkin-info-row"><span>場地</span><b>${venue}</b></div>
       <div class="checkin-info-row"><span>場次</span><b>${parseInt(mm)}/${parseInt(dd)} ${getSlotLabel(venue, slot)}</b></div>
       <div class="checkin-info-row"><span>時間</span><b>${getSlotHours(venue, slot)}</b></div>
-      <div class="checkin-info-row"><span>規則</span><b style="font-size:11px;">需於場地半徑 ${CHECKIN_RADIUS_M} 公尺內</b></div>
+      <div class="checkin-info-row"><span>規則</span><b style="font-size:11px;">拍一張攤位現場照，系統自動記錄時間</b></div>
 
-      <div class="checkin-status checking" id="checkinStatus">
-        <div class="checkin-status-icon">📡</div>
-        <div class="checkin-status-text">正在取得您的位置...</div>
-        <div class="checkin-status-meta">請允許瀏覽器存取定位</div>
+      <div id="shotArea">
+        <div class="shot-drop" onclick="triggerPhotoPick()">
+          <div class="shot-drop-icon">📷</div>
+          <div class="shot-drop-text">點這裡拍照</div>
+          <div class="shot-drop-hint">手機會開相機，電腦可選擇圖片檔</div>
+        </div>
+        <button class="shot-sample" onclick="useSamplePhoto()">用示範照片（Demo 用）</button>
       </div>
     `;
-    document.getElementById('checkinConfirmBtn').disabled = true;
-    document.getElementById('checkinConfirmBtn').style.opacity = '.5';
-    document.getElementById('checkinConfirmBtn').style.cursor = 'not-allowed';
+    setCheckinConfirmEnabled(false);
     document.getElementById('checkinModal').classList.add('active');
-    requestLocation();
   }
 
-  function requestLocation() {
-    if (!navigator.geolocation) {
-      showCheckinError('您的裝置不支援定位功能');
-      return;
-    }
-
-    // demo 模式：直接給場地附近座標（避免每次都要實際允許 GPS）
-    // 正式版會用真實 navigator.geolocation.getCurrentPosition
-    const useDemoGPS = true;
-
-    if (useDemoGPS) {
-      setTimeout(() => {
-        const [venue] = _checkinContext.sessionKey.split('|');
-        const target = VENUE_GPS[venue];
-        if (!target) return showCheckinError('場地座標未設定');
-        // 模擬：80% 機率在場地附近（隨機 50-400m）；20% 機率在 800-1500m
-        const inRange = Math.random() < 0.8;
-        const offset = inRange ? (0.001 + Math.random() * 0.003) : (0.008 + Math.random() * 0.005);
-        const angle = Math.random() * Math.PI * 2;
-        const lat = target.lat + Math.cos(angle) * offset;
-        const lng = target.lng + Math.sin(angle) * offset;
-        evaluateLocation(lat, lng);
-      }, 1200);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      pos => evaluateLocation(pos.coords.latitude, pos.coords.longitude),
-      err => showCheckinError(err.code === 1 ? '您拒絕了定位授權' : '無法取得位置，請稍後再試'),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+  function setCheckinConfirmEnabled(on) {
+    const btn = document.getElementById('checkinConfirmBtn');
+    btn.disabled = !on;
+    btn.style.opacity = on ? '1' : '.5';
+    btn.style.cursor = on ? 'pointer' : 'not-allowed';
   }
 
-  function evaluateLocation(lat, lng) {
-    const [venue] = _checkinContext.sessionKey.split('|');
-    const target = VENUE_GPS[venue];
-    const dist = haversineDistance(lat, lng, target.lat, target.lng);
-    _checkinContext.currentLat = lat;
-    _checkinContext.currentLng = lng;
-    _checkinContext.currentDistance = dist;
-    _checkinContext.allowed = dist <= CHECKIN_RADIUS_M;
-
-    const statusEl = document.getElementById('checkinStatus');
-    if (!statusEl) return;
-    if (_checkinContext.allowed) {
-      statusEl.className = 'checkin-status ok';
-      statusEl.innerHTML = `
-        <div class="checkin-status-icon">✓</div>
-        <div class="checkin-status-text">已在場地附近，可以打卡</div>
-        <div class="checkin-status-meta">距離場地約 ${dist} 公尺</div>`;
-      const btn = document.getElementById('checkinConfirmBtn');
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.cursor = 'pointer';
-    } else {
-      statusEl.className = 'checkin-status far';
-      statusEl.innerHTML = `
-        <div class="checkin-status-icon">⚠️</div>
-        <div class="checkin-status-text">您離場地過遠</div>
-        <div class="checkin-status-meta">距離場地約 ${dist} 公尺 (需 ≤ ${CHECKIN_RADIUS_M}m)</div>
-        <div style="margin-top:8px; font-size:11px;">請到場地附近再打卡</div>`;
-    }
+  function triggerPhotoPick() {
+    document.getElementById('checkinPhotoInput').click();
   }
 
-  function showCheckinError(msg) {
-    const statusEl = document.getElementById('checkinStatus');
-    if (!statusEl) return;
-    statusEl.className = 'checkin-status far';
-    statusEl.innerHTML = `
-      <div class="checkin-status-icon">✗</div>
-      <div class="checkin-status-text">${msg}</div>
-      <div class="checkin-status-meta">請檢查定位設定後重試</div>`;
+  function handlePhotoPick(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => showShotPreview(ev.target.result);
+    reader.readAsDataURL(file);
+    e.target.value = '';  // 允許重選同一張
+  }
+
+  // Demo 用：現場產生一張示範照片，免得展示時還要找圖
+  function useSamplePhoto() {
+    const [venue, , slot] = _checkinContext.sessionKey.split('|');
+    const c = document.createElement('canvas');
+    c.width = 640; c.height = 400;
+    const g = c.getContext('2d');
+
+    const sky = g.createLinearGradient(0, 0, 0, 400);
+    sky.addColorStop(0, '#2c3e57'); sky.addColorStop(1, '#5b6b85');
+    g.fillStyle = sky; g.fillRect(0, 0, 640, 400);
+
+    g.fillStyle = '#1e2634'; g.fillRect(0, 300, 640, 100);          // 地面
+    g.fillStyle = '#d94f3d'; g.fillRect(150, 150, 340, 150);        // 車身
+    g.fillStyle = '#f4c542'; g.fillRect(150, 120, 340, 34);         // 遮陽棚
+    g.fillStyle = '#fdf6e3'; g.fillRect(200, 180, 240, 80);         // 出餐口
+    g.fillStyle = '#1e2634';
+    g.beginPath(); g.arc(215, 300, 26, 0, Math.PI * 2); g.fill();   // 輪
+    g.beginPath(); g.arc(425, 300, 26, 0, Math.PI * 2); g.fill();
+
+    g.fillStyle = '#333'; g.font = 'bold 22px sans-serif'; g.textAlign = 'center';
+    g.fillText('營業中', 320, 228);
+
+    g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(0, 352, 640, 48);
+    g.fillStyle = '#fff'; g.font = '17px sans-serif'; g.textAlign = 'left';
+    g.fillText(`${venue}　${getSlotLabel(venue, slot)}`, 18, 382);
+
+    showShotPreview(c.toDataURL('image/jpeg', 0.85));
+  }
+
+  function showShotPreview(dataUrl) {
+    _checkinContext.photo = dataUrl;
+    document.getElementById('shotArea').innerHTML = `
+      <div class="shot-preview">
+        <img src="${dataUrl}" alt="報到照片">
+        <div class="shot-meta">
+          <span>✓ 照片已就緒</span>
+          <span class="stamp">${formatNow()}</span>
+        </div>
+      </div>
+      <button class="shot-retake" onclick="retakePhoto()">重新拍一張</button>
+    `;
+    setCheckinConfirmEnabled(true);
+  }
+
+  function retakePhoto() {
+    _checkinContext.photo = null;
+    document.getElementById('shotArea').innerHTML = `
+      <div class="shot-drop" onclick="triggerPhotoPick()">
+        <div class="shot-drop-icon">📷</div>
+        <div class="shot-drop-text">點這裡拍照</div>
+        <div class="shot-drop-hint">手機會開相機，電腦可選擇圖片檔</div>
+      </div>
+      <button class="shot-sample" onclick="useSamplePhoto()">用示範照片（Demo 用）</button>
+    `;
+    setCheckinConfirmEnabled(false);
   }
 
   function closeCheckinModal() {
@@ -2325,30 +2342,56 @@
   }
 
   function doCheckin() {
-    if (!_checkinContext || !_checkinContext.allowed) return;
+    if (!_checkinContext || !_checkinContext.photo) return;
+    const stamp = formatNow();
     CHECKINS[_checkinContext.sessionKey] = {
-      checkedAt: formatNow(),
-      distance: _checkinContext.currentDistance,
-      lat: _checkinContext.currentLat,
-      lng: _checkinContext.currentLng
+      checkedAt: stamp,
+      photo: _checkinContext.photo
     };
-    // 推一筆通知
+
     const [venue, date, slot] = _checkinContext.sessionKey.split('|');
     NOTIFICATIONS.unshift({
       id: makeNotifId(),
       type: 'checkin_reminder',
       icon: '✓',
-      title: '打卡成功',
-      body: `已記錄 ${venue} ${getSlotLabel(venue, slot)} 報到時間，信用 +0`,
+      title: '報到成功',
+      body: `已記錄 ${venue} ${getSlotLabel(venue, slot)} 的報到照片與時間`,
       time: '剛剛',
       timestamp: Date.now(),
       read: false,
       action: { screen: 'my' }
     });
+
     closeCheckinModal();
-    showToast(`✓ 已成功打卡，距離 ${_checkinContext ? _checkinContext.currentDistance : 0}m`, 'success');
+    showToast(`✓ 已報到　${stamp}`, 'success');
     refreshBellBadges();
     renderMyList();
+  }
+
+  // 檢視已上傳的報到照片
+  function openShotView(sessionKey) {
+    const rec = CHECKINS[sessionKey];
+    if (!rec) return;
+    const [venue, date, slot] = sessionKey.split('|');
+    const [, mm, dd] = date.split('-');
+    const img = rec.photo
+      ? `<div class="shot-preview"><img src="${rec.photo}" alt="報到照片"></div>`
+      : `<div class="shot-drop" style="cursor:default;">
+           <div class="shot-drop-icon">🗂</div>
+           <div class="shot-drop-text">照片已封存</div>
+           <div class="shot-drop-hint">超過保存期間的照片會移至封存區</div>
+         </div>`;
+    document.getElementById('shotViewBody').innerHTML = `
+      <div class="checkin-info-row"><span>場地</span><b>${venue}</b></div>
+      <div class="checkin-info-row"><span>場次</span><b>${parseInt(mm)}/${parseInt(dd)} ${getSlotLabel(venue, slot)}</b></div>
+      <div class="checkin-info-row"><span>報到時間</span><b>${rec.checkedAt}</b></div>
+      ${img}
+    `;
+    document.getElementById('shotViewModal').classList.add('active');
+  }
+
+  function closeShotView() {
+    document.getElementById('shotViewModal').classList.remove('active');
   }
 
   // ============================================================
@@ -2759,7 +2802,7 @@
         else if (s.status === 'registered') { key = 'registered'; label = '✅ 已登記'; }
         else if (s.status === 'available') { key = 'available'; label = `剩 ${s.cap[1]-s.cap[0]}/${s.cap[1]}`; }
         else if (s.status === 'full') { key = 'full'; label = `候補 ${s.wl[0]}/${s.wl[1]}`; }
-        // 🆕 v1.4 黑名單 chip 加 tooltip / click 原因
+        // 🆕 v1.4 未開放名單 chip 加 tooltip / click 原因
         if (key === 'blocked') {
           const safeReason = reason.replace(/"/g, '&quot;');
           const safeVenue = s.venue.replace(/'/g, "\\'");
@@ -2933,7 +2976,7 @@
         const chips = allSlots.map((s, i) => {
           const st = slotStatuses[i];
           const slotLabel = getSlotLabel(s.venue, s.slot);
-          // 🆕 v1.4 黑名單 chip 加 tooltip / click 原因
+          // 🆕 v1.4 未開放名單 chip 加 tooltip / click 原因
           if (st.key === 'blocked') {
             const reason = getRestrictionReason(currentTruck.id, s.venue);
             const safeReason = reason.replace(/"/g, '&quot;');
@@ -2960,7 +3003,7 @@
   }
 
   // 🆕 時段選擇 modal：點 venue 卡片後跳出，內含 AM/PM 兩個大按鈕
-  // 對「單時段場」（蘆洲整天場、新店夜市）直接跳過此 modal，走對應 action
+  // 對「單時段場」（廟口整天場、河濱夜市）直接跳過此 modal，走對應 action
   function openSlotPicker(date, venue, slots) {
     // 🆕 單時段場 fast path：不開選時段 modal
     if (slots.length === 1) {
@@ -3163,17 +3206,17 @@
       const truckLine = `<div style="font-size:11px; color:#666; margin-top:2px;">${truck.emoji} ${truck.name}${truck.plate ? ' · ' + truck.plate : ''}</div>`;
 
       if (r.status === 'confirmed') {
-        // 🆕 Plan B：報到打卡按鈕狀態判斷
+        // 🆕 拍照報到按鈕狀態判斷
         let checkinBtnHtml = '';
         const checkin = CHECKINS[r.sessionKey];
         if (checkin) {
-          checkinBtnHtml = `<button class="checkin-btn done">✓ 已報到 ${checkin.checkedAt}（${checkin.distance}m）</button>`;
+          checkinBtnHtml = `<button class="checkin-btn done" onclick="openShotView('${r.sessionKey}')">✓ 已報到 ${checkin.checkedAt}　看照片</button>`;
         } else if (isCheckinExpired(r.sessionKey)) {
           checkinBtnHtml = `<button class="checkin-btn miss">⚠️ 未報到</button>`;
         } else if (isCheckinAvailable(r.sessionKey)) {
-          checkinBtnHtml = `<button class="checkin-btn" onclick="openCheckinModal('${r.id}')">📍 報到打卡</button>`;
+          checkinBtnHtml = `<button class="checkin-btn" onclick="openCheckinModal('${r.id}')">📷 拍照報到</button>`;
         } else {
-          checkinBtnHtml = `<button class="checkin-btn future" disabled>📍 當天才能打卡</button>`;
+          checkinBtnHtml = `<button class="checkin-btn future" disabled>📷 當天才能報到</button>`;
         }
 
         html += `
