@@ -405,7 +405,11 @@
 
   /* Modal */
   .modal-overlay { position:absolute; inset:0; background:rgba(0,0,0,.5); display:none; align-items:flex-end; z-index:50; }
-  .modal-overlay.show { display:flex; }
+  /* 專案中同時存在 .show 與 .active 兩種開啟寫法（繳費、拍照報到、通知中心、
+     費率說明、繳費明細用 active），但 CSS 只定義了 .show，導致這幾個彈窗
+     加了 class 卻永遠 display:none。兩種都支援。 */
+  .modal-overlay.show,
+  .modal-overlay.active { display:flex; }
   .modal { background:#fff; border-radius:20px 20px 0 0; width:100%; padding:24px; max-height:80%; overflow-y:auto; }
   .modal-handle { width:36px; height:4px; background:#d4d4d8; border-radius:2px; margin:0 auto 16px; }
   .modal-title { font-size:18px; font-weight:700; margin-bottom:14px; }
@@ -604,6 +608,8 @@
   .checkin-btn { flex:1; padding:8px; background:#dbeafe; color:#1e40af; border:none; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
   .checkin-btn:hover { background:#bfdbfe; }
   .checkin-btn.done { background:#d1fae5; color:#065f46; cursor:pointer; }
+  .checkin-btn.out  { background:#ede9fe; color:#5b21b6; }
+  .checkin-btn.out:hover { background:#ddd6fe; }
   .checkin-btn.done:hover { background:#a7f3d0; }
   .checkin-btn.miss { background:#fee2e2; color:#991b1b; cursor:default; }
   .checkin-btn.future { background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
@@ -1215,7 +1221,7 @@
   <div class="modal-overlay" id="shotViewModal" onclick="if(event.target === this) closeShotView()">
     <div class="modal">
       <div class="modal-handle"></div>
-      <div class="modal-title">🖼 報到紀錄</div>
+      <div class="modal-title">現場照片紀錄</div>
       <div id="shotViewBody"><!-- 動態渲染 --></div>
       <div class="modal-actions">
         <button class="modal-btn cancel" onclick="closeShotView()">關閉</button>
@@ -1720,17 +1726,31 @@
     _DEMO_PAST = { a: pastA, b: pastB };
   }
 
-  // 🆕 報到紀錄（key: sessionKey, value: { checkedAt, photo }）
+  // 🆕 報到紀錄（key: sessionKey, value: { in:{at,photo}, out:{at,photo} }）
   // photo 為圖片 dataURL；正式版改存雲端圖片網址
   let CHECKINS = {};
 
   function initCheckins() {
-    // 過去那場已完成報到，可示範「看照片」
+    // 每筆結構：{ in:{at,photo}, out:{at,photo} }
+    // in  = 到場報到照、out = 收攤照
     CHECKINS = {};
     if (_DEMO_PAST.b) {
-      CHECKINS[_DEMO_PAST.b.key] = { checkedAt: `${_DEMO_PAST.b.mdText} 10:08`, photo: null };
+      CHECKINS[_DEMO_PAST.b.key] = {
+        in:  { at: `${_DEMO_PAST.b.mdText} 10:08`, photo: null },
+        out: { at: `${_DEMO_PAST.b.mdText} 15:12`, photo: null },
+      };
+    }
+    // 另一場示範「有報到但忘了傳收攤照」的異常狀態
+    if (_DEMO_PAST.a) {
+      CHECKINS[_DEMO_PAST.a.key] = {
+        in:  { at: `${_DEMO_PAST.a.mdText} 16:52`, photo: null },
+        out: null,
+      };
     }
   }
+
+  // 照片保存 90 天，超過只留紀錄不留原圖
+  const PHOTO_KEEP_DAYS = 90;
 
   // 🆕 Plan B — 繳費紀錄
   // 每筆：{ id, month, amount, status, paidAt, method, last5, screenshot, sessions[], note, approvedAt, rejectReason }
@@ -2303,46 +2323,74 @@
   }
 
   // ============================================================
-  // 🆕 功能 ② 拍照報到（LIFF 相機 / 相簿上傳）
+  // 🆕 v2.2 拍照報到 + 收攤照
   // ============================================================
   // 只做「存證 + 時間戳」：記錄誰、在哪個場次、幾點上傳了什麼照片。
-  // 不做照片內容判讀（OCR / 影像辨識屬 AI 加值包，不含在本功能）。
-  let _checkinContext = null;  // { regId, sessionKey, photo }
+  // 不做照片內容判讀（是否真在攤位、有沒有清乾淨屬影像辨識，
+  // 為 AI 加值包範圍，不含在本功能）。
+  //
+  // in  = 到場報到照：開場前 30 分 ~ 開場後 1 小時
+  // out = 收攤照：結束前 30 分 ~ 結束後 1 小時
+  let _checkinContext = null;   // { regId, sessionKey, kind:'in'|'out', photo }
 
-  function isCheckinAvailable(sessionKey) {
-    const [, date] = sessionKey.split('|');
-    return date === TODAY;  // demo 簡化：當天才能報到
+  const KIND_TEXT = {
+    in:  { title:'📷 拍照報到', rule:'拍一張攤位現場照，系統自動記錄到場時間',
+           btn:'送出報到', done:'已報到', hint:'到場後拍一張，證明有出攤' },
+    out: { title:'🧹 收攤拍照', rule:'收攤後拍一張場地照，證明已恢復原狀',
+           btn:'送出收攤照', done:'已收攤', hint:'離場前拍一張，避免場地爭議' },
+  };
+
+  // 當天才能報到 / 收攤；過期就標為未完成
+  function isCheckinAvailable(sessionKey) { return sessionKey.split('|')[1] === TODAY; }
+  function isCheckinExpired(sessionKey)   { return sessionKey.split('|')[1] <  TODAY; }
+
+  function getCheckin(sessionKey) {
+    return CHECKINS[sessionKey] || null;
   }
 
-  function isCheckinExpired(sessionKey) {
-    const [, date] = sessionKey.split('|');
-    return date < TODAY;
-  }
-
-  function openCheckinModal(regId) {
+  function openCheckinModal(regId, kind) {
+    kind = kind || 'in';
     const r = MY_REGISTRATIONS.find(x => x.id === regId);
     if (!r) return;
-    _checkinContext = { regId, sessionKey: r.sessionKey, photo: null };
+    _checkinContext = { regId, sessionKey: r.sessionKey, kind, photo: null };
 
     const [venue, date, slot] = r.sessionKey.split('|');
     const [, mm, dd] = date.split('-');
+    const t = KIND_TEXT[kind];
+    const rec = getCheckin(r.sessionKey);
+
+    // 收攤照需先完成報到
+    if (kind === 'out' && !(rec && rec.in)) {
+      showToast('請先完成到場報到', 'info');
+      _checkinContext = null;
+      return;
+    }
+
+    document.querySelector('#checkinModal .modal-title').textContent = t.title;
+    document.getElementById('checkinConfirmBtn').textContent = t.btn;
+
     document.getElementById('checkinBody').innerHTML = `
       <div class="checkin-info-row"><span>場地</span><b>${venue}</b></div>
       <div class="checkin-info-row"><span>場次</span><b>${parseInt(mm)}/${parseInt(dd)} ${getSlotLabel(venue, slot)}</b></div>
       <div class="checkin-info-row"><span>時間</span><b>${getSlotHours(venue, slot)}</b></div>
-      <div class="checkin-info-row"><span>規則</span><b style="font-size:11px;">拍一張攤位現場照，系統自動記錄時間</b></div>
+      ${kind === 'out' && rec && rec.in
+        ? `<div class="checkin-info-row"><span>到場時間</span><b>${rec.in.at}</b></div>` : ''}
+      <div class="checkin-info-row"><span>規則</span><b style="font-size:11px;">${t.rule}</b></div>
 
-      <div id="shotArea">
-        <div class="shot-drop" onclick="triggerPhotoPick()">
-          <div class="shot-drop-icon">📷</div>
-          <div class="shot-drop-text">點這裡拍照</div>
-          <div class="shot-drop-hint">手機會開相機，電腦可選擇圖片檔</div>
-        </div>
-        <button class="shot-sample" onclick="useSamplePhoto()">沒帶手機？用範例照片</button>
-      </div>
+      <div id="shotArea">${shotDropHtml()}</div>
     `;
     setCheckinConfirmEnabled(false);
     document.getElementById('checkinModal').classList.add('active');
+  }
+
+  function shotDropHtml() {
+    return `
+      <div class="shot-drop" onclick="triggerPhotoPick()">
+        <div class="shot-drop-icon">📷</div>
+        <div class="shot-drop-text">點這裡拍照</div>
+        <div class="shot-drop-hint">手機會開相機，電腦可選擇圖片檔</div>
+      </div>
+      <button class="shot-sample" onclick="useSamplePhoto()">沒帶手機？用範例照片</button>`;
   }
 
   function setCheckinConfirmEnabled(on) {
@@ -2352,9 +2400,7 @@
     btn.style.cursor = on ? 'pointer' : 'not-allowed';
   }
 
-  function triggerPhotoPick() {
-    document.getElementById('checkinPhotoInput').click();
-  }
+  function triggerPhotoPick() { document.getElementById('checkinPhotoInput').click(); }
 
   function handlePhotoPick(e) {
     const file = e.target.files && e.target.files[0];
@@ -2362,34 +2408,45 @@
     const reader = new FileReader();
     reader.onload = ev => showShotPreview(ev.target.result);
     reader.readAsDataURL(file);
-    e.target.value = '';  // 允許重選同一張
+    e.target.value = '';
   }
 
   // Demo 用：現場產生一張示範照片，免得展示時還要找圖
   function useSamplePhoto() {
     const [venue, , slot] = _checkinContext.sessionKey.split('|');
+    const isOut = _checkinContext.kind === 'out';
     const c = document.createElement('canvas');
     c.width = 640; c.height = 400;
     const g = c.getContext('2d');
 
     const sky = g.createLinearGradient(0, 0, 0, 400);
-    sky.addColorStop(0, '#2c3e57'); sky.addColorStop(1, '#5b6b85');
+    if (isOut) { sky.addColorStop(0, '#1b2430'); sky.addColorStop(1, '#3d4756'); }
+    else       { sky.addColorStop(0, '#2c3e57'); sky.addColorStop(1, '#5b6b85'); }
     g.fillStyle = sky; g.fillRect(0, 0, 640, 400);
+    g.fillStyle = '#1e2634'; g.fillRect(0, 300, 640, 100);
 
-    g.fillStyle = '#1e2634'; g.fillRect(0, 300, 640, 100);          // 地面
-    g.fillStyle = '#d94f3d'; g.fillRect(150, 150, 340, 150);        // 車身
-    g.fillStyle = '#f4c542'; g.fillRect(150, 120, 340, 34);         // 遮陽棚
-    g.fillStyle = '#fdf6e3'; g.fillRect(200, 180, 240, 80);         // 出餐口
-    g.fillStyle = '#1e2634';
-    g.beginPath(); g.arc(215, 300, 26, 0, Math.PI * 2); g.fill();   // 輪
-    g.beginPath(); g.arc(425, 300, 26, 0, Math.PI * 2); g.fill();
-
-    g.fillStyle = '#333'; g.font = 'bold 22px sans-serif'; g.textAlign = 'center';
-    g.fillText('營業中', 320, 228);
+    if (isOut) {
+      // 收攤後：空地
+      g.strokeStyle = 'rgba(255,255,255,.28)'; g.lineWidth = 3;
+      g.setLineDash([12, 10]);
+      g.strokeRect(160, 190, 320, 110);
+      g.setLineDash([]);
+      g.fillStyle = 'rgba(255,255,255,.6)'; g.font = '18px sans-serif'; g.textAlign = 'center';
+      g.fillText('攤位已淨空', 320, 252);
+    } else {
+      g.fillStyle = '#d94f3d'; g.fillRect(150, 150, 340, 150);
+      g.fillStyle = '#f4c542'; g.fillRect(150, 120, 340, 34);
+      g.fillStyle = '#fdf6e3'; g.fillRect(200, 180, 240, 80);
+      g.fillStyle = '#1e2634';
+      g.beginPath(); g.arc(215, 300, 26, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.arc(425, 300, 26, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#333'; g.font = 'bold 22px sans-serif'; g.textAlign = 'center';
+      g.fillText('營業中', 320, 228);
+    }
 
     g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(0, 352, 640, 48);
     g.fillStyle = '#fff'; g.font = '17px sans-serif'; g.textAlign = 'left';
-    g.fillText(`${venue}　${getSlotLabel(venue, slot)}`, 18, 382);
+    g.fillText(`${venue}　${getSlotLabel(venue, slot)}　${isOut ? '收攤' : '報到'}`, 18, 382);
 
     showShotPreview(c.toDataURL('image/jpeg', 0.85));
   }
@@ -2398,27 +2455,19 @@
     _checkinContext.photo = dataUrl;
     document.getElementById('shotArea').innerHTML = `
       <div class="shot-preview">
-        <img src="${dataUrl}" alt="報到照片">
+        <img src="${dataUrl}" alt="現場照片">
         <div class="shot-meta">
           <span>✓ 照片已就緒</span>
           <span class="stamp">${formatNow()}</span>
         </div>
       </div>
-      <button class="shot-retake" onclick="retakePhoto()">重新拍一張</button>
-    `;
+      <button class="shot-retake" onclick="retakePhoto()">重新拍一張</button>`;
     setCheckinConfirmEnabled(true);
   }
 
   function retakePhoto() {
     _checkinContext.photo = null;
-    document.getElementById('shotArea').innerHTML = `
-      <div class="shot-drop" onclick="triggerPhotoPick()">
-        <div class="shot-drop-icon">📷</div>
-        <div class="shot-drop-text">點這裡拍照</div>
-        <div class="shot-drop-hint">手機會開相機，電腦可選擇圖片檔</div>
-      </div>
-      <button class="shot-sample" onclick="useSamplePhoto()">沒帶手機？用範例照片</button>
-    `;
+    document.getElementById('shotArea').innerHTML = shotDropHtml();
     setCheckinConfirmEnabled(false);
   }
 
@@ -2429,49 +2478,65 @@
 
   function doCheckin() {
     if (!_checkinContext || !_checkinContext.photo) return;
+    const { sessionKey, kind, photo } = _checkinContext;
     const stamp = formatNow();
-    CHECKINS[_checkinContext.sessionKey] = {
-      checkedAt: stamp,
-      photo: _checkinContext.photo
-    };
 
-    const [venue, date, slot] = _checkinContext.sessionKey.split('|');
+    if (!CHECKINS[sessionKey]) CHECKINS[sessionKey] = { in: null, out: null };
+    CHECKINS[sessionKey][kind] = { at: stamp, photo };
+
+    const [venue, , slot] = sessionKey.split('|');
+    const t = KIND_TEXT[kind];
     NOTIFICATIONS.unshift({
-      id: makeNotifId(),
-      type: 'checkin_reminder',
-      icon: '✓',
-      title: '報到成功',
-      body: `已記錄 ${venue} ${getSlotLabel(venue, slot)} 的報到照片與時間`,
-      time: '剛剛',
-      timestamp: Date.now(),
-      read: false,
-      action: { screen: 'my' }
+      id: makeNotifId(), type: 'checkin_reminder', icon: kind === 'out' ? '🧹' : '✓',
+      title: `${t.done}`,
+      body: `已記錄 ${venue} ${getSlotLabel(venue, slot)} 的${kind === 'out' ? '收攤' : '報到'}照片與時間`,
+      time: '剛剛', timestamp: Date.now(), read: false, action: { screen: 'my' }
     });
 
     closeCheckinModal();
-    showToast(`✓ 已報到　${stamp}`, 'success');
+    showToast(`✓ ${t.done}　${stamp}`, 'success');
+    if (kind === 'in') {
+      setTimeout(() => showToast('收攤後記得再拍一張場地照', 'info'), 2200);
+    }
     refreshBellBadges();
     renderMyList();
   }
 
-  // 檢視已上傳的報到照片
+  // 檢視已上傳的照片（報到 + 收攤並列）
   function openShotView(sessionKey) {
-    const rec = CHECKINS[sessionKey];
+    const rec = getCheckin(sessionKey);
     if (!rec) return;
     const [venue, date, slot] = sessionKey.split('|');
     const [, mm, dd] = date.split('-');
-    const img = rec.photo
-      ? `<div class="shot-preview"><img src="${rec.photo}" alt="報到照片"></div>`
-      : `<div class="shot-drop" style="cursor:default;">
-           <div class="shot-drop-icon">🗂</div>
-           <div class="shot-drop-text">照片已封存</div>
-           <div class="shot-drop-hint">超過保存期間的照片會移至封存區</div>
-         </div>`;
+
+    const block = (label, r, emptyText) => {
+      if (!r) return `
+        <div style="margin-top:12px;">
+          <div style="font-size:12px; font-weight:700; color:var(--warn); margin-bottom:6px;">${label}</div>
+          <div class="shot-drop" style="cursor:default; padding:18px 14px;">
+            <div class="shot-drop-icon" style="font-size:26px;">⚠️</div>
+            <div class="shot-drop-text" style="font-size:13px;">${emptyText}</div>
+          </div>
+        </div>`;
+      return `
+        <div style="margin-top:12px;">
+          <div style="font-size:12px; font-weight:700; color:var(--ok, #059669); margin-bottom:6px;">
+            ${label}　<span style="font-weight:400; color:#888;">${r.at}</span></div>
+          ${r.photo
+            ? `<div class="shot-preview"><img src="${r.photo}" alt="${label}"></div>`
+            : `<div class="shot-drop" style="cursor:default; padding:18px 14px;">
+                 <div class="shot-drop-icon" style="font-size:26px;">🗂</div>
+                 <div class="shot-drop-text" style="font-size:13px;">照片已封存</div>
+                 <div class="shot-drop-hint">超過 ${PHOTO_KEEP_DAYS} 天的照片只保留紀錄</div>
+               </div>`}
+        </div>`;
+    };
+
     document.getElementById('shotViewBody').innerHTML = `
       <div class="checkin-info-row"><span>場地</span><b>${venue}</b></div>
       <div class="checkin-info-row"><span>場次</span><b>${parseInt(mm)}/${parseInt(dd)} ${getSlotLabel(venue, slot)}</b></div>
-      <div class="checkin-info-row"><span>報到時間</span><b>${rec.checkedAt}</b></div>
-      ${img}
+      ${block('到場報到', rec.in,  '這場沒有報到紀錄')}
+      ${block('收攤照',   rec.out, '這場沒有上傳收攤照')}
     `;
     document.getElementById('shotViewModal').classList.add('active');
   }
@@ -3300,18 +3365,40 @@
       const truckLine = `<div style="font-size:11px; color:#666; margin-top:2px;">${truck.emoji} ${truck.name}${truck.plate ? ' · ' + truck.plate : ''}</div>`;
 
       if (r.status === 'confirmed') {
-        // 🆕 拍照報到按鈕狀態判斷
-        let checkinBtnHtml = '';
-        const checkin = CHECKINS[r.sessionKey];
-        if (checkin) {
-          checkinBtnHtml = `<button class="checkin-btn done" onclick="openShotView('${r.sessionKey}')">✓ 已報到 ${checkin.checkedAt}　看照片</button>`;
-        } else if (isCheckinExpired(r.sessionKey)) {
-          checkinBtnHtml = `<button class="checkin-btn miss">⚠️ 未報到</button>`;
-        } else if (isCheckinAvailable(r.sessionKey)) {
-          checkinBtnHtml = `<button class="checkin-btn" onclick="openCheckinModal('${r.id}')">📷 拍照報到</button>`;
+        // 🆕 v2.2 報到 + 收攤兩顆按鈕
+        const rec     = getCheckin(r.sessionKey);
+        const hasIn   = !!(rec && rec.in);
+        const hasOut  = !!(rec && rec.out);
+        const isToday = isCheckinAvailable(r.sessionKey);
+        const isPast  = isCheckinExpired(r.sessionKey);
+        let btnIn, btnOut;
+
+        if (hasIn) {
+          btnIn = `<button class="checkin-btn done" onclick="openShotView('${r.sessionKey}')">✓ 已報到 ${rec.in.at}</button>`;
+        } else if (isPast) {
+          btnIn = `<button class="checkin-btn miss">⚠️ 未報到</button>`;
+        } else if (isToday) {
+          btnIn = `<button class="checkin-btn" onclick="openCheckinModal('${r.id}','in')">📷 拍照報到</button>`;
         } else {
-          checkinBtnHtml = `<button class="checkin-btn future" disabled>📷 當天才能報到</button>`;
+          btnIn = `<button class="checkin-btn future" disabled>📷 當天才能報到</button>`;
         }
+
+        if (hasOut) {
+          btnOut = `<button class="checkin-btn done" onclick="openShotView('${r.sessionKey}')">✓ 已收攤 ${rec.out.at}</button>`;
+        } else if (isPast) {
+          // 沒補傳收攤照只記錄、不扣分
+          btnOut = hasIn
+            ? `<button class="checkin-btn miss">⚠️ 未傳收攤照</button>`
+            : `<button class="checkin-btn future" disabled>🧹 未收攤</button>`;
+        } else if (isToday && hasIn) {
+          btnOut = `<button class="checkin-btn out" onclick="openCheckinModal('${r.id}','out')">🧹 收攤拍照</button>`;
+        } else if (isToday) {
+          btnOut = `<button class="checkin-btn future" disabled>🧹 報到後才能收攤</button>`;
+        } else {
+          btnOut = `<button class="checkin-btn future" disabled>🧹 收攤拍照</button>`;
+        }
+
+        const checkinBtnHtml = btnIn + btnOut;
 
         html += `
           <div class="session-card registered" style="margin-bottom:8px;">
@@ -3947,6 +4034,6 @@
   })();
 </script>
 
-<!-- BUILD: v2.1 · 08/12 04:22 -->
+<!-- BUILD: v2.2 · 08/12 04:42 -->
 </body>
 </html>

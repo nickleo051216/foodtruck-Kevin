@@ -913,6 +913,7 @@
   <div class="nav-item" onclick="switchPage('events', this)"><span class="nav-icon">🎪</span><span class="nav-label">包場管理</span></div>
 
   <div class="sidebar-section">監控</div>
+  <div class="nav-item" onclick="switchPage('photos', this)"><span class="nav-icon">📷</span><span class="nav-label">拍照稽核</span><span class="nav-badge warn" id="navBadgePhotos">0</span></div>
   <div class="nav-item" onclick="switchPage('credit', this)"><span class="nav-icon">⭐</span><span class="nav-label">信用觀察</span><span class="nav-badge warn">2</span></div>
   <div class="nav-item" onclick="switchPage('payment', this)"><span class="nav-icon">💰</span><span class="nav-label">對帳</span><span class="nav-badge" id="navBadgePayment">1</span></div>
   <div class="nav-item" onclick="switchPage('reports', this)"><span class="nav-icon">📈</span><span class="nav-label">報表</span></div>
@@ -925,7 +926,7 @@
     <span>回首頁</span>
   </a>
 
-  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v2.1 · 08/12</div>
+  <div id="buildTag" style="padding:0 20px 8px; font-size:9px; color:rgba(255,255,255,.28); font-family:'Inter',sans-serif; letter-spacing:.4px;">v2.2 · 08/12</div>
   <div class="sidebar-user">
     <div class="sidebar-user-avatar">A</div>
     <div class="sidebar-user-info">
@@ -1280,6 +1281,46 @@
           場地費收入＝每場實際登記攤位數 × 該場地費率，費率可在「場地管理 → 編輯」調整。<br>
           場地成本＝場地租金／清潔／電費等固定支出，可按「設定成本」調整。<br>
           淨貢獻為負代表這個場地目前在賠錢，可考慮調整費率、縮減開放天數，或改談租金。
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 🆕 v2.2 Page: 拍照稽核 ====== -->
+    <div class="page" id="page-photos">
+      <div class="kpi-grid" id="photoKpis" style="margin-bottom:16px;"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">⚠️ 需要處理</span>
+            <span class="card-title-meta">只列出沒報到、或報到了卻沒傳收攤照的場次</span>
+          </div>
+          <span class="badge warn" id="photoIssueCount">0</span>
+        </div>
+        <div id="photoIssueList"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <div>
+            <span class="card-title">🎲 今日抽查</span>
+            <span class="card-title-meta">系統每天隨機挑幾張，看過就好，不用每張都審</span>
+          </div>
+          <button class="btn sm" onclick="renderPhotoAudit(true)">換一批</button>
+        </div>
+        <div id="photoSampleList"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-body">
+          <div style="font-size:12.5px; color:var(--text-3); line-height:1.85;">
+            <b style="color:var(--text-2);">運作方式</b><br>
+            車主上傳後即視為完成，不需逐張核准 —— 每天上千張照片逐一審核不切實際。<br>
+            系統只在「該報到沒報到」「報到了沒傳收攤照」時把場次挑出來給您處理。<br>
+            收攤照為必填，但第一階段僅記錄不扣信用分，讓車主先養成習慣。<br>
+            照片保存 <b>90 天</b>，逾期自動封存，只保留上傳時間與紀錄。<br>
+            <span style="color:var(--warn);">系統不會判斷照片內容是否屬實或場地是否清潔，該項屬 AI 影像辨識加值功能。</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2430,6 +2471,7 @@
     trucks: ['餐車總覽', '168 台車輛'],
     rules: ['特殊規則', '限制名單管理（後台限定）'],
     events: ['包場管理', 'EventBookings'],
+    photos: ['拍照稽核', '報到照 · 收攤照'],
     credit: ['信用觀察', '信用分 < 80 名單'],
     payment: ['對帳審核', '場地費繳款 · 截圖辨識'],
     reports: ['報表', '月度數據 · 2026/6'],
@@ -2446,6 +2488,7 @@
     document.getElementById('pageTitleSub').textContent = s;
     if (id === 'calendar') scrollCalToToday();
     if (id === 'reports')  renderReports();
+    if (id === 'photos')   renderPhotoAudit();
     if (id === 'payment') renderPaymentReview();
     if (id === 'rules') renderRules();  // 🆕 v1.4
     if (isMobileView()) closeDrawer();  // 手機：選完自動收起抽屜
@@ -3919,6 +3962,168 @@
       ${blocks}`);
   }
 
+  // ============================================================
+  // 🆕 v2.2 拍照稽核：報到照 + 收攤照
+  // ============================================================
+  // 設計原則：預設通過、例外處理。
+  // 上千張照片逐一核准不切實際，業主只需處理異常 + 每日隨機抽查。
+  const PHOTO_KEEP_DAYS = 90;
+
+  // 產生過去 14 天的出攤紀錄（deterministic）
+  function buildPhotoRecords() {
+    const out = [];
+    for (let back = 1; back <= 14; back++) {
+      const dt = dOff(-back);
+      const y = dt.getFullYear(), m = dt.getMonth() + 1, d = dt.getDate();
+      CAL_VENUES.forEach((v, vi) => {
+        const st = venueDayState(vi, y, m, d);
+        if (!st.open || st.event || !st.booked) return;
+        const off = Math.floor(seedRand(`off-${v.name}-${m}-${d}`) * TRUCK_POOL.length);
+        for (let i = 0; i < st.booked; i++) {
+          const [emoji, name] = TRUCK_POOL[(off + i) % TRUCK_POOL.length];
+          const key = `${v.name}|${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}|${v.slotKey}`;
+          const r1 = seedRand(`in-${key}-${i}`);
+          const r2 = seedRand(`out-${key}-${i}`);
+          // 96% 有報到；有報到者 92% 有傳收攤照（收攤照為新規定，仍有少數漏傳）
+          const hasIn  = r1 > 0.04;
+          const hasOut = hasIn && r2 > 0.08;
+          out.push({
+            key, venue:v.name, slot:v.slot, date:`${m}/${d}`, back,
+            emoji, name, hasIn, hasOut,
+            inAt:  hasIn  ? `${m}/${d} ${10 + Math.floor(r1*4)}:${String(Math.floor(r1*59)).padStart(2,'0')}` : null,
+            outAt: hasOut ? `${m}/${d} ${19 + Math.floor(r2*3)}:${String(Math.floor(r2*59)).padStart(2,'0')}` : null,
+          });
+        }
+      });
+    }
+    return out;
+  }
+
+  let PHOTO_RECORDS = [];
+  let _sampleSeed = 0;
+
+  function renderPhotoAudit(reshuffle) {
+    if (!PHOTO_RECORDS.length) PHOTO_RECORDS = buildPhotoRecords();
+    if (reshuffle) _sampleSeed++;
+
+    const total    = PHOTO_RECORDS.length;
+    const noIn     = PHOTO_RECORDS.filter(r => !r.hasIn);
+    const noOut    = PHOTO_RECORDS.filter(r => r.hasIn && !r.hasOut);
+    const complete = total - noIn.length - noOut.length;
+
+    // KPI
+    const kpi = document.getElementById('photoKpis');
+    if (kpi) {
+      const rate = total ? Math.round(complete / total * 100) : 0;
+      kpi.innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">近 14 天出攤場次</div>
+          <div class="kpi-value">${total}</div>
+          <div class="kpi-delta neutral">兩張照片都完成 ${complete} 場</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">完成率</div>
+          <div class="kpi-value" style="color:${rate >= 85 ? 'var(--success)' : 'var(--warn)'};">${rate}%</div>
+          <div class="kpi-delta neutral">報到 + 收攤都有傳</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">未報到</div>
+          <div class="kpi-value" style="color:var(--danger);">${noIn.length}</div>
+          <div class="kpi-delta down">視同缺席，自動扣分</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">缺收攤照</div>
+          <div class="kpi-value" style="color:var(--warn);">${noOut.length}</div>
+          <div class="kpi-delta neutral">僅記錄，暫不扣分</div>
+        </div>`;
+    }
+
+    // 異常清單
+    const issues = [...noIn, ...noOut].sort((a, b) => a.back - b.back).slice(0, 12);
+    const cnt = document.getElementById('photoIssueCount');
+    if (cnt) cnt.textContent = noIn.length + noOut.length;
+
+    const list = document.getElementById('photoIssueList');
+    if (list) {
+      list.innerHTML = issues.length ? issues.map(r => {
+        const isNoIn = !r.hasIn;
+        return `<div style="display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border);">
+          <span style="font-size:22px;">${r.emoji}</span>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:14px;">${r.name}</div>
+            <div style="font-size:11.5px; color:var(--text-3);">
+              ${r.date} · ${r.venue} ${r.slot}${r.inAt ? ` · 到場 ${r.inAt}` : ''}</div>
+          </div>
+          <span class="badge ${isNoIn ? 'danger' : 'warn'}" style="white-space:nowrap;">
+            ${isNoIn ? '未報到' : '缺收攤照'}</span>
+          <button class="btn sm" onclick="notifyMissing('${r.name}','${isNoIn ? '報到' : '收攤'}')">提醒</button>
+        </div>`;
+      }).join('') : `<div style="padding:30px; text-align:center; color:var(--text-3);">
+        近 14 天沒有異常，大家都有乖乖拍照 👍</div>`;
+    }
+
+    // 今日抽查
+    const pool = PHOTO_RECORDS.filter(r => r.hasIn && r.hasOut);
+    const picks = [];
+    for (let i = 0; i < 4 && pool.length; i++) {
+      const idx = Math.floor(seedRand(`sample-${DEMO_D}-${_sampleSeed}-${i}`) * pool.length);
+      picks.push(pool[idx]);
+    }
+    const sl = document.getElementById('photoSampleList');
+    if (sl) {
+      sl.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr)); gap:12px; padding:14px 16px;">
+        ${picks.map(r => `
+          <div style="border:1px solid var(--border); border-radius:10px; overflow:hidden;">
+            <div style="display:flex; height:96px;">
+              ${photoThumb(r, 'in')}${photoThumb(r, 'out')}
+            </div>
+            <div style="padding:9px 11px;">
+              <div style="font-weight:700; font-size:13px;">${r.emoji} ${r.name}</div>
+              <div style="font-size:11px; color:var(--text-3); margin-top:2px;">${r.date} · ${r.venue}</div>
+              <div style="display:flex; gap:6px; margin-top:8px;">
+                <button class="btn sm" style="flex:1;" onclick="showToast('已標記正常')">看起來 OK</button>
+                <button class="btn sm danger" style="flex:1;" onclick="flagPhoto('${r.name}')">有問題</button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+    }
+
+    const badge = document.getElementById('navBadgePhotos');
+    if (badge) {
+      const n = noIn.length + noOut.length;
+      badge.textContent = n;
+      badge.style.display = n ? '' : 'none';
+    }
+  }
+
+  // 縮圖（demo 用 CSS 畫，正式版接雲端圖片網址）
+  function photoThumb(r, kind) {
+    const isOut = kind === 'out';
+    const bg = isOut
+      ? 'linear-gradient(160deg,#1b2430,#3d4756)'
+      : 'linear-gradient(160deg,#2c3e57,#5b6b85)';
+    const inner = isOut
+      ? `<div style="border:2px dashed rgba(255,255,255,.35); width:56%; height:44%; border-radius:4px;"></div>`
+      : `<div style="width:56%; height:46%; background:#d94f3d; border-radius:3px;
+            box-shadow:0 -9px 0 #f4c542;"></div>`;
+    return `<div style="flex:1; background:${bg}; display:flex; align-items:center;
+                        justify-content:center; position:relative; border-right:1px solid rgba(0,0,0,.2);">
+      ${inner}
+      <span style="position:absolute; left:5px; bottom:4px; font-size:9.5px; color:rgba(255,255,255,.85);">
+        ${isOut ? '收攤' : '報到'} ${(isOut ? r.outAt : r.inAt).split(' ')[1]}</span>
+    </div>`;
+  }
+
+  function notifyMissing(name, what) {
+    showToast(`已透過 LINE 提醒 ${name} 補傳${what}照片`);
+  }
+
+  function flagPhoto(name) {
+    if (!confirm(`把「${name}」這筆標記為有問題？\n會通知車主說明，並記錄於信用紀錄。`)) return;
+    showToast(`已標記並通知 ${name}`);
+  }
+
   // ---- 把寫死的日期換成今天 ----
   function applyTodayLabels() {
     const sub = document.getElementById('pageTitleSub');
@@ -3949,6 +4154,7 @@
   // 🆕 初始化
   applyTodayLabels();
   refreshFeeCells();
+  renderPhotoAudit();
   renderTodaySchedule();
   renderReports();
   renderCalGrid();
@@ -3961,6 +4167,6 @@
   renderSettings();  // 🆕 載入業主設定
 </script>
 
-<!-- BUILD: v2.1 · 08/12 04:22 -->
+<!-- BUILD: v2.2 · 08/12 04:42 -->
 </body>
 </html>
