@@ -917,8 +917,8 @@
     <div class="community-bar">
       <div class="community-avatar">🌳</div>
       <div style="flex:1;">
-        <div class="community-name">北部餐車市集 <span class="openchat-tag">OPENCHAT</span></div>
-        <div class="community-meta">912 位成員 · 官方管理</div>
+        <div class="community-name">◯◯市集排班群 <span class="openchat-tag">OPENCHAT</span></div>
+        <div class="community-meta">168 位成員 · 官方管理</div>
       </div>
     </div>
     <div class="community-feed">
@@ -2252,7 +2252,7 @@
           <div class="shot-drop-text">點這裡拍照</div>
           <div class="shot-drop-hint">手機會開相機，電腦可選擇圖片檔</div>
         </div>
-        <button class="shot-sample" onclick="useSamplePhoto()">用示範照片（Demo 用）</button>
+        <button class="shot-sample" onclick="useSamplePhoto()">沒帶手機？用範例照片</button>
       </div>
     `;
     setCheckinConfirmEnabled(false);
@@ -2331,7 +2331,7 @@
         <div class="shot-drop-text">點這裡拍照</div>
         <div class="shot-drop-hint">手機會開相機，電腦可選擇圖片檔</div>
       </div>
-      <button class="shot-sample" onclick="useSamplePhoto()">用示範照片（Demo 用）</button>
+      <button class="shot-sample" onclick="useSamplePhoto()">沒帶手機？用範例照片</button>
     `;
     setCheckinConfirmEnabled(false);
   }
@@ -3680,6 +3680,30 @@
     switchScreen('calendar');
     showToast('已重置所有資料 🔄', 'info');
   }
+
+  // 🆕 隱藏重置入口：連點頂部社群頭像 / 手機外框 5 下
+  (function initHiddenReset(){
+    let hits = 0, timer = null;
+    function tap() {
+      hits++;
+      clearTimeout(timer);
+      timer = setTimeout(() => { hits = 0; }, 1200);
+      if (hits >= 5) {
+        hits = 0;
+        if (confirm('重置 Demo 狀態？\n會清掉這次操作留下的登記、照片與通知。')) {
+          try { localStorage.clear(); sessionStorage.clear(); } catch (e) {}
+          if (typeof resetDemo === 'function') resetDemo();
+          else location.reload();
+        }
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.community-avatar, .splash-truck').forEach(el => {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', tap);
+      });
+    });
+  })();
 
   // ===== 🔌 LIFF SDK 初始化 =====
   // 在 LINE App 內開啟時自動取得真實 LINE 暱稱、ID、頭像
