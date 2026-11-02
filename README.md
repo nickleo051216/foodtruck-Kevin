@@ -55,7 +55,7 @@ vercel --prod      # 部署到正式環境
 
 ### Real API 模式
 - 加 query string：`?mode=real`
-- 會打 n8n webhook（`https://nickleo9.zeabur.app/webhook/foodtruck-*`）
+- 會打 n8n webhook（`https://n8n.znstudio216.com/webhook/foodtruck-*`）
 - 真實寫入 Google Sheets
 
 ## 📱 LINE LIFF 設定
