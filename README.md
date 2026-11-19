@@ -77,8 +77,8 @@ vercel --prod      # 部署到正式環境
 ## 🛠 技術棧
 
 - **前端**：純 HTML + CSS + Vanilla JS（無框架，方便維護）
-- **後端**：n8n on Zeabur（已部署）
-- **資料**：Google Sheets（n8n credential 已連）
+- **後端**：n8n on Linode（`n8n.znstudio216.com`，負責 LINE OA 推播與排程）
+- **資料**：Supabase（試用版建置中，見 `supabase/README.md`）；Demo 模式仍用前端假資料
 - **通知**：LINE OA push API
 
 ## 📊 系統範圍
@@ -97,7 +97,7 @@ vercel --prod      # 部署到正式環境
 2. **排班月曆** - 多場地總覽 grid
 3. **待審核** - 新車申請 + 暱稱修改
 4. **場地管理** - 5 個據點配置
-5. **餐車總覽** - 912 台車輛
+5. **餐車總覽** - 車輛資料 CRUD
 6. **特殊規則** - 黑名單
 7. **包場管理** - 建立 / 刪除
 8. **信用觀察** - < 80 分名單
