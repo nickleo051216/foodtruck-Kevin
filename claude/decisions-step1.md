@@ -16,11 +16,11 @@
 | D8 | 文件第 4、5 節的「Sheets」 | 全部改用 Supabase，不再寫 Google Sheets | — |
 | D9 | 試用環境建在哪 | Nick 帳號下的獨立試用專案（免費方案需定時 ping 防暫停） | — |
 | 附加 | 操作紀錄 audit_logs | 試用版就做 | `audit_logs` + `private.write_audit_log` |
+| D10 | 20 人同時搶 5 個名額的壓力測試 | **不做**（2026-11-19 Nick）：Kevin 一次推一位業主試用，一個一個來。取代交接文件第 5 節第 1 條與第 8 節第 7 步的壓力測試。登記函式內「鎖住場次再算名額」的那一行保留，當作基本保險 | `supabase/tests/run_tests.sh` 只保留連點測試 |
 
 ## 本機驗證結果（2026-11-19）
 
-`bash supabase/tests/run_tests.sh`：功能測試 73 項全部通過；壓力測試連跑 5 次，每次結果都是
-「20 人同時搶 5 名額 → 正取 5、候補 5、額滿 10」，同一台車連點 10 次只寫入 1 筆；rollback 後可完整重新套用。
+`bash supabase/tests/run_tests.sh`：功能測試 73 項全部通過；同一台車連點 10 次只寫入 1 筆；rollback 後可完整重新套用。
 
 ## 尚未處理（留給後續步驟）
 

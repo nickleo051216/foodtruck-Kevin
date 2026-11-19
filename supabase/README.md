@@ -12,7 +12,7 @@
 | `migrations/…0300_rpc_functions.sql` | 登記、取消、確認遞補、逾時處理、拍照報到、產生場次、查詢、n8n 推播領取 |
 | `migrations/…0400_storage_photos.sql` | 照片空間 `checkin-photos` 與權限 |
 | `migrations/…0500_cron_jobs.sql` | 每分鐘處理逾時遞補（需要 pg_cron） |
-| `tests/run_tests.sh` | 本機測試（功能測試 + 20 人搶 5 名額 + 連點） |
+| `tests/run_tests.sh` | 本機測試（功能測試 + 連點測試 + 還原測試） |
 | `rollback/…_down.sql` | 全部還原 |
 
 ## 本機測試（不會連到 Supabase）
