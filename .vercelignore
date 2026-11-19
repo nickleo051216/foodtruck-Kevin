@@ -1,0 +1,3 @@
+# 不要讓 Vercel 把資料庫腳本和內部文件當成網站檔案公開
+supabase/
+claude/
