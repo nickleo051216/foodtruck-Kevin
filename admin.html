@@ -4167,6 +4167,393 @@
   renderSettings();  // 🆕 載入業主設定
 </script>
 
+<script>
+// =====================================================================
+// 🗄️ 第 5 步：業主後台改讀真實資料（只在網址帶 ?mode=real 時啟用，Demo 完全不變）
+//
+// 登入：用 LINE（後台專用 LIFF「Food-car 後台」）→ line-auth 換 Supabase 身分
+//       → 只有該市集 org_admins 名單裡的人（或平台管理員）才能進來
+// 真實資料的頁面：即時總覽（今日排班）、排班月曆、待審核（新車）、場地管理
+// 其他頁面（拍照稽核、對帳、信用、報表…）仍是 Demo 資料
+// =====================================================================
+const ADMIN_REAL = new URLSearchParams(location.search).get('mode') === 'real';
+const ADMIN_ORG_SLUG = new URLSearchParams(location.search).get('org');
+const ADMIN_LIFF_ID = '2010274155-WuSVZzfK';                                  // Food-car 後台（Endpoint：/admin）
+const A_SUPABASE_URL = 'https://qavmukksnebhjqxgudnw.supabase.co';             // Kevin'foodtest
+const A_SUPABASE_KEY = 'sb_publishable_q-HSIDZQ2a3mw056yS-RPA_hP6VVZrz';       // 公開金鑰；資料由 RLS 保護
+const A_LIFF_SDK = 'https://static.line-scdn.net/liff/edge/2/sdk.js';
+const A_SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js';
+
+let ASB = null;            // supabase client
+let A_ORG = null;          // { id, name, slug }
+let A_UID = null;
+let A_VENUES = [];         // 資料庫的場地
+let A_SLOTS = [];          // 資料庫的時段
+const A_SESS = {};         // `${場地}|${時段代號}|${日期}` → { row, confirmed:[], waiting:[] }
+const A_MONTHS = {};       // 已載入的月份：'YYYY-MM' → true / Promise
+
+const aPad = (n) => String(n).padStart(2, '0');
+const aEsc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const aKey = (venue, code, date) => `${venue}|${code}|${date}`;
+const aTwTime = (iso) => new Date(iso).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+
+function aLoadScript(src, ready) {
+  return new Promise((resolve, reject) => {
+    if (ready()) return resolve();
+    const s = document.createElement('script');
+    s.src = src; s.onload = () => resolve(); s.onerror = () => reject(new Error('無法載入 ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+// ---------- 登入畫面（改成 LINE 登入） ----------
+function aLoginCard(html) {
+  showLogin();
+  const card = document.querySelector('#login-screen .login-card');
+  if (!card) return;
+  card.innerHTML = `
+    <div class="login-header">
+      <div class="login-logo">🚐</div>
+      <div class="login-title">餐車市集後台</div>
+      <div class="login-subtitle">ADMIN · ZN Studio · 真實資料</div>
+    </div>
+    <div id="aLoginBody" style="text-align:center; font-size:13px; line-height:1.7;">${html}</div>
+    <div class="login-footer">⚠️ 此後台僅供業主使用<br>需要權限請聯絡 <a href="https://lin.ee/Faz0doj" target="_blank">ZN Studio</a></div>`;
+}
+
+async function aAdminAuth() {
+  aLoginCard('⏳ 連線中…');
+  try {
+    await aLoadScript(A_LIFF_SDK, () => typeof liff !== 'undefined');
+    await liff.init({ liffId: ADMIN_LIFF_ID });
+  } catch (e) {
+    aLoginCard(`❌ LINE 登入元件載入失敗<br><span style="color:var(--text-3);">${aEsc(e.message || e)}</span>`);
+    return false;
+  }
+  if (!liff.isLoggedIn()) {
+    aLoginCard(`<p style="margin-bottom:14px;">請用市集業主的 LINE 帳號登入</p>
+      <button class="login-btn" style="background:#06C755;" onclick="liff.login({ redirectUri: location.href })">用 LINE 登入</button>`);
+    return false;
+  }
+  const idToken = liff.getIDToken();
+  if (!idToken) { aLoginCard('❌ 拿不到 LINE 登入憑證（請確認後台 LIFF 有勾 openid）'); return false; }
+
+  try {
+    await aLoadScript(A_SUPABASE_JS, () => window.supabase && window.supabase.createClient);
+    ASB = window.supabase.createClient(A_SUPABASE_URL, A_SUPABASE_KEY, { auth: { persistSession: true, storageKey: 'foodtruck-trial-admin-auth' } });
+    const r = await fetch(`${A_SUPABASE_URL}/functions/v1/line-auth`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: A_SUPABASE_KEY },
+      body: JSON.stringify({ id_token: idToken }),
+    }).then((x) => x.json());
+    if (!r.ok) throw new Error(r.message || '登入失敗');
+    const { error } = await ASB.auth.setSession({ access_token: r.session.access_token, refresh_token: r.session.refresh_token });
+    if (error) throw error;
+    A_UID = r.user_id;
+  } catch (e) {
+    aLoginCard(`❌ 登入失敗：${aEsc(e.message || e)}<br><button class="login-btn" style="margin-top:14px;" onclick="location.reload()">重試</button>`);
+    return false;
+  }
+
+  // 哪個市集？網址 ?org= 優先，否則用我擔任管理員的第一個市集
+  try {
+    let q = ASB.from('orgs').select('id,name,slug').order('created_at');
+    if (ADMIN_ORG_SLUG) q = q.eq('slug', ADMIN_ORG_SLUG);
+    const { data: orgs, error } = await q;
+    if (error) throw error;
+    for (const o of orgs || []) {
+      // 看得到這個市集的管理員名單 = 我是這個市集的管理員（或平台管理員）；一般車主看不到
+      const { count, error: e2 } = await ASB.from('org_admins').select('user_id', { count: 'exact', head: true }).eq('org_id', o.id);
+      if (!e2 && count > 0) { A_ORG = o; break; }
+    }
+  } catch (e) {
+    aLoginCard(`❌ 讀取市集失敗：${aEsc(e.message || e)}`);
+    return false;
+  }
+  if (!A_ORG) {
+    const name = (liff.getDecodedIDToken() || {}).name || '';
+    aLoginCard(`<p>🔒 ${aEsc(name)} 您好，這個 LINE 帳號目前沒有${ADMIN_ORG_SLUG ? `「${aEsc(ADMIN_ORG_SLUG)}」` : ''}的後台權限。</p>
+      <p style="color:var(--text-3);">請聯絡 ZN Studio 開通。</p>
+      <button class="login-btn" style="margin-top:10px; background:#6b7280;" onclick="aLogout()">換一個 LINE 帳號</button>`);
+    return false;
+  }
+  showAdminApp();
+  return true;
+}
+
+function aLogout() {
+  if (ASB) ASB.auth.signOut().catch(() => {});
+  try { if (typeof liff !== 'undefined' && liff.isLoggedIn()) liff.logout(); } catch (e) {}
+  location.reload();
+}
+
+// ---------- 讀資料 ----------
+async function aLoadMonth(monthKey) {
+  if (A_MONTHS[monthKey] === true) return;
+  if (A_MONTHS[monthKey]) return A_MONTHS[monthKey];
+  const p = (async () => {
+    const [y, m] = monthKey.split('-').map(Number);
+    const from = `${monthKey}-01`, to = `${monthKey}-${aPad(new Date(y, m, 0).getDate())}`;
+    const [{ data: sess, error: e1 }, { data: regs, error: e2 }] = await Promise.all([
+      ASB.from('sessions').select('id,venue_id,slot_id,date,capacity,status,starts_at,ends_at')
+        .eq('org_id', A_ORG.id).gte('date', from).lte('date', to),
+      ASB.from('registrations').select('id,status,queued_at,session_id,offer_expires_at,trucks(name,kind),vendors(display_name),sessions!inner(date)')
+        .eq('org_id', A_ORG.id).in('status', ['confirmed', 'waitlisted', 'offered'])
+        .gte('sessions.date', from).lte('sessions.date', to).order('queued_at'),
+    ]);
+    if (e1 || e2) throw (e1 || e2);
+    const byId = {};
+    (sess || []).forEach((s) => {
+      const v = A_VENUES.find((x) => x.id === s.venue_id), sl = A_SLOTS.find((x) => x.id === s.slot_id);
+      if (!v || !sl) return;
+      const rec = { row: s, confirmed: [], waiting: [] };
+      A_SESS[aKey(v.name, sl.code, s.date)] = rec;
+      byId[s.id] = rec;
+    });
+    (regs || []).forEach((r) => {
+      const rec = byId[r.session_id];
+      if (!rec) return;
+      const item = [r.trucks && r.trucks.kind === 'stall' ? '⛺' : '🚚',
+                    `${(r.trucks && r.trucks.name) || '—'}（${(r.vendors && r.vendors.display_name) || '—'}）`,
+                    r.status];
+      if (r.status === 'waitlisted') rec.waiting.push(item); else rec.confirmed.push(item);
+    });
+    A_MONTHS[monthKey] = true;
+  })();
+  A_MONTHS[monthKey] = p;
+  try { await p; } catch (e) { delete A_MONTHS[monthKey]; throw e; }
+}
+
+async function aLoadAll() {
+  const [{ data: venues, error: e1 }, { data: slots, error: e2 }] = await Promise.all([
+    ASB.from('venues').select('id,name,status,address,notes,sort_order').eq('org_id', A_ORG.id).order('sort_order').order('name'),
+    ASB.from('venue_slots').select('id,venue_id,code,label,start_time,end_time,weekdays,capacity,fee,is_active').eq('org_id', A_ORG.id).order('start_time'),
+  ]);
+  if (e1 || e2) throw (e1 || e2);
+  A_VENUES = venues || [];
+  A_SLOTS = slots || [];
+  // 月曆／今日排班用的「場地 × 時段」列表，換成真實資料
+  CAL_VENUES.length = 0;
+  A_VENUES.forEach((v) => A_SLOTS.filter((s) => s.venue_id === v.id).forEach((s) => {
+    CAL_VENUES.push({ name: v.name, slot: s.label, slotKey: s.code, cap: s.capacity,
+                      days: s.weekdays.map((w) => w % 7), paused: v.status !== 'open' || !s.is_active, venueId: v.id });
+  }));
+  Object.keys(A_SESS).forEach((k) => delete A_SESS[k]);
+  Object.keys(A_MONTHS).forEach((k) => delete A_MONTHS[k]);
+  const thisMonth = `${DEMO_Y}-${aPad(DEMO_M)}`;
+  const calMonth = `${_calYear}-${aPad(_calMonth)}`;
+  const n = new Date(DEMO_Y, DEMO_M, 1), nextMonth = `${n.getFullYear()}-${aPad(n.getMonth() + 1)}`;
+  await Promise.all([...new Set([thisMonth, calMonth, nextMonth])].map(aLoadMonth));
+  await aLoadPendingTrucks();
+}
+
+async function aLoadPendingTrucks() {
+  const { data: trucks, error } = await ASB.from('trucks').select('id,name,kind,food_type,plate,created_at,vendor_id')
+    .eq('org_id', A_ORG.id).eq('status', 'pending').order('created_at');
+  if (error) throw error;
+  const ids = [...new Set((trucks || []).map((t) => t.vendor_id))];
+  const names = {};
+  if (ids.length) {
+    const { data: vs } = await ASB.from('vendors').select('id,display_name').in('id', ids);
+    (vs || []).forEach((v) => { names[v.id] = v.display_name; });
+  }
+  aSetPending((trucks || []).map((t) => ({ ...t, ownerName: names[t.vendor_id] })));
+}
+function aSetPending(rows) {
+  NEW_TRUCK_REVIEWS = rows.map((t) => {
+    const owner = t.ownerName || '車主';
+    return { id: t.id, avatarText: owner, ownerName: owner, handle: 'LINE', time: aTwTime(t.created_at), submittedFrom: 'LIFF',
+             truck: { name: t.name, type: t.kind === 'stall' ? '落地攤' : '餐車', food: t.food_type, plate: t.plate, emoji: t.kind === 'stall' ? '⛺' : '🚚' } };
+  });
+  NICKNAME_REVIEWS = [];
+}
+
+// ---------- 取代 Demo 的計算 ----------
+const _demoVenueDayState = venueDayState;
+venueDayState = function (vi, y, m, d) {
+  if (!A_ORG) return _demoVenueDayState(vi, y, m, d);
+  const v = CAL_VENUES[vi];
+  if (!v) return { open: false, reason: 'closed', cap: 0 };
+  if (v.paused) return { open: false, reason: 'paused', cap: v.cap };
+  const monthKey = `${y}-${aPad(m)}`;
+  if (A_MONTHS[monthKey] !== true) {
+    if (!A_MONTHS[monthKey]) aLoadMonth(monthKey).then(() => renderCalGrid()).catch((e) => showToast('載入失敗：' + (e.message || e), 'danger'));
+    return { open: false, reason: 'loading', cap: v.cap };
+  }
+  const rec = A_SESS[aKey(v.name, v.slotKey, `${monthKey}-${aPad(d)}`)];
+  if (!rec || rec.row.status === 'cancelled' || rec.row.status === 'closed') return { open: false, reason: 'closed', cap: v.cap };
+  if (rec.row.status === 'private') return { open: true, event: true, cap: rec.row.capacity };
+  const booked = rec.confirmed.length, cap = rec.row.capacity;
+  return { open: true, booked, cap, state: booked >= cap ? 'full' : (booked >= cap - 1 ? 'warning' : 'available') };
+};
+
+const _demoRosterOf = rosterOf;
+rosterOf = function (vi, y, m, d) {
+  if (!A_ORG) return _demoRosterOf(vi, y, m, d);
+  const v = CAL_VENUES[vi], st = venueDayState(vi, y, m, d);
+  if (!st.open) return null;
+  const dStr = `${y}-${aPad(m)}-${aPad(d)}`;
+  if (st.event) return { date: dStr, event: true, cap: st.cap };
+  const rec = A_SESS[aKey(v.name, v.slotKey, dStr)];
+  return { date: dStr, booked: st.booked, cap: st.cap, state: st.state,
+           confirmed: rec.confirmed.map(([e, n, s]) => [e, s === 'offered' ? n + ' · 遞補待確認' : n]),
+           waiting: rec.waiting.map(([e, n]) => [e, n]) };
+};
+
+const _demoRenderToday = renderTodaySchedule;
+renderTodaySchedule = function () {
+  if (!A_ORG) return _demoRenderToday();
+  const grid = document.getElementById('todayGrid'), meta = document.getElementById('todayMeta');
+  if (!grid) return;
+  const list = [];
+  CAL_VENUES.forEach((v, vi) => { const r = rosterOf(vi, DEMO_Y, DEMO_M, DEMO_D); if (r) list.push({ v, r }); });
+  if (meta) meta.textContent = `${DEMO_M}/${DEMO_D}（${WD_TW[DEMO_NOW.getDay()]}）· ${A_ORG.name} · 共 ${list.length} 個場次`;
+  if (!list.length) { grid.innerHTML = `<div style="padding:26px; text-align:center; color:var(--text-3);">今天沒有場次</div>`; return; }
+  grid.innerHTML = list.map(({ v, r }) => {
+    if (r.event) return `<div class="today-venue"><div class="today-venue-header"><span class="today-venue-name">${aEsc(v.name)} · ${aEsc(v.slot)}</span>
+      <span class="badge purple"><span class="dot"></span>已包場</span></div></div>`;
+    const rows = r.confirmed.map(([e, n]) => `<div class="today-truck confirmed"><span class="today-truck-emoji">${e}</span>${aEsc(n)}<span class="today-truck-status">已確認</span></div>`)
+      .concat(r.waiting.map(([e, n], i) => `<div class="today-truck waitlist"><span class="today-truck-emoji">${e}</span>${aEsc(n)}<span class="today-truck-status">候補 #${i + 1}</span></div>`));
+    if (!rows.length) rows.push(`<div class="today-truck" style="color:var(--text-3);">尚無人登記</div>`);
+    const badge = r.state === 'full' ? `<span class="badge success"><span class="dot"></span>${r.booked}/${r.cap} 滿</span>`
+      : r.state === 'warning' ? `<span class="badge warn"><span class="dot"></span>${r.booked}/${r.cap} 接近滿</span>`
+      : `<span class="badge info"><span class="dot"></span>${r.booked}/${r.cap}</span>`;
+    return `<div class="today-venue"><div class="today-venue-header"><span class="today-venue-name">${aEsc(v.name)} · ${aEsc(v.slot)}</span>${badge}</div>
+      <div class="today-venue-trucks">${rows.join('')}</div></div>`;
+  }).join('');
+};
+
+// 名單：一個場地可能有好幾個時段，全部列出（未來 21 天、最多 10 場）
+const _demoOpenRoster = openVenueRoster;
+openVenueRoster = function (name) {
+  if (!A_ORG) return _demoOpenRoster(name);
+  const idxs = CAL_VENUES.map((v, i) => (v.name === name ? i : -1)).filter((i) => i >= 0);
+  const blocks = [];
+  let totalC = 0, totalW = 0;
+  for (let i = 0; i < 21 && blocks.length < 10; i++) {
+    const dt = dOff(i);
+    idxs.forEach((vi) => {
+      const r = rosterOf(vi, dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+      if (!r || blocks.length >= 10) return;
+      const label = `${dt.getMonth() + 1}/${dt.getDate()}（${WD_TW[dt.getDay()]}）${CAL_VENUES[vi].slot}${i === 0 ? '　今天' : ''}`;
+      if (r.event) { blocks.push(`<div style="border:1px solid var(--border); border-radius:10px; margin-bottom:10px; padding:9px 12px; background:var(--purple-bg);"><b>${label}</b> 🎪 已包場</div>`); return; }
+      totalC += r.confirmed.length; totalW += r.waiting.length;
+      const rows = r.confirmed.map(([e, n], k) => `<div style="padding:5px 0; font-size:13px; border-bottom:1px solid #f5f5f5;">${k + 1}. ${e} ${aEsc(n)}</div>`).join('')
+        + r.waiting.map(([e, n], k) => `<div style="padding:5px 0; font-size:13px; color:var(--warn);">候補 #${k + 1} ${e} ${aEsc(n)}</div>`).join('');
+      blocks.push(`<div style="border:1px solid var(--border); border-radius:10px; margin-bottom:10px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; padding:9px 12px; background:#fafafa;"><b style="font-size:13px;">${label}</b>
+        <span class="badge ${r.state === 'full' ? 'danger' : 'success'}">${r.booked}/${r.cap}</span></div>
+        <div style="padding:4px 12px 10px;">${rows || '<div style="padding:8px 0; font-size:12.5px; color:var(--text-3);">尚無人登記</div>'}</div></div>`);
+    });
+  }
+  openInfoModal(`${aEsc(name)} · 登記名單`, blocks.length
+    ? `<div style="font-size:12px; color:var(--text-3); margin-bottom:10px;">未來場次 · 已登記 ${totalC} · 候補 ${totalW}</div>${blocks.join('')}`
+    : `<div style="padding:26px; text-align:center; color:var(--text-3);">未來三週沒有開放場次</div>`);
+};
+
+// ---------- 待審核：核准 / 退回新車 ----------
+const _demoApprove = approveNewTruck, _demoReject = rejectNewTruck;
+approveNewTruck = async function (id) {
+  if (!A_ORG) return _demoApprove(id);
+  const r = NEW_TRUCK_REVIEWS.find((x) => x.id === id);
+  const { error } = await ASB.from('trucks').update({ status: 'active', review_note: null }).eq('id', id);
+  if (error) { showToast('核准失敗：' + error.message, 'danger'); return; }
+  showToast(`已核准「${r ? r.truck.name : ''}」，車主現在就能登記`, 'success');
+  await aLoadPendingTrucks(); renderNewTruckReviews(); aUpdateKpis();
+};
+rejectNewTruck = async function (id) {
+  if (!A_ORG) return _demoReject(id);
+  const r = NEW_TRUCK_REVIEWS.find((x) => x.id === id);
+  const note = prompt(`退回「${r ? r.truck.name : ''}」的原因（車主會看到）：`, '資料不完整，請補上車牌與照片');
+  if (note === null) return;
+  const { error } = await ASB.from('trucks').update({ status: 'rejected', review_note: note.slice(0, 200) }).eq('id', id);
+  if (error) { showToast('退回失敗：' + error.message, 'danger'); return; }
+  showToast(`已退回「${r ? r.truck.name : ''}」`, 'info');
+  await aLoadPendingTrucks(); renderNewTruckReviews(); aUpdateKpis();
+};
+
+// ---------- 場地管理：真實場地清單＋暫停 / 開放 ----------
+function aRenderVenues() {
+  const page = document.getElementById('page-venues');
+  if (!page) return;
+  const wdText = (ws) => (ws.length === 7 ? '每日' : ws.map((w) => '一二三四五六日'[w - 1]).join('、'));
+  const thead = page.querySelector('thead'), tbody = page.querySelector('tbody');
+  if (thead) thead.innerHTML = '<tr><th>場地</th><th>時段（名額）</th><th>場地費 / 攤</th><th>開放星期</th><th>狀態</th><th></th></tr>';
+  if (!tbody) return;
+  tbody.innerHTML = A_VENUES.map((v) => {
+    const ss = A_SLOTS.filter((s) => s.venue_id === v.id);
+    const open = v.status === 'open';
+    return `<tr>
+      <td><b>${aEsc(v.name)}</b>${v.notes ? `<br><span style="font-size:11px; color:var(--text-3);">📌 ${aEsc(v.notes)}</span>` : ''}</td>
+      <td style="font-size:12px;">${ss.map((s) => `${aEsc(s.label)} ${s.start_time.slice(0, 5)}–${s.end_time.slice(0, 5)}（${s.capacity}）${s.is_active ? '' : ' · 停用'}`).join('<br>')}</td>
+      <td style="font-size:12px;">${ss.map((s) => `${aEsc(s.label)} ${s.fee}`).join(' / ')}</td>
+      <td style="font-size:12px;">${[...new Set(ss.map((s) => wdText(s.weekdays)))].join(' / ')}</td>
+      <td>${open ? '<span class="badge success"><span class="dot"></span>開放中</span>' : '<span class="badge neutral"><span class="dot"></span>暫停</span>'}</td>
+      <td><button class="btn sm" onclick="openVenueRoster('${aEsc(v.name)}')">👥 名單</button>
+          <button class="btn sm" onclick="aToggleVenue('${v.id}')">${open ? '⏸ 暫停' : '▶️ 開放'}</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center; color:var(--text-3); padding:20px;">還沒有場地</td></tr>';
+  PAGE_TITLES.venues[1] = `${A_VENUES.length} 個據點 · 真實資料`;
+}
+
+async function aToggleVenue(id) {
+  const v = A_VENUES.find((x) => x.id === id);
+  if (!v) return;
+  const next = v.status === 'open' ? 'paused' : 'open';
+  if (next === 'paused' && !confirm(`確定暫停「${v.name}」？\n暫停後車主端不能再登記這個場地（已登記的不受影響）。`)) return;
+  const { error } = await ASB.from('venues').update({ status: next }).eq('id', id);
+  if (error) { showToast('更新失敗：' + error.message, 'danger'); return; }
+  showToast(next === 'open' ? `「${v.name}」已開放` : `「${v.name}」已暫停`, 'success');
+  await aRefreshAll();
+}
+
+// ---------- KPI ----------
+function aUpdateKpis() {
+  const vals = document.querySelectorAll('.kpi-card .kpi-value'), deltas = document.querySelectorAll('.kpi-card .kpi-delta');
+  const thisMonth = `${DEMO_Y}-${aPad(DEMO_M)}`;
+  let confirmed = 0, waiting = 0;
+  Object.entries(A_SESS).forEach(([k, rec]) => {
+    if (k.split('|')[2].startsWith(thisMonth)) confirmed += rec.confirmed.length;
+    if (k.split('|')[2] >= iso(0)) waiting += rec.waiting.length;
+  });
+  if (vals[0]) vals[0].textContent = confirmed;
+  if (deltas[0]) { deltas[0].textContent = '本月已確認的登記'; deltas[0].className = 'kpi-delta neutral'; }
+  if (vals[1]) vals[1].textContent = waiting;
+  if (deltas[1]) { deltas[1].textContent = '今天以後的候補'; deltas[1].className = 'kpi-delta neutral'; }
+  if (vals[2]) vals[2].textContent = NEW_TRUCK_REVIEWS.length;
+  if (deltas[2]) { deltas[2].textContent = NEW_TRUCK_REVIEWS.length ? `最早：${NEW_TRUCK_REVIEWS[0].time}` : '沒有待審核'; deltas[2].className = 'kpi-delta neutral'; }
+  if (deltas[3]) deltas[3].textContent = '（Demo 資料）';
+  const navBadge = document.querySelector(".nav-item[onclick*=\"'review'\"] .nav-badge");
+  if (navBadge) { navBadge.textContent = NEW_TRUCK_REVIEWS.length; navBadge.style.display = NEW_TRUCK_REVIEWS.length ? '' : 'none'; }
+}
+
+async function aRefreshAll() {
+  try { await aLoadAll(); } catch (e) { showToast('讀取真實資料失敗：' + (e.message || e), 'danger'); return; }
+  renderTodaySchedule(); renderCalGrid(); renderNewTruckReviews(); aRenderVenues(); aUpdateKpis();
+}
+
+// ---------- 啟動 ----------
+if (ADMIN_REAL) {
+  // 登出改成 LINE 登出；Demo 密碼登入在真實模式停用
+  doLogout = function () { if (confirm('確定要登出後台嗎？')) aLogout(); };
+  (async () => {
+    if (!(await aAdminAuth())) return;
+    try {
+      await aLoadAll();
+    } catch (e) {
+      showToast('讀取真實資料失敗：' + (e.message || e), 'danger');
+      return;
+    }
+    renderTodaySchedule(); renderCalGrid(); renderNewTruckReviews(); aRenderVenues(); aUpdateKpis();
+    const sub = document.getElementById('pageTitleSub');
+    const logo = document.querySelector('.sidebar-logo-text small');
+    if (logo) logo.textContent = `🔌 真實資料 · ${A_ORG.name}`;
+    if (sub) sub.textContent = `${twDateLabel(DEMO_NOW)} · ${A_ORG.name}`;
+    PAGE_TITLES.overview[1] = `${twDateLabel(DEMO_NOW)} · ${A_ORG.name}`;
+    showToast(`已登入 ${A_ORG.name}（真實資料：總覽、月曆、待審核、場地）`, 'success');
+  })();
+}
+</script>
+
 <!-- BUILD: v2.5 · 08/12 05:31 -->
 </body>
 </html>

@@ -22,6 +22,7 @@
 | D13 | LINE 設定確認 | **已確認**（2026-11-26 Nick 後台截圖）：Provider `Vegenn8n` → LINE Login channel `food-car` 已連結 LINE OA `@266rvwxa`（餐車系統小幫手）＝同一個 Provider，userId 會一致；LIFF `Food-car` Scope 有 `openid, profile`；Endpoint URL `https://foodtruck-kevin.vercel.app/liff`。沒有申請 email 權限，所以帳號用內部代號 email | — |
 | D14 | 第 3 步：車主端接真實資料的做法 | **轉接層**（2026-11-26）：`?mode=real&org=市集代號` 登入並加入市集後，把資料庫的場地、時段、場次（`get_sessions`）、自己的車、我的登記（`my_registrations`）轉成 Demo 畫面原本的格式，畫面程式幾乎不用改。登記、候補、取消、確認遞補、讓位改呼叫 RPC，規則與訊息都以資料庫為準。新增餐車一律「待審核」；車主只能改車牌，停用要找業主。原本 `?mode=real` 呼叫 n8n 登記 webhook 的程式已移除 | `liff.html`：`realLoadAll`、`realCall` |
 | D15 | 測試市集 | `test-market`（測試市集，`is_demo = true`，試用到 2026-12-31）：測試公園、午場 5 名額、晚場 3 名額、每天開，11–12 月共 122 場；Nick 是 owner，另有一台已審核的「Nick 測試車」。2026-11-26 依 Nick 要求建立，也依 Nick 要求把他加入 `platform_admins` | — |
+| D16 | 第 5 步：業主後台怎麼登入、哪些頁改真資料 | **LINE 登入**（2026-11-26 Nick）：新增後台專用 LIFF「Food-car 後台」`2010274155-WuSVZzfK`（Endpoint `/admin`，同一個 `food-car` channel，所以 `line-auth` 不用改）。登入後只有該市集 `org_admins` 名單上的人（或平台管理員）進得來，其他人看到「沒有後台權限」。`?mode=real&org=市集代號` 時，即時總覽（今日排班、KPI）、排班月曆、待審核（新車核准／退回）、場地管理（暫停／開放）改讀真實資料；其他頁面仍是 Demo。Demo 的帳號密碼登入在真實模式停用 | `admin.html` 第二段 `<script>` |
 
 ## 本機驗證結果（2026-11-19）
 
