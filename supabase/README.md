@@ -71,11 +71,11 @@ const r = await fetch(`${SUPABASE_URL}/functions/v1/line-auth`, {
 if (r.ok) await supabase.auth.setSession(r.session); // 之後就能呼叫 join_org / register_for_session
 ```
 
-### 部署（2b，Nick 確認後才做）
+### 部署（2b：2026-11-26 已部署到 Kevin'foodtest，v1）
 
 - 函式名稱 `line-auth`，**verify_jwt = false**（車主這時還沒有 Supabase 身分，改由 LINE ID Token 驗證）
 - 不需要另外設定 secret：`SUPABASE_URL`、金鑰由 Supabase 自動提供；LINE channel ID 預設 `2010274155`，可用 secret `LINE_LOGIN_CHANNEL_ID` 覆蓋
-- 只接受 `https://foodtruck-kevin.vercel.app` 與 `https://foodtruck-kevin-*.vercel.app` 呼叫
+- 只接受 `https://foodtruck-kevin.vercel.app` 與 Nick 帳號底下的預覽網址 `https://foodtruck-kevin-*-nickleo051216s-projects.vercel.app` 呼叫
 
 ### 還原
 

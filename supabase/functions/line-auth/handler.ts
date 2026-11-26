@@ -46,8 +46,9 @@ export class LineVerifyError extends Error {
   }
 }
 
-// 正式網址 + Vercel 預覽網址（foodtruck-kevin-xxxx.vercel.app）
-const ORIGIN_RE = /^https:\/\/foodtruck-kevin(?:-[a-z0-9-]+)?\.vercel\.app$/;
+// 正式網址 + Nick 帳號底下的 Vercel 預覽網址
+//   例：foodtruck-kevin-git-<分支>-nickleo051216s-projects.vercel.app
+const ORIGIN_RE = /^https:\/\/foodtruck-kevin(?:-[a-z0-9-]+-nickleo051216s-projects)?\.vercel\.app$/;
 
 export function isAllowedOrigin(origin: string | null): boolean {
   return !!origin && ORIGIN_RE.test(origin);

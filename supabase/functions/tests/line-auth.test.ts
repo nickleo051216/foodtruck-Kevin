@@ -38,7 +38,9 @@ function post(body: unknown, origin: string | null = OK_ORIGIN, method = "POST")
 
 Deno.test("允許的網址：正式站與 Vercel 預覽", () => {
   assertEq(isAllowedOrigin("https://foodtruck-kevin.vercel.app"), true);
-  assertEq(isAllowedOrigin("https://foodtruck-kevin-git-step2-nick.vercel.app"), true);
+  assertEq(isAllowedOrigin("https://foodtruck-kevin-git-claude-quirk-e4e982-nickleo051216s-projects.vercel.app"), true);
+  assertEq(isAllowedOrigin("https://foodtruck-kevin-git-step2-someone-else.vercel.app"), false);
+  assertEq(isAllowedOrigin("https://foodtruck-kevin-evil.vercel.app"), false);
   assertEq(isAllowedOrigin("https://foodtruck-kevin.vercel.app.evil.com"), false);
   assertEq(isAllowedOrigin("https://evil-foodtruck-kevin.vercel.app"), false);
   assertEq(isAllowedOrigin("http://foodtruck-kevin.vercel.app"), false);
