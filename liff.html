@@ -1290,7 +1290,13 @@
   let LIFF_READY = false;   // LIFF SDK 是否成功 init
 
   // URL ?user=nick / ?user=amy / ?user=lin / ?user=chen 切換不同會員視角（demo 用）
-  const URL_PARAMS = new URLSearchParams(location.search);
+  // 從 liff.line.me 開啟時，LINE 可能先把參數包進 liff.state，liff.init() 之後才還原，所以兩邊都看
+  const URL_PARAMS = (() => {
+    const q = new URLSearchParams(location.search);
+    const inner = new URLSearchParams((q.get('liff.state') || '').split('?')[1] || '');
+    inner.forEach((v, k) => { if (!q.has(k)) q.set(k, v); });
+    return q;
+  })();
   // 🔌 後端 API 串接開關
   // 目前過渡期：前端純模擬，加 ?mode=real 才打 n8n webhook
   // 後端 workflow 全部準備好後，將改為預設 true

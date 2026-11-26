@@ -4176,8 +4176,13 @@
 // 真實資料的頁面：即時總覽（今日排班）、排班月曆、待審核（新車）、場地管理
 // 其他頁面（拍照稽核、對帳、信用、報表…）仍是 Demo 資料
 // =====================================================================
-const ADMIN_REAL = new URLSearchParams(location.search).get('mode') === 'real';
-const ADMIN_ORG_SLUG = new URLSearchParams(location.search).get('org');
+// 從 liff.line.me 開啟時，LINE 會先把網址參數包進 liff.state（例：?liff.state=%3Fmode%3Dreal），
+// 等 liff.init() 之後才還原，所以兩個地方都要看
+const _aQuery = new URLSearchParams(location.search);
+const _aLiffState = new URLSearchParams((_aQuery.get('liff.state') || '').split('?')[1] || '');
+const aParam = (k) => _aQuery.get(k) || _aLiffState.get(k);
+const ADMIN_REAL = aParam('mode') === 'real';
+const ADMIN_ORG_SLUG = aParam('org');
 const ADMIN_LIFF_ID = '2010274155-WuSVZzfK';                                  // Food-car 後台（Endpoint：/admin）
 const A_SUPABASE_URL = 'https://qavmukksnebhjqxgudnw.supabase.co';             // Kevin'foodtest
 const A_SUPABASE_KEY = 'sb_publishable_q-HSIDZQ2a3mw056yS-RPA_hP6VVZrz';       // 公開金鑰；資料由 RLS 保護
