@@ -20,6 +20,8 @@
 | D11 | 試用版用哪個 Supabase 專案 | **Kevin'foodtest**（`qavmukksnebhjqxgudnw`，ap-northeast-2，Pro 組織）。2026-11-26 Nick 確定；5 個 migration 已套用、驗證通過、冒煙測試已回滾。之後的 Edge Function、前端、n8n 都接這個專案 | — |
 | D12 | 第 2 步：LINE 身分怎麼換成 Supabase 登入 | **方案 A：Edge Function `line-auth` 換證**（2026-11-26 Nick）。前端送 `liff.getIDToken()` → 伺服器向 LINE `POST /oauth2/v2.1/verify` 驗證（client_id = 2010274155）→ 建立 / 找回帳號與 `vendors` → 伺服器端兌換一次性登入連結，回傳 Supabase 登入身分。不採用自簽 JWT（Supabase 已不建議舊的共用密鑰）；Supabase 自訂 OIDC 登入（`custom:line`）留到正式版再實測 | `supabase/functions/line-auth/` |
 | D13 | LINE 設定確認 | **已確認**（2026-11-26 Nick 後台截圖）：Provider `Vegenn8n` → LINE Login channel `food-car` 已連結 LINE OA `@266rvwxa`（餐車系統小幫手）＝同一個 Provider，userId 會一致；LIFF `Food-car` Scope 有 `openid, profile`；Endpoint URL `https://foodtruck-kevin.vercel.app/liff`。沒有申請 email 權限，所以帳號用內部代號 email | — |
+| D14 | 第 3 步：車主端接真實資料的做法 | **轉接層**（2026-11-26）：`?mode=real&org=市集代號` 登入並加入市集後，把資料庫的場地、時段、場次（`get_sessions`）、自己的車、我的登記（`my_registrations`）轉成 Demo 畫面原本的格式，畫面程式幾乎不用改。登記、候補、取消、確認遞補、讓位改呼叫 RPC，規則與訊息都以資料庫為準。新增餐車一律「待審核」；車主只能改車牌，停用要找業主。原本 `?mode=real` 呼叫 n8n 登記 webhook 的程式已移除 | `liff.html`：`realLoadAll`、`realCall` |
+| D15 | 測試市集 | `test-market`（測試市集，`is_demo = true`，試用到 2026-12-31）：測試公園、午場 5 名額、晚場 3 名額、每天開，11–12 月共 122 場；Nick 是 owner，另有一台已審核的「Nick 測試車」。2026-11-26 依 Nick 要求建立，也依 Nick 要求把他加入 `platform_admins` | — |
 
 ## 本機驗證結果（2026-11-19）
 
