@@ -59,7 +59,7 @@ bash supabase/tests/run_tests.sh
 deno test supabase/functions/tests/
 ```
 
-### 前端怎麼用（2c 才會改 `liff.html`）
+### 前端怎麼用（2c 已接到 `liff.html` 的 `runRealAuth()`，只在 `?mode=real` 執行；加 `&org=市集代號` 會自動加入市集）
 
 ```js
 const idToken = liff.getIDToken();               // LIFF 已 init 且已登入

@@ -27,7 +27,7 @@
 
 ## 尚未處理（留給後續步驟）
 
-- 第 2 步：`line-auth` 已寫好並通過本機測試（D12）；2026-11-26 已部署到 Kevin'foodtest（2b，v1，verify_jwt=false），外部測試擋得住其他網站、假 token、缺 token；、`liff.html` 在 `?mode=real` 時改用 ID Token 登入（2c）、Nick 手機實測（2d）
+- 第 2 步：`line-auth` 已寫好並通過本機測試（D12）；2026-11-26 已部署到 Kevin'foodtest（2b，v1，verify_jwt=false），外部測試擋得住其他網站、假 token、缺 token；；2c 完成：`liff.html` 在 `?mode=real` 時用 ID Token 換 Supabase 登入，左下角顯示連線檢查（LIFF / openid / OA 連結 / Supabase 登入 / 加入市集）；待 Nick 手機實測（2d）
 - 第 4 步：照片 90 天清除（需透過 Storage API 刪檔）、前端壓縮照片到約 150 KB
 - 第 6 步：n8n 用 `n8n_worker` 帳號呼叫 `claim_notifications` / `mark_notification` 發 LINE OA 推播；每日 ping 防止免費專案暫停
 - 預留表：`credit_events`、`payments`、`private_events`、`truck_change_requests`
