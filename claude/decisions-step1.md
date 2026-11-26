@@ -17,6 +17,7 @@
 | D9 | 試用環境建在哪 | Nick 帳號下的獨立試用專案（免費方案需定時 ping 防暫停） | — |
 | 附加 | 操作紀錄 audit_logs | 試用版就做 | `audit_logs` + `private.write_audit_log` |
 | D10 | 20 人同時搶 5 個名額的壓力測試 | **不做**（2026-11-19 Nick）：Kevin 一次推一位業主試用，一個一個來。取代交接文件第 5 節第 1 條與第 8 節第 7 步的壓力測試。登記函式內「鎖住場次再算名額」的那一行保留，當作基本保險 | `supabase/tests/run_tests.sh` 只保留連點測試 |
+| D11 | 試用版用哪個 Supabase 專案 | **Kevin'foodtest**（`qavmukksnebhjqxgudnw`，ap-northeast-2，Pro 組織）。2026-11-26 Nick 確定；5 個 migration 已套用、驗證通過、冒煙測試已回滾。之後的 Edge Function、前端、n8n 都接這個專案 | — |
 
 ## 本機驗證結果（2026-11-19）
 
