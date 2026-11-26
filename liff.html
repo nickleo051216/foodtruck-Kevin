@@ -4123,6 +4123,17 @@
         return `<div data-diag="${key}" data-state="${s.state}">${DIAG_ICON[s.state]} ${esc(label)}` +
           (s.detail ? `<div style="color:#6b7280;margin-left:20px;">${esc(s.detail)}</div>` : '') + '</div>';
       }).join('');
+
+    // 全部 ✅ → 3 秒後自動淡出；只要有 ⚠️ ❌ ➖ 就一直顯示，方便截圖回報
+    const allOk = REAL_DIAG.every(({ key }) => (REAL_DIAG_STATE[key] || {}).state === 'ok');
+    if (allOk && !box.dataset.autoHide) {
+      box.dataset.autoHide = '1';
+      setTimeout(() => {
+        box.style.transition = 'opacity .4s';
+        box.style.opacity = '0';
+        setTimeout(() => box.remove(), 400);
+      }, 3000);
+    }
   }
 
   function loadScriptOnce(src) {
