@@ -40,3 +40,44 @@ bash supabase/tests/run_tests.sh
 ## 還原
 
 在 SQL Editor 執行 `rollback/20261119_trial_schema_down.sql`。會刪除所有試用資料，請先備份。
+
+---
+
+## 第 2 步：LINE 登入 → Supabase 身分（Edge Function `line-auth`）
+
+> 決策：D12（方案 A）、D13（LINE 設定已確認）
+
+| 路徑 | 內容 |
+|---|---|
+| `functions/line-auth/handler.ts` | 邏輯：檢查網址 → 向 LINE 驗證 ID Token → 找 / 建車主 → 發登入身分 |
+| `functions/line-auth/index.ts` | 把真正的 LINE、Supabase 接上去 |
+| `functions/tests/line-auth.test.ts` | 本機測試（假的 LINE / Supabase，13 項） |
+
+### 本機測試
+
+```bash
+deno test supabase/functions/tests/
+```
+
+### 前端怎麼用（2c 才會改 `liff.html`）
+
+```js
+const idToken = liff.getIDToken();               // LIFF 已 init 且已登入
+const r = await fetch(`${SUPABASE_URL}/functions/v1/line-auth`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY },
+  body: JSON.stringify({ id_token: idToken }),
+}).then(r => r.json());
+if (r.ok) await supabase.auth.setSession(r.session); // 之後就能呼叫 join_org / register_for_session
+```
+
+### 部署（2b，Nick 確認後才做）
+
+- 函式名稱 `line-auth`，**verify_jwt = false**（車主這時還沒有 Supabase 身分，改由 LINE ID Token 驗證）
+- 不需要另外設定 secret：`SUPABASE_URL`、金鑰由 Supabase 自動提供；LINE channel ID 預設 `2010274155`，可用 secret `LINE_LOGIN_CHANNEL_ID` 覆蓋
+- 只接受 `https://foodtruck-kevin.vercel.app` 與 `https://foodtruck-kevin-*.vercel.app` 呼叫
+
+### 還原
+
+在 Supabase → Edge Functions 刪除 `line-auth`。前端預設就是 Demo 模式，不受影響。
+已建立的車主帳號可在 Authentication → Users 刪除（`vendors` 會跟著刪除）。
