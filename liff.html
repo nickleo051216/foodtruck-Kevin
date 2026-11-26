@@ -4386,7 +4386,8 @@
     try {
       const { data, error } = await SUPABASE.rpc(fn, args);
       if (error) throw error;
-      showToast((data && data.ok ? '✓ ' : '❌ ') + ((data && data.message) || '完成'), data && data.ok ? okType : 'error');
+      // 圖示由 .toast.success / .info / .error 的 CSS 自動加，這裡只放文字
+      showToast((data && data.message) || '完成', data && data.ok ? okType : 'error');
       await realRefresh();
       return data;
     } catch (e) {
