@@ -4086,6 +4086,138 @@
     }
   }
 
+  // ===== 🔐 第 2 步：LINE 身分 → Supabase 登入（只在 ?mode=real 時執行，Demo 模式完全不受影響）=====
+  // 流程：liff.getIDToken() → Edge Function line-auth 向 LINE 驗證 → 拿回 Supabase 登入身分
+  // 畫面左下角會出現「連線檢查」小卡，直接顯示每一步 ✅ / ❌
+  const SUPABASE_URL = 'https://qavmukksnebhjqxgudnw.supabase.co';            // Kevin'foodtest
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_q-HSIDZQ2a3mw056yS-RPA_hP6VVZrz'; // 公開金鑰，本來就放前端；資料由 RLS 保護
+  const LINE_AUTH_URL = `${SUPABASE_URL}/functions/v1/line-auth`;
+  const SUPABASE_JS_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js';
+  let SUPABASE = null;        // 登入成功後的 supabase-js client（第 3 步會用它呼叫 RPC）
+  let SB_USER_ID = null;
+
+  const REAL_DIAG = [
+    { key: 'liff',   label: 'LIFF 啟動' },
+    { key: 'openid', label: 'openid 權限（ID Token）' },
+    { key: 'oa',     label: 'LINE OA 連結' },
+    { key: 'auth',   label: 'Supabase 登入' },
+    { key: 'org',    label: '加入市集' },
+  ];
+  const REAL_DIAG_STATE = {};
+  const DIAG_ICON = { pending: '⏳', ok: '✅', warn: '⚠️', fail: '❌', skip: '➖' };
+
+  function setDiag(key, state, detail) {
+    REAL_DIAG_STATE[key] = { state, detail: detail || '' };
+    let box = document.getElementById('realDiag');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'realDiag';
+      box.setAttribute('role', 'status');
+      box.style.cssText = 'position:fixed;left:12px;bottom:84px;z-index:99999;max-width:min(340px,calc(100vw - 24px));' +
+        'background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);' +
+        'font:12px/1.5 -apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:10px 12px;';
+      document.body.appendChild(box);
+    }
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    box.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+        '<strong>🔌 連線檢查（mode=real）</strong>' +
+        '<button type="button" aria-label="關閉" onclick="this.closest(\'#realDiag\').remove()" ' +
+        'style="border:0;background:none;font-size:16px;line-height:1;cursor:pointer;padding:4px;">×</button></div>' +
+      REAL_DIAG.map(({ key, label }) => {
+        const s = REAL_DIAG_STATE[key] || { state: 'pending', detail: '' };
+        return `<div data-diag="${key}" data-state="${s.state}">${DIAG_ICON[s.state]} ${esc(label)}` +
+          (s.detail ? `<div style="color:#6b7280;margin-left:20px;">${esc(s.detail)}</div>` : '') + '</div>';
+      }).join('');
+  }
+
+  function loadScriptOnce(src) {
+    return new Promise((resolve, reject) => {
+      if (window.supabase && window.supabase.createClient) return resolve();
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('無法載入 ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function runRealAuth() {
+    REAL_DIAG.forEach(({ key }) => setDiag(key, 'pending'));
+
+    // 1. LIFF
+    if (!LIFF_READY) {
+      setDiag('liff', 'fail', '請用手機在 LINE 裡打開這個網址');
+      ['openid', 'oa', 'auth', 'org'].forEach((k) => setDiag(k, 'skip'));
+      return;
+    }
+    if (!liff.isLoggedIn()) {
+      setDiag('liff', 'warn', '正在導向 LINE 登入…');
+      liff.login({ redirectUri: location.href });
+      return;
+    }
+    setDiag('liff', 'ok', (liff.isInClient() ? 'LINE App 內' : '外部瀏覽器') + ' · ' + (liff.getOS() || ''));
+
+    // 2. openid → ID Token
+    const idToken = liff.getIDToken();
+    if (!idToken) {
+      setDiag('openid', 'fail', '拿不到 ID Token：請到 LINE Developers 的 LIFF 設定勾選 openid');
+      ['auth', 'org'].forEach((k) => setDiag(k, 'skip'));
+    } else {
+      setDiag('openid', 'ok', '已取得');
+    }
+
+    // 3. LINE OA 是否連結到同一個 LINE Login channel（＝同一個 Provider）
+    try {
+      const f = await liff.getFriendship();
+      if (f.friendFlag) setDiag('oa', 'ok', '已連結，您已加好友，收得到推播');
+      else setDiag('oa', 'warn', '已連結，但您還沒加 LINE OA 好友，會收不到推播');
+    } catch (e) {
+      setDiag('oa', 'fail', 'LINE OA 沒有連結到這個 LINE Login channel（' + (e && e.message || e) + '）');
+    }
+    if (!idToken) return;
+
+    // 4. 換 Supabase 登入身分
+    let r;
+    try {
+      await loadScriptOnce(SUPABASE_JS_URL);
+      SUPABASE = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: { persistSession: true, storageKey: 'foodtruck-trial-auth' },
+      });
+      r = await fetch(LINE_AUTH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY },
+        body: JSON.stringify({ id_token: idToken }),
+      }).then((res) => res.json());
+      if (!r || !r.ok) throw new Error((r && r.message) || '登入失敗');
+      const { error } = await SUPABASE.auth.setSession({
+        access_token: r.session.access_token,
+        refresh_token: r.session.refresh_token,
+      });
+      if (error) throw error;
+      SB_USER_ID = r.user_id;
+      setDiag('auth', 'ok', r.message + ' · 帳號 …' + String(r.user_id).slice(-8));
+    } catch (e) {
+      setDiag('auth', 'fail', (e && e.message) || String(e));
+      setDiag('org', 'skip');
+      return;
+    }
+
+    // 5. 網址帶 ?org=市集代號 → 加入市集
+    const orgSlug = URL_PARAMS.get('org');
+    if (!orgSlug) {
+      setDiag('org', 'skip', '網址沒有 ?org=市集代號');
+      return;
+    }
+    try {
+      const { data, error } = await SUPABASE.rpc('join_org', { p_slug: orgSlug });
+      if (error) throw error;
+      setDiag('org', data && data.ok ? 'ok' : 'fail', (data && data.message) || '');
+    } catch (e) {
+      setDiag('org', 'fail', (e && e.message) || String(e));
+    }
+  }
+
   // ===== Init 主流程 =====
   (async function init() {
     // 🆕 v1.4 記錄啟動時間（給 splash 用）
@@ -4098,6 +4230,8 @@
     updateSplash('連接 LINE 服務');
     // 先嘗試 LIFF SDK init
     await initLiff();
+    // 🔐 第 2 步：只有 ?mode=real 才換 Supabase 登入身分（不等待，畫面照常載入）
+    if (USE_REAL_API) runRealAuth();
     updateSplash('準備您的場次資料');
 
     // 🆕 把所有顯示「Nick Chang」等 hardcoded 資訊改為真實 LINE 暱稱（若 LIFF 成功）
